@@ -5,21 +5,22 @@
  */
 
 
-module.exports.handleGatewayError = (err) => {
-  if (typeof err.response === "string") {
+module.exports.parseGatewayError = (err) => {
+  if (typeof err.response !== 'object') {
     throw err;
   }
 
-  if (typeof err.response.body === "string") {
-    throw new Error(err.response.body)
+  if (typeof err.response.body !== 'object') {
+    throw new Error(err.response.body || err.message)
   }
 
-  if (typeof err.response.body.message === "string") {
+  if (typeof err.response.body.error === 'object') {
+    throw new Error(err.response.body.error.message);
+  }
+
+  if (typeof err.response.body.message === 'string'
+    || typeof err.response.body.message === 'undefined') {
     throw new Error(err.response.body.message)
-  }
-
-  if (typeof err.response.body.error.message === "string") {
-    throw new Error(err.response.body.error.message)
   }
 
   throw new Error("Invalid Gateway error");

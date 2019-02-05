@@ -4,76 +4,53 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const debug = require('debug')('lightstreams:gateway');
+const got = require('got');
+const _ = require('lodash');
 
-const { GATEWAY_DOMAIN } = require('@src/config/urls');
+const { parseGatewayError } = require('../lib/error');
 
-const GET_WALLET_BALANCE_URL = `${GATEWAY_DOMAIN}/wallet/balance`;
-const REQUEST_TRANSFER_URL = `${GATEWAY_DOMAIN}/wallet/transfer`;
+const WALLET_BALANCE_PATH = '/wallet/balance';
+const WALLET_TRANSFER_PATH = '/wallet/transfer';
 
-module.exports.getWalletBalance = (ethAddress) => {
+module.exports.balance = (gwDomain) => async (account) => {
   const options = {
     json: true,
     query: {
-      account: ethAddress
+      account
     },
   };
 
-  debug(`GET: ${GET_WALLET_BALANCE_URL}\t${JSON.stringify(options)}`);
-  return got.get(GET_WALLET_BALANCE_URL, options)
-    .then(response => {
-      const { balance } = response.body;
-      return { balance };
-    }).catch(err => {
-      handleGatewayError(err);
-    });
+  try {
+    const response = await got.get(`${gwDomain}${WALLET_BALANCE_PATH}`, options);
+    const { balance, error } = response.body;
+    if (!_.isEmpty(error)) {
+      parseGatewayError(err);
+    }
+    return { balance };
+  } catch (err) {
+    parseGatewayError(err);
+  }
 };
 
-module.exports.requestFaucetTransfer = async (ethAddress, weiAmount) => {
-  const transfers = await Faucet.findByToAddress(ethAddress);
-  const now = DateTime.utc();
-  const waitingTimeSlotInSec = 30; // 30s window
-
-  const validTransfers = _.filter(transfers, (transfer) => {
-    if (transfer.succeeded === true) return true;
-    if (now.toMillis() - transfer.created_at.getTime() < (waitingTimeSlotInSec * 1000)) return true;
-    return false;
-  });
-
-  if (validTransfers.length > 0) {
-    // throw new Error('Faucet transfer is not authorized');
-  }
-
-  const transfer = await Faucet.create({
-    to_address: ethAddress,
-    amount: weiAmount,
-    succeeded: null,
-    created_at: now.toSQL(),
-    modified_at: now.toSQL(),
-  });
-
+module.exports.transfer = (gwDomain) => async (from, password, to, amountWei) => {
   const options = {
     json: true,
     body: {
-      from: authConfig.faucet.address,
-      password: authConfig.faucet.pwd,
-      to: ethAddress,
-      amount_wei: weiAmount.toString()
+      from: from,
+      password: password,
+      to: to,
+      amount_wei: amountWei.toString()
     }
   };
 
-  debug(`POST: ${REQUEST_TRANSFER_URL}\t${JSON.stringify(options)}`);
-  return got.post(REQUEST_TRANSFER_URL, options)
-    .then(async (gwResponse) => {
-      const { balance } = gwResponse.body;
-      await transfer.update({
-        succeeded: true
-      });
-      return {
-        balance
-      }
-    })
-    .catch((err) => {
-      handleGatewayError(err);
-    });
+  try {
+    const response = await got.post(`${gwDomain}${WALLET_TRANSFER_PATH}`, options);
+    const { balance, error } = response.body;
+    if (!_.isEmpty(error)) {
+      parseGatewayError(err);
+    }
+    return { balance };
+  } catch (err) {
+    parseGatewayError(err);
+  }
 };

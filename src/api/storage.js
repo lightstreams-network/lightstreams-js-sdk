@@ -4,6 +4,10 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
+const got = require('got');
+const _ = require('lodash');
+
+const { parseGatewayError } = require('../lib/error');
 
 const ADD_FILE_URL = `${urls.GATEWAY_DOMAIN}/acl/add`;
 const FETCH_URL = `${urls.GATEWAY_DOMAIN}/storage/fetch`;

@@ -9,8 +9,10 @@ const GatewayAPI = require('../api');
 
 module.exports = (gwDomain) => {
   const userRoutes = require('./user')(GatewayAPI(gwDomain).user);
+  const walletRoutes = require('./wallet')(GatewayAPI(gwDomain).wallet);
 
   return _.concat(
     _.map(userRoutes, (route) => {return {...route, path: `/user/${route.path}` }}),
+    _.map(walletRoutes, (route) => {return {...route, path: `/wallet/${route.path}` }}),
   );
 };

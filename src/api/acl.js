@@ -4,6 +4,11 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
+const got = require('got');
+const _ = require('lodash');
+
+const { parseGatewayError } = require('../lib/error');
+
 const GRANT_PERMISSIONS_URL = `${urls.GATEWAY_DOMAIN}/acl/grant`;
 
 module.exports.grant = (artistAccount, artistAccountPassword, itemAcl, granteeEthAddress) => {
@@ -31,6 +36,6 @@ module.exports.grant = (artistAccount, artistAccountPassword, itemAcl, granteeEt
         is_granted
       }
     }).catch(err => {
-      handleGatewayError(err);
+      parseGatewayError(err);
     });
 };

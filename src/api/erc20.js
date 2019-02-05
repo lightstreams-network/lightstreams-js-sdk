@@ -4,6 +4,11 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
+const got = require('got');
+const _ = require('lodash');
+
+const { parseGatewayError } = require('../lib/error');
+
 const URL_GET_ICO_BALANCE = `${urls.GATEWAY_DOMAIN}/erc20/balance`;
 const URL_TRANSFER_ICO = `${urls.GATEWAY_DOMAIN}/erc20/transfer`;
 const URL_PURCHASE_ICO = `${urls.GATEWAY_DOMAIN}/erc20/purchase`;
@@ -27,7 +32,7 @@ module.exports.purchaseCoins = (ethAddress, icoAddress, password, weiAmount) => 
         coins: tokens
       }
     }).catch(err => {
-      handleGatewayError(err);
+      parseGatewayError(err);
     });
 };
 
@@ -48,7 +53,7 @@ module.exports.getCoinBalance = (ethAddress, icoAddress) => {
         balance
       }
     }).catch(err => {
-      handleGatewayError(err);
+      parseGatewayError(err);
     });
 };
 
@@ -72,6 +77,6 @@ module.exports.transferIco = (icoAddress, artistAccount, sourceEthAddress, passw
         balance
       }
     }).catch(err => {
-      handleGatewayError(err);
+      parseGatewayError(err);
     });
 };

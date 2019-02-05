@@ -12,9 +12,9 @@ module.exports = (domain) => {
 
   return {
     user: _.mapValues(require('./user'), initEndpoint),
-    // storage: _.map(require('./storage'), initEndpoint),
-    // wallet: _.map(require('./wallet'), initEndpoint),
-    // acl: _.map(require('./acl'), initEndpoint),
-    // erc20: _.map(require('./erc20'), initEndpoint)
+    wallet: _.mapValues(require('./wallet'), initEndpoint),
+    // storage: _.mapValues(require('./storage'), initEndpoint),
+    // acl: _.mapValues(require('./acl'), initEndpoint),
+    // erc20: _.mapValues(require('./erc20'), initEndpoint)
   }
 };
