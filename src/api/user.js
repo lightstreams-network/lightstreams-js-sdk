@@ -23,12 +23,12 @@ module.exports.signIn = (gwDomain) => async (account, password) => {
   };
 
   try {
-    const response = await got.post(`${gwDomain}${SIGN_IN_PATH}`, options);
-    const { token, error } = response.body;
+    const gwResponse = await got.post(`${gwDomain}${SIGN_IN_PATH}`, options);
+    const { error, ...response } = gwResponse.body;
     if (!_.isEmpty(error)) {
       parseGatewayError(err);
     }
-    return { token };
+    return response;
   } catch (err) {
     parseGatewayError(err);
   }
@@ -43,12 +43,12 @@ module.exports.signUp = (gwDomain) => async (password) => {
   };
 
   try {
-    const response = await got.post(`${gwDomain}${SIGN_UP_PATH}`, options);
-    const { account, error } = response.body;
+    const gwResponse = await got.post(`${gwDomain}${SIGN_UP_PATH}`, options);
+    const { error, ...response } = gwResponse.body;
     if (!_.isEmpty(error)) {
       parseGatewayError(err);
     }
-    return { account };
+    return response;
   } catch (err) {
     parseGatewayError(err);
   }

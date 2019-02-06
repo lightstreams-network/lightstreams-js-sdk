@@ -21,12 +21,12 @@ module.exports.balance = (gwDomain) => async (account) => {
   };
 
   try {
-    const response = await got.get(`${gwDomain}${WALLET_BALANCE_PATH}`, options);
-    const { balance, error } = response.body;
+    const gwResponse = await got.get(`${gwDomain}${WALLET_BALANCE_PATH}`, options);
+    const { error, ...response } = gwResponse.body;
     if (!_.isEmpty(error)) {
       parseGatewayError(err);
     }
-    return { balance };
+    return response;
   } catch (err) {
     parseGatewayError(err);
   }
@@ -44,12 +44,12 @@ module.exports.transfer = (gwDomain) => async (from, password, to, amountWei) =>
   };
 
   try {
-    const response = await got.post(`${gwDomain}${WALLET_TRANSFER_PATH}`, options);
-    const { balance, error } = response.body;
+    const gwResponse = await got.post(`${gwDomain}${WALLET_TRANSFER_PATH}`, options);
+    const { error, ...response } = gwResponse.body;
     if (!_.isEmpty(error)) {
       parseGatewayError(err);
     }
-    return { balance };
+    return response;
   } catch (err) {
     parseGatewayError(err);
   }
