@@ -4,10 +4,10 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const { notFoundResponse, jsonResponse } = require('./response');
+const { ErrorNotFoundResponse, JsonResponse } = require('./response');
 
 module.exports.notFoundHandler = (req, res, next) => {
-  next(notFoundResponse());
+  next(ErrorNotFoundResponse());
 };
 
 module.exports.errorHandler = (err, req, res, next) => {
@@ -21,7 +21,7 @@ module.exports.errorHandler = (err, req, res, next) => {
 
   if (/json/.test(req.get('accept'))) {
     res.setHeader('Content-Type', 'application/json');
-    res.json(jsonResponse(err.stack.split('\n'), err))
+    res.json(JsonResponse(err.stack.split('\n'), err))
   } else {
     res.render('error');
   }

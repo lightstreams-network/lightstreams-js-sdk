@@ -4,26 +4,22 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const { extractRequestAttrs } = require('../lib/request');
-const { badInputResponse } = require('../lib/response');
+const { validateRequestAttrs, extractRequestAttrs } = require('../lib/request');
+const { ErrorBadInputResponse } = require('../lib/response');
 
 module.exports = (gwApi) => {
   const addFile = async (req, res, next) => {
-    const attrs = extractRequestAttrs(req, ['owner', 'password', 'file']);
-
-    if (!attrs.owner || !attrs.password) {
-      next(badInputResponse());
-      return;
-    }
-
-    if (!attrs.file || !req.files.file) {
-      next(badInputResponse());
+    const query = ['owner', 'password', 'file'];
+    try {
+      validateRequestAttrs(req, query);
+    } catch ( err ) {
+      next(ErrorBadInputResponse(err.message));
       return;
     }
 
     try {
-      const reqStream = gwApi.addProxy(attrs.owner, attrs.password, attrs.file);
-
+      const attrs = extractRequestAttrs(req, query);
+      const reqStream = await gwApi.storage.addProxy(attrs.owner, attrs.password, attrs.file);
       reqStream
         .on('uploadProgress', progress => {
           console.log(`Uploading: ${progress.transferred} KB`);
@@ -38,15 +34,17 @@ module.exports = (gwApi) => {
   };
 
   const fetchFile = async (req, res, next) => {
-    const attrs = extractRequestAttrs(req, ['meta', 'token']);
-    if (!attrs.meta || !attrs.token) {
-      next(badInputResponse());
+    const query = ['meta', 'token'];
+    try {
+      validateRequestAttrs(req, query);
+    } catch ( err ) {
+      next(ErrorBadInputResponse(err.message));
       return;
     }
 
     try {
-      const reqStream = gwApi.fetchProxy(attrs.meta, attrs.token);
-
+      const attrs = extractRequestAttrs(req, query);
+      const reqStream = await gwApi.storage.fetchProxy(attrs.meta, attrs.token);
       reqStream
         .on('downloadProgress', progress => {
           console.log(`Transferring: ${progress.transferred} KB`);

@@ -4,35 +4,41 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const { extractRequestAttrs } = require('../lib/request');
-const { jsonResponse, badInputResponse } = require('../lib/response');
+const { validateRequestAttrs, extractRequestAttrs } = require('../lib/request');
+const { JsonResponse, ErrorBadInputResponse } = require('../lib/response');
 
 module.exports = (gwApi) => {
   const getBalance = async (req, res, next) => {
-    const attrs = extractRequestAttrs(req, ['account']);
-    if (!attrs.account) {
-      next(badInputResponse());
+    const query = ['account'];
+    try {
+      validateRequestAttrs(req, query);
+    } catch ( err ) {
+      next(ErrorBadInputResponse(err.message));
       return;
     }
 
     try {
-      const { balance } = await gwApi.balance(attrs.account);
-      res.send(jsonResponse({ balance }));
+      const attrs = extractRequestAttrs(req, query);
+      const { balance } = await gwApi.wallet.balance(attrs.account);
+      res.send(JsonResponse({ balance }));
     } catch ( err ) {
       next(err);
     }
   };
 
   const transfer = async (req, res, next) => {
-    const attrs = extractRequestAttrs(req, ['from', 'password', 'to', 'amount_wei']);
-    if (!attrs.from || !attrs.password || !attrs.to || !attrs.amount_wei) {
-      next(badInputResponse());
+    const query = ['from', 'password', 'to', 'amount_wei'];
+    try {
+      validateRequestAttrs(req, query);
+    } catch ( err ) {
+      next(ErrorBadInputResponse(err.message));
       return;
     }
 
     try {
-      const { balance } = await gwApi.transfer(attrs.from, attrs.password, attrs.to, attrs.amount_wei);
-      res.send(jsonResponse({ balance }));
+      const attrs = extractRequestAttrs(req, query);
+      const { balance } = await gwApi.wallet.transfer(attrs.from, attrs.password, attrs.to, attrs.amount_wei);
+      res.send(JsonResponse({ balance }));
     } catch ( err ) {
       next(err);
     }

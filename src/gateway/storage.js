@@ -11,7 +11,7 @@ const FormData = require('form-data');
 const ADD_FILE_PATH = `/storage/add`;
 const FETCH_FILE_PATH = `/storage/fetch`;
 
-module.exports.addProxy = (gwDomain) => (owner, password, file) => {
+module.exports.addProxy = (gwDomain) => async (owner, password, file) => {
   var form = new FormData();
   form.append('owner', owner);
   form.append('password', password);
@@ -27,7 +27,7 @@ module.exports.addProxy = (gwDomain) => (owner, password, file) => {
   return got.post(`${gwDomain}${ADD_FILE_PATH}`, options);
 };
 
-module.exports.fetchProxy = (gwDomain) => (meta, token) => {
+module.exports.fetchProxy = (gwDomain) => async (meta, token) => {
   const options = {
     stream: true,
     throwHttpErrors: false,

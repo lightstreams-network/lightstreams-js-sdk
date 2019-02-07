@@ -7,7 +7,7 @@
 const got = require('got');
 const _ = require('lodash');
 
-const { parseGatewayError } = require('../lib/error');
+const { parseGatewayError } = require('../lib/gateway');
 
 const URL_GET_ICO_BALANCE = `${urls.GATEWAY_DOMAIN}/erc20/balance`;
 const URL_TRANSFER_ICO = `${urls.GATEWAY_DOMAIN}/erc20/transfer`;
@@ -16,6 +16,7 @@ const URL_PURCHASE_ICO = `${urls.GATEWAY_DOMAIN}/erc20/purchase`;
 module.exports.purchaseCoins = (ethAddress, icoAddress, password, weiAmount) => {
   const options = {
     json: true,
+    throwHttpErrors: false,
     body: {
       erc20_address: icoAddress,
       password: password,

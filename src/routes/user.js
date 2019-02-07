@@ -4,35 +4,41 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const { extractRequestAttrs } = require('../lib/request');
-const { jsonResponse, badInputResponse } = require('../lib/response');
+const { validateRequestAttrs, extractRequestAttrs } = require('../lib/request');
+const { JsonResponse, ErrorBadInputResponse } = require('../lib/response');
 
 module.exports = (gwApi) => {
   const signUp = async (req, res, next) => {
-    const attrs = extractRequestAttrs(req, ['password']);
-    if (!attrs.password) {
-      next(badInputResponse());
+    const query = ['password'];
+    try {
+      validateRequestAttrs(req, query);
+    } catch ( err ) {
+      next(ErrorBadInputResponse(err.message));
       return;
     }
 
     try {
-      const { account } = await gwApi.signUp(attrs.password);
-      res.send(jsonResponse({ account }));
+      const attrs = extractRequestAttrs(req, query);
+      const { account } = await gwApi.user.signUp(attrs.password);
+      res.send(JsonResponse({ account }));
     } catch ( err ) {
       next(err);
     }
   };
 
   const signIn = async (req, res, next) => {
-    const attrs = extractRequestAttrs(req, ['account', 'password']);
-    if (!attrs.password || !attrs.account) {
-      next(badInputResponse());
+    const query = ['password', 'account'];
+    try {
+      validateRequestAttrs(req, query);
+    } catch ( err ) {
+      next(ErrorBadInputResponse(err.message));
       return;
     }
 
     try {
-      const { token } = await gwApi.signIn(attrs.account, attrs.password);
-      res.send(jsonResponse({ token }));
+      const attrs = extractRequestAttrs(req, query);
+      const { token } = await gwApi.user.signIn(attrs.account, attrs.password);
+      res.send(JsonResponse({ token }));
     } catch ( err ) {
       next(err);
     }

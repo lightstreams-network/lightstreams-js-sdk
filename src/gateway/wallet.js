@@ -7,7 +7,7 @@
 const got = require('got');
 const _ = require('lodash');
 
-const { parseGatewayError } = require('../lib/error');
+const { ErrorGatewayResponse } = require('../lib/response');
 
 const WALLET_BALANCE_PATH = '/wallet/balance';
 const WALLET_TRANSFER_PATH = '/wallet/transfer';
@@ -15,26 +15,24 @@ const WALLET_TRANSFER_PATH = '/wallet/transfer';
 module.exports.balance = (gwDomain) => async (account) => {
   const options = {
     json: true,
+    throwHttpErrors: false,
     query: {
       account
     },
   };
 
-  try {
-    const gwResponse = await got.get(`${gwDomain}${WALLET_BALANCE_PATH}`, options);
-    const { error, ...response } = gwResponse.body;
-    if (!_.isEmpty(error)) {
-      parseGatewayError(err);
-    }
-    return response;
-  } catch (err) {
-    parseGatewayError(err);
+  const gwResponse = await got.get(`${gwDomain}${WALLET_BALANCE_PATH}`, options);
+  const { error, ...response } = gwResponse.body;
+  if (!_.isEmpty(error)) {
+    throw ErrorGatewayResponse(error);
   }
+  return response;
 };
 
 module.exports.transfer = (gwDomain) => async (from, password, to, amountWei) => {
   const options = {
     json: true,
+    throwHttpErrors: false,
     body: {
       from: from,
       password: password,
@@ -43,14 +41,11 @@ module.exports.transfer = (gwDomain) => async (from, password, to, amountWei) =>
     }
   };
 
-  try {
-    const gwResponse = await got.post(`${gwDomain}${WALLET_TRANSFER_PATH}`, options);
-    const { error, ...response } = gwResponse.body;
-    if (!_.isEmpty(error)) {
-      parseGatewayError(err);
-    }
-    return response;
-  } catch (err) {
-    parseGatewayError(err);
+  const gwResponse = await got.post(`${gwDomain}${WALLET_TRANSFER_PATH}`, options);
+  const { error, ...response } = gwResponse.body;
+  if (!_.isEmpty(error)) {
+    throw ErrorGatewayResponse(error);
   }
+
+  return response;
 };
