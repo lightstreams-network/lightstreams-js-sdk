@@ -5,24 +5,33 @@
  */
 
 const { extractRequestAttrs } = require('../lib/request');
-const { jsonResponse, badInputResponse } = require('../lib/response');
+const { badInputResponse } = require('../lib/response');
 
 module.exports = (gwApi) => {
   const addFile = async (req, res, next) => {
-    const attrs = extractRequestAttrs(req, ['owner', 'password']);
+    const attrs = extractRequestAttrs(req, ['owner', 'password', 'file']);
 
     if (!attrs.owner || !attrs.password) {
       next(badInputResponse());
       return;
     }
 
-    if(!req.files.file) {
+    if (!attrs.file || !req.files.file) {
       next(badInputResponse());
       return;
     }
 
     try {
-      await gwApi.addProxy(req, res, attrs.owner, attrs.password, req.files.file);
+      const reqStream = gwApi.addProxy(attrs.owner, attrs.password, attrs.file);
+
+      reqStream
+        .on('uploadProgress', progress => {
+          console.log(`Uploading: ${progress.transferred} KB`);
+          if (progress.percent === 1) {
+            console.log("Upload completed");
+          }
+        })
+        .pipe(res);
     } catch ( err ) {
       next(err);
     }
@@ -36,7 +45,16 @@ module.exports = (gwApi) => {
     }
 
     try {
-      gwApi.fetchProxy(req, res, attrs.meta, attrs.token);
+      const reqStream = gwApi.fetchProxy(attrs.meta, attrs.token);
+
+      reqStream
+        .on('downloadProgress', progress => {
+          console.log(`Transferring: ${progress.transferred} KB`);
+          if (progress.percent === 1) {
+            console.log("Transfer completed");
+          }
+        })
+        .pipe(res);
     } catch ( err ) {
       next(err);
     }

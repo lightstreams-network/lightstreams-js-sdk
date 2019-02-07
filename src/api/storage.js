@@ -8,63 +8,38 @@ const _ = require('lodash');
 const got = require('got');
 const FormData = require('form-data');
 
-const { parseGatewayError } = require('../lib/error');
-const { errorHandler } = require('../lib/middleware');
-
 const ADD_FILE_PATH = `/storage/add`;
 const FETCH_FILE_PATH = `/storage/fetch`;
 
-module.exports.addProxy = (gwDomain) => async (req, res, owner, password, file) => {
+module.exports.addProxy = (gwDomain) => (owner, password, file) => {
   var form = new FormData();
   form.append('owner', owner);
   form.append('password', password);
   form.append('file', file);
 
-  const headers = {
-    ...form.getHeaders(),
-    ...{
-      connection: req.connection,
-      'content-length': req['content-length'],
-      'content-type': req['content-type']
-    }
-  };
-
   const options = {
-    headers: headers,
+    headers: form.getHeaders(),
     stream: true,
+    throwHttpErrors: false,
     body: form
   };
 
-  await got.stream(`${gwDomain}${ADD_FILE_PATH}`, options)
-    .on('error', err => {
-      errorHandler(err, req, res)
-    })
-    .on('uploadProgress', progress => {
-      console.log(`Uploading: ${progress.transferred} KB`);
-      if (progress.percent === 1) {
-        console.log("Upload completed");
-      }
-    }).pipe(res);
+  return got.post(`${gwDomain}${ADD_FILE_PATH}`, options);
 };
 
-module.exports.fetchProxy = (gwDomain) => (req, res, meta, token) => {
+module.exports.fetchProxy = (gwDomain) => (meta, token) => {
   const options = {
     stream: true,
+    throwHttpErrors: false,
+    json: true,
+    headers: {
+      'Content-Type': 'application/json'
+    },
     query: {
       meta,
       token
     },
   };
 
-  got.stream(`${gwDomain}${FETCH_FILE_PATH}`, options)
-    .on('error', err => {
-      errorHandler(err, req, res)
-    })
-    .on('downloadProgress', progress => {
-      console.log(`Transferring: ${progress.transferred} KB`);
-      if (progress.percent === 1) {
-        console.log("Transfer completed");
-      }
-    })
-    .pipe(res);
+  return got.get(`${gwDomain}${FETCH_FILE_PATH}`, options);
 };
