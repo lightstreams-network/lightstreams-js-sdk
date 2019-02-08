@@ -7,8 +7,7 @@
 const got = require('got');
 const _ = require('lodash');
 
-const { ErrorGatewayResponse } = require('../lib/response');
-const { ErrorResponse } = require('../lib/response');
+const { extractResponse, defaultOptions } = require('../lib/gateway');
 
 const GRANT_PERMISSIONS_PATH = '/acl/grant';
 
@@ -18,29 +17,34 @@ const PERMISSIONS = {
   ADMIN: 'admin'
 };
 
-module.exports.grant = (gwDomain) => async (acl, owner, password, to, permission) => {
+module.exports = (gwDomain) => ({
+  /**
+   *
+   * @param acl
+   * @param owner
+   * @param password
+   * @param to
+   * @param permission
+   * @returns {Promise<*>}
+   */
+  grant: async (acl, owner, password, to, permission) => {
 
-  if (_.values(PERMISSIONS).indexOf(permission) === -1) {
-    throw ErrorResponse(`"${permission}" is not a valid permission`);
+    if (_.values(PERMISSIONS).indexOf(permission) === -1) {
+      throw ErrorResponse(`"${permission}" is not a valid permission`);
+    }
+
+    const options = {
+      ...defaultOptions,
+      body: {
+        acl,
+        owner,
+        password,
+        to,
+        permission
+      },
+    };
+
+    const gwResponse = await got.post(`${gwDomain}${GRANT_PERMISSIONS_PATH}`, options);
+    return extractResponse(gwResponse);
   }
-
-  const options = {
-    json: true,
-    throwHttpErrors: false,
-    body: {
-      acl,
-      owner,
-      password,
-      to,
-      permission
-    },
-  };
-
-  const gwResponse = await got.post(`${gwDomain}${GRANT_PERMISSIONS_PATH}`, options);
-  const { error, ...response } = gwResponse.body;
-  if (!_.isEmpty(error)) {
-    throw ErrorGatewayResponse(error);
-  }
-
-  return response;
-};
+});

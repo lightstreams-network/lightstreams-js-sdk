@@ -23,6 +23,7 @@ module.exports.errorHandler = (err, req, res, next) => {
     res.setHeader('Content-Type', 'application/json');
     res.json(JsonResponse(err.stack.split('\n'), err))
   } else {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.render('error');
   }
 };

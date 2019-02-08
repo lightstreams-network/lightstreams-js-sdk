@@ -7,77 +7,76 @@
 const got = require('got');
 const _ = require('lodash');
 
-const { parseGatewayError } = require('../lib/gateway');
+const { extractResponse, defaultOptions } = require('../lib/gateway');
 
-const URL_GET_ICO_BALANCE = `${urls.GATEWAY_DOMAIN}/erc20/balance`;
-const URL_TRANSFER_ICO = `${urls.GATEWAY_DOMAIN}/erc20/transfer`;
-const URL_PURCHASE_ICO = `${urls.GATEWAY_DOMAIN}/erc20/purchase`;
+const ERC20_BALANCE_PATH = `/erc20/balance`;
+const ERC20_TRANSFER_PATH = `/erc20/transfer`;
+const ERC20_PURCHASE_PATH = `/erc20/purchase`;
 
-module.exports.purchaseCoins = (ethAddress, icoAddress, password, weiAmount) => {
-  const options = {
-    json: true,
-    throwHttpErrors: false,
-    body: {
-      erc20_address: icoAddress,
-      password: password,
-      account: ethAddress,
-      amount_wei: weiAmount.toString()
-    },
-  };
+module.exports = (gwDomain) => ({
+  /**
+   *
+   * @param erc20_address
+   * @param account
+   * @returns {Promise<*>}
+   */
+  balance: async (erc20_address, account) => {
+    const options = {
+      ...defaultOptions,
+      query: {
+        erc20_address,
+        account
+      },
+    };
 
-  debug(`POST: ${URL_PURCHASE_ICO}\t${JSON.stringify(options)}`);
-  return got.post(URL_PURCHASE_ICO, options)
-    .then((response) => {
-      const { tokens } = response.body;
-      return {
-        coins: tokens
-      }
-    }).catch(err => {
-      parseGatewayError(err);
-    });
-};
+    const gwResponse = await got.get(`${gwDomain}${ERC20_BALANCE_PATH}`, options);
+    return extractResponse(gwResponse);
+  },
 
-module.exports.getCoinBalance = (ethAddress, icoAddress) => {
-  const options = {
-    json: true,
-    query: {
-      erc20_address: icoAddress,
-      account: ethAddress
-    },
-  };
+  /**
+   *
+   * @param erc20_address
+   * @param from
+   * @param password
+   * @param to
+   * @param amount
+   * @returns {Promise<*>}
+   */
+  transfer: async (erc20_address, from, password, to, amount) => {
+    const options = {
+      ...defaultOptions,
+      body: {
+        erc20_address,
+        from,
+        password,
+        to,
+        amount: amount.toString()
+      },
+    };
 
-  debug(`GET: ${URL_GET_ICO_BALANCE}\t${JSON.stringify(options)}`);
-  return got.get(URL_GET_ICO_BALANCE, options)
-    .then((response) => {
-      const { balance } = response.body;
-      return {
-        balance
-      }
-    }).catch(err => {
-      parseGatewayError(err);
-    });
-};
+    const gwResponse = await got.post(`${gwDomain}${ERC20_TRANSFER_PATH}`, options);
+    return extractResponse(gwResponse);
+  },
+  /**
+   *
+   * @param erc20_address
+   * @param account
+   * @param password
+   * @param amount_wei
+   * @returns {Promise<*>}
+   */
+  purchase: async (erc20_address, account, password, amount_wei) => {
+    const options = {
+      ...defaultOptions,
+      body: {
+        erc20_address,
+        password,
+        account,
+        amount_wei: amount_wei.toString()
+      },
+    };
 
-module.exports.transferIco = (icoAddress, artistAccount, sourceEthAddress, password, amount) => {
-  const options = {
-    json: true,
-    body: {
-      erc20_address: icoAddress,
-      account: sourceEthAddress,
-      password: password,
-      to: artistAccount,
-      amount: amount.toString()
-    },
-  };
-
-  debug(`POST: ${URL_TRANSFER_ICO}\t${JSON.stringify(options)}`);
-  return got.post(URL_TRANSFER_ICO, options)
-    .then(gwResponse => {
-      const { balance } = gwResponse.body;
-      return {
-        balance
-      }
-    }).catch(err => {
-      parseGatewayError(err);
-    });
-};
+    const gwResponse = await got.post(`${gwDomain}${ERC20_PURCHASE_PATH}`, options);
+    return extractResponse(gwResponse);
+  }
+});

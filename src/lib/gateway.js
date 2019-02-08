@@ -4,25 +4,51 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
+const _ = require('lodash');
+const { ErrorGatewayResponse } = require('../lib/response');
 
-module.exports.parseGatewayError = (err) => {
-  if (typeof err.response !== 'object') {
-    throw err;
+const parseUnknownResponseError = (response) => {
+  if (typeof response !== 'object') {
+    throw response;
   }
 
-  if (typeof err.response.body !== 'object') {
-    throw new Error(err.response.body || err.message)
+  if (typeof response.body !== 'object') {
+    throw new Error(response.body || message)
   }
 
-  if (typeof err.response.body.error === 'object') {
-    throw new Error(err.response.body.error.message);
+  if (typeof response.body.error === 'object') {
+    throw new Error(response.body.error.message);
   }
 
-  if (typeof err.response.body.message === 'string'
-    || typeof err.response.body.message === 'undefined') {
-    throw new Error(err.response.body.message)
+  if (typeof response.body.message === 'string'
+    || typeof response.body.message === 'undefined') {
+    throw new Error(response.body.message)
   }
 
-  throw new Error("Invalid Gateway error");
+  throw new Error("Unknown Error");
 };
+
+module.exports.extractResponse = (gwResponse) => {
+
+  if (gwResponse.statusCode !== 200) {
+    if (typeof gwResponse.body === 'object' && typeof gwResponse.body.error === 'object') {
+      throw ErrorGatewayResponse(gwResponse.body.error);
+    }
+    parseUnknownResponseError(gwResponse);
+  }
+
+  const { error, ...response } = gwResponse.body;
+  if (!_.isEmpty(error)) {
+    throw ErrorGatewayResponse(error);
+  }
+
+  return response;
+};
+
+module.exports.defaultOptions = {
+  json: true,
+  throwHttpErrors: false,
+  followRedirect: false,
+};
+
 

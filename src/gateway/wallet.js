@@ -7,45 +7,49 @@
 const got = require('got');
 const _ = require('lodash');
 
-const { ErrorGatewayResponse } = require('../lib/response');
+const { extractResponse, defaultOptions } = require('../lib/gateway');
 
 const WALLET_BALANCE_PATH = '/wallet/balance';
 const WALLET_TRANSFER_PATH = '/wallet/transfer';
 
-module.exports.balance = (gwDomain) => async (account) => {
-  const options = {
-    json: true,
-    throwHttpErrors: false,
-    query: {
-      account
-    },
-  };
+module.exports = (gwDomain) => ({
+  /**
+   *
+   * @param account
+   * @returns {Promise<*>}
+   */
+  balance: async (account) => {
+    const options = {
+      ...defaultOptions,
+      query: {
+        account
+      },
+    };
 
-  const gwResponse = await got.get(`${gwDomain}${WALLET_BALANCE_PATH}`, options);
-  const { error, ...response } = gwResponse.body;
-  if (!_.isEmpty(error)) {
-    throw ErrorGatewayResponse(error);
+    const gwResponse = await got.get(`${gwDomain}${WALLET_BALANCE_PATH}`, options);
+    return extractResponse(gwResponse);
+  },
+
+  /**
+   *
+   * @param from
+   * @param password
+   * @param to
+   * @param amountWei
+   * @returns {Promise<*>}
+   */
+  transfer: async (from, password, to, amountWei) => {
+    const options = {
+      ...defaultOptions,
+      body: {
+        from: from,
+        password: password,
+        to: to,
+        amount_wei: amountWei.toString()
+      }
+    };
+
+    const gwResponse = await got.post(`${gwDomain}${WALLET_TRANSFER_PATH}`, options);
+    return extractResponse(gwResponse);
   }
-  return response;
-};
-
-module.exports.transfer = (gwDomain) => async (from, password, to, amountWei) => {
-  const options = {
-    json: true,
-    throwHttpErrors: false,
-    body: {
-      from: from,
-      password: password,
-      to: to,
-      amount_wei: amountWei.toString()
-    }
-  };
-
-  const gwResponse = await got.post(`${gwDomain}${WALLET_TRANSFER_PATH}`, options);
-  const { error, ...response } = gwResponse.body;
-  if (!_.isEmpty(error)) {
-    throw ErrorGatewayResponse(error);
-  }
-
-  return response;
-};
+});

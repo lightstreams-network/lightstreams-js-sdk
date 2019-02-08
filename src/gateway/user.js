@@ -7,44 +7,44 @@
 const got = require('got');
 const _ = require('lodash');
 
-const { ErrorGatewayResponse } = require('../lib/response');
+const { extractResponse, defaultOptions } = require('../lib/gateway');
 
 const SIGN_IN_PATH = '/user/signin';
 const SIGN_UP_PATH = '/user/signup';
 
+module.exports = (gwDomain) => ({
+  /**
+   *
+   * @param account
+   * @param password
+   * @returns {Promise<*>}
+   */
+  signIn: async (account, password) => {
+    const options = {
+      ...defaultOptions,
+      body: {
+        account,
+        password,
+      }
+    };
 
-module.exports.signIn = (gwDomain) => async (account, password) => {
-  const options = {
-    json: true,
-    throwHttpErrors: false,
-    body: {
-      account,
-      password,
-    }
-  };
+    const gwResponse = await got.post(`${gwDomain}${SIGN_IN_PATH}`, options);
+    return extractResponse(gwResponse);
+  },
+  /**
+   *
+   * @param password
+   * @returns {Promise<*>}
+   */
+  signUp: async (password) => {
+    const options = {
+      ...defaultOptions,
+      body: {
+        password,
+      }
+    };
 
-  const gwResponse = await got.post(`${gwDomain}${SIGN_IN_PATH}`, options);
-  const { error, ...response } = gwResponse.body;
-  if (!_.isEmpty(error)) {
-    throw ErrorGatewayResponse(error);
+    const gwResponse = await got.post(`${gwDomain}${SIGN_UP_PATH}`, options);
+    return extractResponse(gwResponse);
   }
-  return response;
-};
-
-module.exports.signUp = (gwDomain) => async (password) => {
-  const options = {
-    json: true,
-    throwHttpErrors: false,
-    body: {
-      password,
-    }
-  };
-
-  const gwResponse = await got.post(`${gwDomain}${SIGN_UP_PATH}`, options);
-  const { error, ...response } = gwResponse.body;
-  if (!_.isEmpty(error)) {
-    throw ErrorGatewayResponse(error);
-  }
-
-  return response;
-};
+});

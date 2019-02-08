@@ -5,18 +5,17 @@
  */
 
 const _ = require('lodash');
-const GatewayAPI = require('../gateway');
+const Gateway = require('../gateway');
 
 module.exports = (gwDomain) => {
-  const userRoutes = require('./user')(GatewayAPI(gwDomain));
-  const walletRoutes = require('./wallet')(GatewayAPI(gwDomain));
-  const storageRoutes = require('./storage')(GatewayAPI(gwDomain));
-  const aclRoutes = require('./acl')(GatewayAPI(gwDomain));
+
+  const gateway = Gateway(gwDomain);
 
   return _.concat(
-    _.map(userRoutes, (route) => {return {...route, path: `/user/${route.path}` }}),
-    _.map(walletRoutes, (route) => {return {...route, path: `/wallet/${route.path}` }}),
-    _.map(storageRoutes, (route) => {return {...route, path: `/storage/${route.path}` }}),
-    _.map(aclRoutes, (route) => {return {...route, path: `/acl/${route.path}` }}),
+    _.map(require('./user')(gateway), (route) => ({...route, path: `/user/${route.path}` })),
+    _.map(require('./wallet')(gateway), (route) => ({...route, path: `/wallet/${route.path}` })),
+    _.map(require('./storage')(gateway), (route) => ({...route, path: `/storage/${route.path}` })),
+    _.map(require('./acl')(gateway), (route) => ({...route, path: `/acl/${route.path}` })),
+    _.map(require('./erc20')(gateway), (route) => ({...route, path: `/erc20/${route.path}` })),
   );
 };

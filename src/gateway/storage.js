@@ -11,35 +11,46 @@ const FormData = require('form-data');
 const ADD_FILE_PATH = `/storage/add`;
 const FETCH_FILE_PATH = `/storage/fetch`;
 
-module.exports.addProxy = (gwDomain) => async (owner, password, file) => {
-  var form = new FormData();
-  form.append('owner', owner);
-  form.append('password', password);
-  form.append('file', file);
+const { defaultOptions } = require('../lib/gateway');
 
-  const options = {
-    headers: form.getHeaders(),
-    stream: true,
-    throwHttpErrors: false,
-    body: form
-  };
+module.exports = (gwDomain) => ({
+  /**
+   *
+   * @param owner
+   * @param password
+   * @param file
+   * @returns {Promise<*>}
+   */
+  addProxy: async (owner, password, file) => {
+    var form = new FormData();
+    form.append('owner', owner);
+    form.append('password', password);
+    form.append('file', file);
 
-  return got.post(`${gwDomain}${ADD_FILE_PATH}`, options);
-};
+    const options = {
+      ...defaultOptions,
+      headers: form.getHeaders(),
+      body: form
+    };
 
-module.exports.fetchProxy = (gwDomain) => async (meta, token) => {
-  const options = {
-    stream: true,
-    throwHttpErrors: false,
-    json: true,
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    query: {
-      meta,
-      token
-    },
-  };
+    return got.post(`${gwDomain}${ADD_FILE_PATH}`, options);
+  },
+  /**
+   *
+   * @param gwDomain
+   * @returns {function(*, *): *}
+   */
+  fetchProxy: (gwDomain) => async (meta, token) => {
+    const options = {
+      ...defaultOptions,
+      stream: true,
+      query: {
+        meta,
+        token
+      },
+    };
 
-  return got.get(`${gwDomain}${FETCH_FILE_PATH}`, options);
-};
+    return got.get(`${gwDomain}${FETCH_FILE_PATH}`, options);
+  }
+});
+
