@@ -15,11 +15,13 @@ const { defaultOptions } = require('../lib/gateway');
 
 module.exports = (gwDomain) => ({
   /**
-   *
-   * @param owner
-   * @param password
-   * @param file
-   * @returns {Promise<*>}
+   * Uploaded new file into distributed storage
+   * @param owner Address of the owner of the file
+   * @param password The password that unlocks the owner
+   * @param file File to add
+   * @returns {StreamResponse<{ meta, acl }>}
+   * `meta` refers to the unique identifier for file uploaded into distributed storage
+   * `acl` refers to the acl smart contract address
    */
   addProxy: async (owner, password, file) => {
     var form = new FormData();
@@ -36,11 +38,12 @@ module.exports = (gwDomain) => ({
     return got.post(`${gwDomain}${ADD_FILE_PATH}`, options);
   },
   /**
-   *
-   * @param gwDomain
-   * @returns {function(*, *): *}
+   * Fetch file from distributed storage
+   * @param meta Unique identifier of stored file
+   * @param token Account authentication token
+   * @returns {StreamResponse<**CONTENT_FILE**>}
    */
-  fetchProxy: (gwDomain) => async (meta, token) => {
+  fetchProxy: async (meta, token) => {
     const options = {
       ...defaultOptions,
       stream: true,

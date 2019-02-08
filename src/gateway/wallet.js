@@ -14,9 +14,9 @@ const WALLET_TRANSFER_PATH = '/wallet/transfer';
 
 module.exports = (gwDomain) => ({
   /**
-   *
-   * @param account
-   * @returns {Promise<*>}
+   * Get wallet balance from an account
+   * @param account Account address
+   * @returns {Promise<{ balance }>}
    */
   balance: async (account) => {
     const options = {
@@ -31,12 +31,12 @@ module.exports = (gwDomain) => ({
   },
 
   /**
-   *
-   * @param from
-   * @param password
-   * @param to
-   * @param amountWei
-   * @returns {Promise<*>}
+   * Transfer funds to an account
+   * @param from Account address to transfer funds from
+   * @param password The password that unlocks the account
+   * @param to Account address to transfer funds to
+   * @param amountWei Amount in wei
+   * @returns {Promise<{ balance }>} Remaining balance on from account
    */
   transfer: async (from, password, to, amountWei) => {
     const options = {

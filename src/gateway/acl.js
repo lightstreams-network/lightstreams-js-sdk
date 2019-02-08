@@ -19,13 +19,13 @@ const PERMISSIONS = {
 
 module.exports = (gwDomain) => ({
   /**
-   *
-   * @param acl
-   * @param owner
-   * @param password
-   * @param to
-   * @param permission
-   * @returns {Promise<*>}
+   * Grant certain file permissions to an account
+   * @param acl ACL address obtained after storing a file
+   * @param owner Account address of file's owner
+   * @param password The password that unlocks the account
+   * @param to Account address that will receive the permissions
+   * @param permission Permission type to grant (Enum:"read" "write" "admin")
+   * @returns {Promise<{ is_granted }>}
    */
   grant: async (acl, owner, password, to, permission) => {
 

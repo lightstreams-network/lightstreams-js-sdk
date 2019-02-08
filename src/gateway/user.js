@@ -14,10 +14,10 @@ const SIGN_UP_PATH = '/user/signup';
 
 module.exports = (gwDomain) => ({
   /**
-   *
-   * @param account
-   * @param password
-   * @returns {Promise<*>}
+   * Sign in a user into the system
+   * @param account Account address
+   * @param password The password that unlocks the account
+   * @returns {Promise<{ token }>}
    */
   signIn: async (account, password) => {
     const options = {
@@ -32,9 +32,9 @@ module.exports = (gwDomain) => ({
     return extractResponse(gwResponse);
   },
   /**
-   *
-   * @param password
-   * @returns {Promise<*>}
+   * Create a new user on the gateway
+   * @param password The password used to create a new Ethereum account
+   * @returns {Promise<{ account }>}
    */
   signUp: async (password) => {
     const options = {

@@ -15,10 +15,10 @@ const ERC20_PURCHASE_PATH = `/erc20/purchase`;
 
 module.exports = (gwDomain) => ({
   /**
-   *
-   * @param erc20_address
-   * @param account
-   * @returns {Promise<*>}
+   * Get balance of any erc20 token
+   * @param erc20_address Address of the erc20 token contract
+   * @param account Account address for which to check the balance
+   * @returns {Promise<{ balance }>}
    */
   balance: async (erc20_address, account) => {
     const options = {
@@ -34,12 +34,12 @@ module.exports = (gwDomain) => ({
   },
 
   /**
-   *
-   * @param erc20_address
-   * @param from
-   * @param password
-   * @param to
-   * @param amount
+   * Transfer erc20 token to an account
+   * @param erc20_address ERC20 token address
+   * @param from Account address to transfer funds from
+   * @param password The password that unlocks the account
+   * @param to Account address to transfer funds to
+   * @param amount Amount in erc20 token
    * @returns {Promise<*>}
    */
   transfer: async (erc20_address, from, password, to, amount) => {
@@ -58,12 +58,12 @@ module.exports = (gwDomain) => ({
     return extractResponse(gwResponse);
   },
   /**
-   *
-   * @param erc20_address
-   * @param account
-   * @param password
-   * @param amount_wei
-   * @returns {Promise<*>}
+   * Sending tokens to ICO contract and purchase tokens
+   * @param erc20_address ERC20 token address
+   * @param account Account address to transfer funds from
+   * @param password The password that unlocks the account
+   * @param amount_wei Amount in wei to purchase
+   * @returns {Promise<{ tokens }>}
    */
   purchase: async (erc20_address, account, password, amount_wei) => {
     const options = {
