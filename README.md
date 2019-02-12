@@ -23,8 +23,8 @@ npm install git+ssh://git@github.com:lightstreams-network/js-sdk-lightstreams#ma
 Initialize a gateway sdk object to interact with lightstreams gateway.
 
 ```
-const LigtstreamsSDK = require('js-sdk-lightstreams')
-const gateway = LigtstreamsSDK('https://gateway.sirius.lightstreams.io')
+const lsClient = require('js-sdk-lightstreams')
+const gateway = lsClient('https://gateway.sirius.lightstreams.io')
 ```
 where `'https://gateway.sirius.lightstreams.io'` is the endpoint we are going to use to interact
 with lightstreams node. [More available domains](#gateway-endpoints)
