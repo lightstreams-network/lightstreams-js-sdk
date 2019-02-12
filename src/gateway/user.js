@@ -7,7 +7,8 @@
 const got = require('got');
 const _ = require('lodash');
 
-const { extractResponse, defaultOptions } = require('../lib/gateway');
+const { parseResponse } = require('../lib/response');
+const { defaultOptions } = require('../lib/request');
 
 const SIGN_IN_PATH = '/user/signin';
 const SIGN_UP_PATH = '/user/signup';
@@ -29,7 +30,7 @@ module.exports = (gwDomain) => ({
     };
 
     const gwResponse = await got.post(`${gwDomain}${SIGN_IN_PATH}`, options);
-    return extractResponse(gwResponse);
+    return parseResponse(gwResponse);
   },
   /**
    * Create a new user on the gateway
@@ -45,6 +46,6 @@ module.exports = (gwDomain) => ({
     };
 
     const gwResponse = await got.post(`${gwDomain}${SIGN_UP_PATH}`, options);
-    return extractResponse(gwResponse);
+    return parseResponse(gwResponse);
   }
 });

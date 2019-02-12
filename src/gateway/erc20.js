@@ -7,7 +7,8 @@
 const got = require('got');
 const _ = require('lodash');
 
-const { extractResponse, defaultOptions } = require('../lib/gateway');
+const { parseResponse } = require('../lib/response');
+const { defaultOptions } = require('../lib/request');
 
 const ERC20_BALANCE_PATH = `/erc20/balance`;
 const ERC20_TRANSFER_PATH = `/erc20/transfer`;
@@ -30,7 +31,7 @@ module.exports = (gwDomain) => ({
     };
 
     const gwResponse = await got.get(`${gwDomain}${ERC20_BALANCE_PATH}`, options);
-    return extractResponse(gwResponse);
+    return parseResponse(gwResponse);
   },
 
   /**
@@ -55,7 +56,7 @@ module.exports = (gwDomain) => ({
     };
 
     const gwResponse = await got.post(`${gwDomain}${ERC20_TRANSFER_PATH}`, options);
-    return extractResponse(gwResponse);
+    return parseResponse(gwResponse);
   },
   /**
    * Sending tokens to ICO contract and purchase tokens
@@ -77,6 +78,6 @@ module.exports = (gwDomain) => ({
     };
 
     const gwResponse = await got.post(`${gwDomain}${ERC20_PURCHASE_PATH}`, options);
-    return extractResponse(gwResponse);
+    return parseResponse(gwResponse);
   }
 });

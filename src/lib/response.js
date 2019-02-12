@@ -1,37 +1,51 @@
+/**
+ * User: ggarrido
+ * Date: 12/02/19 12:50
+ * Copyright 2019 (c) Lightstreams, Granada
+ */
 
-module.exports.ErrorNotFoundResponse = () => {
-    const err = new Error('Route not found');
-    err.status = 404;
-    return err;
+const _ = require('lodash');
+
+const parseUnknownResponseError = (response) => {
+  if (typeof response !== 'object') {
+    throw response;
+  }
+
+  if (typeof response.body !== 'object') {
+    throw new Error(response.body || message)
+  }
+
+  if (typeof response.body.error === 'object') {
+    throw new Error(response.body.error.message);
+  }
+
+  if (typeof response.body.message === 'string'
+    || typeof response.body.message === 'undefined') {
+    throw new Error(response.body.message)
+  }
+
+  throw new Error("Unknown Error");
 };
 
-module.exports.ErrorBadInputResponse = (msg) => {
-    const err = new Error(msg || 'Bad input parameter');
-    err.status = 400;
-    return err;
-};
-
-module.exports.ErrorUnauthorizedResponse = (msg) => {
-    const err = new Error(msg || 'Unauthorized');
-    err.status = 401;
-    return err;
-};
-
-module.exports.ErrorGatewayResponse = (gwErr) => {
+const newErrorGatewayResponse = (gwErr) => {
   const err = new Error(gwErr.message);
   err.status = gwErr.code === 'ERROR_UNKNOWN' ? 500 : gwErr.code;
   return err;
 };
 
-module.exports.ErrorResponse = (msg, errCode) => {
-  const err = new Error(msg || 'Unauthorized');
-  err.status = errCode;
-  return err;
-};
+module.exports.parseResponse = (gwResponse) => {
 
-module.exports.JsonResponse = (data, err) => {
-    if (err) {
-        return { success: false, message: err.message, stack: data }
+  if (gwResponse.statusCode !== 200) {
+    if (typeof gwResponse.body === 'object' && typeof gwResponse.body.error === 'object') {
+      throw newErrorGatewayResponse(gwResponse.body.error);
     }
-    return { success: true, data }
+    parseUnknownResponseError(gwResponse);
+  }
+
+  const { error, ...response } = gwResponse.body;
+  if (!_.isEmpty(error)) {
+    throw newErrorGatewayResponse(error);
+  }
+
+  return response;
 };

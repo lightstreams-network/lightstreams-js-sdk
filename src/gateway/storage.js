@@ -11,7 +11,8 @@ const FormData = require('form-data');
 const ADD_FILE_PATH = `/storage/add`;
 const FETCH_FILE_PATH = `/storage/fetch`;
 
-const { defaultOptions } = require('../lib/gateway');
+const { parseResponse } = require('../lib/response');
+const { defaultOptions } = require('../lib/request');
 
 module.exports = (gwDomain) => ({
   /**

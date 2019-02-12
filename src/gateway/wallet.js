@@ -7,7 +7,8 @@
 const got = require('got');
 const _ = require('lodash');
 
-const { extractResponse, defaultOptions } = require('../lib/gateway');
+const { parseResponse } = require('../lib/response');
+const { defaultOptions } = require('../lib/request');
 
 const WALLET_BALANCE_PATH = '/wallet/balance';
 const WALLET_TRANSFER_PATH = '/wallet/transfer';
@@ -27,7 +28,7 @@ module.exports = (gwDomain) => ({
     };
 
     const gwResponse = await got.get(`${gwDomain}${WALLET_BALANCE_PATH}`, options);
-    return extractResponse(gwResponse);
+    return parseResponse(gwResponse);
   },
 
   /**
@@ -50,6 +51,6 @@ module.exports = (gwDomain) => ({
     };
 
     const gwResponse = await got.post(`${gwDomain}${WALLET_TRANSFER_PATH}`, options);
-    return extractResponse(gwResponse);
+    return parseResponse(gwResponse);
   }
 });

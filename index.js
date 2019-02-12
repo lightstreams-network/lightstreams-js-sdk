@@ -8,4 +8,10 @@
 
 'use strict';
 
-module.exports = require('./src/gateway');
+module.exports = (gwDomain) => ({
+  user: require('./src/gateway/user')(gwDomain),
+  wallet: require('./src/gateway/wallet')(gwDomain),
+  storage: require('./src/gateway/storage')(gwDomain),
+  acl: require('./src/gateway/acl')(gwDomain),
+  erc20: require('./src/gateway/erc20')(gwDomain),
+});

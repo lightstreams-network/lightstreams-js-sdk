@@ -7,7 +7,8 @@
 const got = require('got');
 const _ = require('lodash');
 
-const { extractResponse, defaultOptions } = require('../lib/gateway');
+const { parseResponse } = require('../lib/response');
+const { defaultOptions } = require('../lib/request');
 
 const GRANT_PERMISSIONS_PATH = '/acl/grant';
 
@@ -45,6 +46,6 @@ module.exports = (gwDomain) => ({
     };
 
     const gwResponse = await got.post(`${gwDomain}${GRANT_PERMISSIONS_PATH}`, options);
-    return extractResponse(gwResponse);
+    return parseResponse(gwResponse);
   }
 });
