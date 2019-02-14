@@ -11,9 +11,6 @@ const FormData = require('form-data');
 const ADD_FILE_PATH = `/storage/add`;
 const FETCH_FILE_PATH = `/storage/fetch`;
 
-const { parseResponse } = require('../lib/response');
-const { defaultOptions } = require('../lib/request');
-
 module.exports = (gwDomain) => ({
   /**
    * Uploaded new file into distributed storage
@@ -31,7 +28,8 @@ module.exports = (gwDomain) => ({
     form.append('file', file);
 
     const options = {
-      ...defaultOptions,
+      stream: true,
+      throwHttpErrors: false,
       headers: form.getHeaders(),
       body: form
     };
@@ -46,8 +44,12 @@ module.exports = (gwDomain) => ({
    */
   fetchProxy: async (meta, token) => {
     const options = {
-      ...defaultOptions,
       stream: true,
+      throwHttpErrors: false,
+      json: true,
+      headers: {
+        'Content-Type': 'application/json'
+      },
       query: {
         meta,
         token
