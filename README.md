@@ -27,7 +27,7 @@ const lsClient = require('lightstreams-js-sdk')
 const gateway = lsClient('https://gateway.sirius.lightstreams.io')
 ```
 where `'https://gateway.sirius.lightstreams.io'` is the endpoint we are going to use to interact
-with lightstreams node. [More available domains](#available-gateway-apis)
+with lightstreams node. [See available gateway APIs below](#available-gateway-apis)
 
 Once `LightstreamsSDK` is initialized you interact with it as follow:
 ```
