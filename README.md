@@ -27,7 +27,7 @@ const lsClient = require('lightstreams-js-sdk')
 const gateway = lsClient('https://gateway.sirius.lightstreams.io')
 ```
 where `'https://gateway.sirius.lightstreams.io'` is the endpoint we are going to use to interact
-with lightstreams node. [More available domains](#gateway-endpoints)
+with lightstreams node. [More available domains](#available-gateway-apis)
 
 Once `LightstreamsSDK` is initialized you interact with it as follow:
 ```
@@ -47,7 +47,7 @@ METHOD: GET
 QUERY: {account: "0xa981f8ca77d069d79b609ca0069b052db79e7e30"}
 ```
 
-## <a href="#gateway-endpoints"></a>Available Gateway APIs
+## Available Gateway APIs
 
 Lightstreams team provides provides two public gateway api for its free usage.
 
