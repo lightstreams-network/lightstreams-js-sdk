@@ -1,7 +1,7 @@
-# Lightstreams JS Gateway SDK
+# Lightstreams JS SDK
 
 This repository is a Javascript SDK to facilitate the usage of functionalities
-implemented in Lightstreams node, [http api](https://docs.lightstreams.network/api-docs).
+implemented in the Lightstreams node (also known as the Lightstreams Gateway node, or simply Gateway), [http api](https://docs.lightstreams.network/api-docs).
 
 ## Requirements
 - Node > 10
@@ -13,9 +13,9 @@ implemented in Lightstreams node, [http api](https://docs.lightstreams.network/a
 
 **Install node module**
 
-Install `js-sdk-lightstreams` as part of your project dependencies:
+Install `lightstreams-js-sdk` as part of your project dependencies:
 ```bash
-npm install git+ssh://git@github.com:lightstreams-network/js-sdk-lightstreams#master --save
+npm install git+ssh://git@github.com:lightstreams-network/lightstreams-js-sdk#master --save
 ```
 
 **Using Gateway SDK**
@@ -23,7 +23,7 @@ npm install git+ssh://git@github.com:lightstreams-network/js-sdk-lightstreams#ma
 Initialize a gateway sdk object to interact with lightstreams gateway.
 
 ```
-const lsClient = require('js-sdk-lightstreams')
+const lsClient = require('lightstreams-js-sdk')
 const gateway = lsClient('https://gateway.sirius.lightstreams.io')
 ```
 where `'https://gateway.sirius.lightstreams.io'` is the endpoint we are going to use to interact
@@ -65,10 +65,10 @@ Runs over Ethereum test net Rinkeby
 `https://gateway.rinkeby.lightstreams.io`
 
 ## Sample project
-- [Gateway Proxy Server](https://github.com/lightstreams-network/js-sdk-lightstreams/tree/master/example/gateway-proxy)
+- [Gateway Proxy Server](https://github.com/lightstreams-network/lightstreams-js-sdk/tree/master/example/gateway-proxy)
 
 
 ## Help
 In case you have questions regarding the usage of this repository
-create a new [question issue](https://github.com/lightstreams-network/js-sdk-lightstreams/issues/new)
+create a new [question issue](https://github.com/lightstreams-network/lightstreams-js-sdk/issues/new)
 and Lighstreams team will reply as soon as possible.
