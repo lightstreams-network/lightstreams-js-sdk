@@ -49,10 +49,7 @@ QUERY: {account: "0xa981f8ca77d069d79b609ca0069b052db79e7e30"}
 
 ## Available Gateway APIs
 
-Lightstreams team provides provides two public gateway api for its free usage.
-
-Additionally to those endpoints you can run your own local lightstreams node,
-follow the instructions [here](https://docs.lightstreams.network/getting-started/quick-start/#running-lightstreams-node)
+Lightstreams provides two public gateway APIs at the moment:
 
 **Sirius**
 
@@ -64,9 +61,10 @@ Run over Lightstreams test net Sirius
 Runs over Ethereum test net Rinkeby
 `https://gateway.rinkeby.lightstreams.io`
 
+In addition to those endpoints, you can run your own local lightstreams node and expose the same API. Follow the instructions [here](https://docs.lightstreams.network/getting-started/quick-start/#running-lightstreams-node)
+
 ## Sample project
 - [Gateway Proxy Server](https://github.com/lightstreams-network/lightstreams-js-sdk/tree/master/example/gateway-proxy)
-
 
 ## Help
 In case you have questions regarding the usage of this repository
