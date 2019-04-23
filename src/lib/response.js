@@ -33,7 +33,7 @@ const newErrorGatewayResponse = (gwErr) => {
   return err;
 };
 
-module.export.errorResponse = (msg, code) => {
+module.exports.errorResponse = (msg, code) => {
   const err = new Error(mgs);
   err.status = code || 500;
   return err;
