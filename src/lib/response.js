@@ -34,7 +34,7 @@ const newErrorGatewayResponse = (gwErr) => {
 };
 
 module.exports.errorResponse = (msg, code) => {
-  const err = new Error(mgs);
+  const err = new Error(msg);
   err.status = code || 500;
   return err;
 };
