@@ -57,6 +57,56 @@ module.exports = (gwDomain) => ({
     };
 
     return got.get(`${gwDomain}${FETCH_FILE_PATH}`, options);
-  }
+  },
+
+  /**
+   * Fetch file from distributed storage
+   * @param meta Unique identifier of stored file
+   * @param token Account authentication token
+   * @param options Got lib options
+   */
+  fetch: async (meta, token, options = {}) => {
+    const defaultOptions = {
+      throwHttpErrors: false,
+      json: true,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    };
+
+    return got.get(`${gwDomain}${FETCH_FILE_PATH}`, {
+      ...defaultOptions,
+      ...options,
+      query: {
+        meta,
+        token
+      },
+    });
+  },
+
+  /**
+   * Uploaded new file into distributed storage
+   * @param owner Address of the owner of the file
+   * @param password The password that unlocks the owner
+   * @param file File to add
+   * @param options Got lib options
+   */
+  add: async (owner, password, file, options = {}) => {
+    var form = new FormData();
+    form.append('owner', owner);
+    form.append('password', password);
+    form.append('file', file);
+
+    const defaultOptions = {
+      throwHttpErrors: false,
+      headers: form.getHeaders(),
+      body: form
+    };
+
+    return got.post(`${gwDomain}${ADD_FILE_PATH}`, {
+      ...defaultOptions,
+      ...options,
+    });
+  },
 });
 
