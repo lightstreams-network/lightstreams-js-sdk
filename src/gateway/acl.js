@@ -5,7 +5,6 @@
  */
 
 const got = require('got');
-const _ = require('lodash');
 
 const { parseResponse, errorResponse } = require('../lib/response');
 const { defaultOptions } = require('../lib/request');
@@ -30,7 +29,7 @@ module.exports = (gwDomain) => ({
    */
   grant: async (acl, owner, password, to, permission) => {
 
-    if (_.values(PERMISSIONS).indexOf(permission) === -1) {
+    if (Object.values(PERMISSIONS).indexOf(permission) === -1) {
       throw errorResponse(`"${permission}" is not a valid permission`);
     }
 

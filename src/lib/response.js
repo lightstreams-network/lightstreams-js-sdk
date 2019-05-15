@@ -4,8 +4,6 @@
  * Copyright 2019 (c) Lightstreams, Granada
  */
 
-const _ = require('lodash');
-
 const parseUnknownResponseError = (response) => {
   if (typeof response !== 'object') {
     throw response;
@@ -49,7 +47,7 @@ module.exports.parseResponse = (gwResponse) => {
   }
 
   const { error, ...response } = gwResponse.body;
-  if (!_.isEmpty(error)) {
+  if (!error) {
     throw newErrorGatewayResponse(error);
   }
 

@@ -1,15 +1,17 @@
 {
   "name": "lightstreams-js-sdk",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Javascript SDK for the Lightstreams Gateway API",
   "authors": "Gabriel Garrido",
-  "contributors": ["Andrew Zappella"],
+  "contributors": [
+    "Andrew Zappella"
+  ],
   "license": "GPLv3",
   "homepage": "https://github.com/lightstreams-network/js-sdk-lightstreams#readme",
   "bugs": {
     "url": "https://github.com/lightstreams-network/js-sdk-lightstreams/issues"
   },
-  "main": "index.js",
+  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lightstreams-network/js-sdk-lightstreams.git"
@@ -25,13 +27,20 @@
     "storage"
   ],
   "files": [
-    "index.js",
-    "src/"
+    "src/",
+    "lib/"
   ],
+  "scripts": {
+    "build": "babel src -d lib"
+  },
   "dependencies": {
     "form-data": "^2.3.3",
     "got": "^9.6.0",
-    "lodash": "^4.17.11",
     "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.4",
+    "@babel/preset-env": "^7.4.4"
   }
 }

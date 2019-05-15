@@ -5,7 +5,6 @@
  */
 
 const got = require('got');
-const _ = require('lodash');
 
 const { parseResponse } = require('../lib/response');
 const { defaultOptions } = require('../lib/request');

@@ -4,7 +4,6 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const _ = require('lodash');
 const got = require('got');
 const FormData = require('form-data');
 
