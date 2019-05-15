@@ -66,7 +66,7 @@ module.exports = (() => {
       method: 'GET',
     }).then((res) => {
       if(res.status === 200 && options['stream']) {
-        return res.body;
+        return res;
       }
       return parseResponse(res)
     });
