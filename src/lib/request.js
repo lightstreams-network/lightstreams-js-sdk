@@ -45,40 +45,31 @@ module.exports = (() => {
   const postFile = (url, data, file, options = {}) => {
     const FormData = require('form-data');
     var form = new FormData();
-    form.append('owner', owner);
-    form.append('password', password);
     form.append('file', file);
-    if (options['stream'] === true ) {
-      return fetch(url, {
-        ...defaultOptions,
-        body: data,
-        headers: form.getHeaders(),
-        method: 'POST',
-        ...options
-      });
-    } else {
-      return fetch(url, {
-        ...defaultOptions,
-        body: data,
-        headers: form.getHeaders(),
-        method: 'POST',
-        ...options
-      }).then(parseResponse);
-    }
-  };
-
-  const fetchFile = (url, data, options = {}) => {
-    if (options['stream'] === true) {
-      // DO SOMETHING
-    } else {
-      // OR SOMETHING ELSE
-    }
+    Object.keys(data).forEach(dataKey => {
+      form.append(dataKey, data[dataKey]);
+    });
 
     return fetch(url, {
       ...defaultOptions,
-      body: data,
-      method: 'GET',
+      body: form,
+      headers: form.getHeaders(),
+      method: 'POST',
       ...options
+    }).then(parseResponse);
+  };
+
+  const fetchFile = (url, data, options = {}) => {
+    return fetch(url + queryParams(data), {
+      ...defaultOptions,
+      ...options,
+      method: 'GET',
+    }).then((res) => {
+      if(res.status !== 200) {
+        return parseResponse(res);
+      } else {
+        return res.body;
+      }
     });
   };
 

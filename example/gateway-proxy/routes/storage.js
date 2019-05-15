@@ -5,7 +5,7 @@
  */
 
 const { validateRequestAttrs, extractRequestAttrs } = require('../lib/request');
-const { ErrorBadInputResponse } = require('../lib/response');
+const { JsonResponse, ErrorBadInputResponse } = require('../lib/response');
 
 module.exports = (gwApi) => {
   const addFile = async (req, res, next) => {
@@ -19,15 +19,8 @@ module.exports = (gwApi) => {
 
     try {
       const attrs = extractRequestAttrs(req, query);
-      const reqStream = await gwApi.storage.addProxy(attrs.owner, attrs.password, attrs.file);
-      reqStream
-        .on('uploadProgress', progress => {
-          console.log(`Uploading: ${progress.transferred} KB`);
-          if (progress.percent === 1) {
-            console.log("Upload completed");
-          }
-        })
-        .pipe(res);
+      const { meta, acl } = await gwApi.storage.add(attrs.owner, attrs.password, attrs.file);
+      res.send(JsonResponse({ meta, acl }));
     } catch ( err ) {
       next(err);
     }
@@ -44,15 +37,8 @@ module.exports = (gwApi) => {
 
     try {
       const attrs = extractRequestAttrs(req, query);
-      const reqStream = await gwApi.storage.fetchProxy(attrs.meta, attrs.token);
-      reqStream
-        .on('downloadProgress', progress => {
-          console.log(`Transferring: ${progress.transferred} KB`);
-          if (progress.percent === 1) {
-            console.log("Transfer completed");
-          }
-        })
-        .pipe(res);
+      const reqStream = await gwApi.storage.fetch(attrs.meta, attrs.token, true);
+      reqStream.pipe(res);
     } catch ( err ) {
       next(err);
     }

@@ -5,7 +5,7 @@
  */
 
 const _ = require('lodash');
-const Gateway = require('js-sdk-lightstreams');
+const Gateway = require('lightstreams-js-sdk');
 
 module.exports = (gwDomain) => {
 

@@ -40,7 +40,6 @@ module.exports.errorResponse = (msg, code) => {
 module.exports.parseResponse = (gwResponse) => {
   if (gwResponse.status !== 200) {
     return gwResponse.json().then(parsedResponse => {
-      debugger;
       if (typeof parsedResponse === 'object' && typeof parsedResponse.error === 'object') {
         throw newErrorGatewayResponse(parsedResponse.error);
       }
