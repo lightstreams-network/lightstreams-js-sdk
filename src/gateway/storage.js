@@ -30,11 +30,12 @@ module.exports = (gwDomain) => ({
    * @param token {string} Account authentication token
    * @returns {StreamResponse<**CONTENT_FILE**>} || <**CONTENT_FILE**>
    */
-  fetch: (meta, token) => {
+  fetch: (meta, token, stream) => {
     return request.fetchFile(`${gwDomain}${FETCH_FILE_PATH}`, {
       meta,
       token
     }, {
+      stream,
       headers: {
         'Content-Type': 'application/json'
       }
