@@ -16,6 +16,7 @@ module.exports = (gwDomain) => {
     _.map(require('./wallet')(gateway), (route) => ({...route, path: `/wallet/${route.path}` })),
     _.map(require('./storage')(gateway), (route) => ({...route, path: `/storage/${route.path}` })),
     _.map(require('./acl')(gateway), (route) => ({...route, path: `/acl/${route.path}` })),
+    _.map(require('./shop')(gateway), (route) => ({...route, path: `/shop/${route.path}` })),
     _.map(require('./erc20')(gateway), (route) => ({...route, path: `/erc20/${route.path}` })),
   );
 };

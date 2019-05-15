@@ -67,7 +67,7 @@ module.exports = (gwDomain) => ({
    */
   fetch: async (meta, token, options = {}) => {
     const defaultOptions = {
-      throwHttpErrors: false,
+      throwHttpErrors: true,
       json: true,
       headers: {
         'Content-Type': 'application/json'
@@ -98,7 +98,7 @@ module.exports = (gwDomain) => ({
     form.append('file', file);
 
     const defaultOptions = {
-      throwHttpErrors: false,
+      throwHttpErrors: true,
       headers: form.getHeaders(),
       body: form
     };
