@@ -6,23 +6,23 @@
 
 const parseUnknownResponseError = (response) => {
   if (typeof response !== 'object') {
-    throw response;
+    return response;
   }
 
   if (typeof response.body !== 'object') {
-    throw new Error(response.body || message)
+    return new Error(response.body || message)
   }
 
   if (typeof response.body.error === 'object') {
-    throw new Error(response.body.error.message);
+    return new Error(response.body.error.message);
   }
 
   if (typeof response.body.message === 'string'
     || typeof response.body.message === 'undefined') {
-    throw new Error(response.body.message)
+    return new Error(response.body.message)
   }
 
-  throw new Error("Unknown Error");
+  return new Error("Unknown Error");
 };
 
 const newErrorGatewayResponse = (gwErr) => {
@@ -38,18 +38,22 @@ module.exports.errorResponse = (msg, code) => {
 };
 
 module.exports.parseResponse = (gwResponse) => {
+  if (gwResponse.status !== 200) {
+    return gwResponse.json().then(parsedResponse => {
+      debugger;
+      if (typeof parsedResponse === 'object' && typeof parsedResponse.error === 'object') {
+        throw newErrorGatewayResponse(parsedResponse.error);
+      }
+      throw parseUnknownResponseError(parsedResponse);
+    })
+  } else {
+    return gwResponse.json().then(parsedResponse => {
+      const { error, ...response } = parsedResponse;
+      if (error) {
+        throw newErrorGatewayResponse(error);
+      }
 
-  if (gwResponse.statusCode !== 200) {
-    if (typeof gwResponse.body === 'object' && typeof gwResponse.body.error === 'object') {
-      throw newErrorGatewayResponse(gwResponse.body.error);
-    }
-    parseUnknownResponseError(gwResponse);
+      return response;
+    })
   }
-
-  const { error, ...response } = gwResponse.body;
-  if (!error) {
-    throw newErrorGatewayResponse(error);
-  }
-
-  return response;
 };

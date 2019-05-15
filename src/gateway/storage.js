@@ -4,11 +4,10 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const got = require('got');
-const FormData = require('form-data');
-
 const ADD_FILE_PATH = `/storage/add`;
 const FETCH_FILE_PATH = `/storage/fetch`;
+
+const request = require('../lib/request');
 
 module.exports = (gwDomain) => ({
   /**
@@ -16,95 +15,40 @@ module.exports = (gwDomain) => ({
    * @param owner Address of the owner of the file
    * @param password The password that unlocks the owner
    * @param file File to add
-   * @returns {StreamResponse<{ meta, acl }>}
+   * @param stream stream file up
+   * @returns {StreamResponse<{ meta, acl }>} | {<{ meta, acl }>}
    * `meta` refers to the unique identifier for file uploaded into distributed storage
    * `acl` refers to the acl smart contract address
    */
-  addProxy: async (owner, password, file) => {
-    var form = new FormData();
-    form.append('owner', owner);
-    form.append('password', password);
-    form.append('file', file);
-
-    const options = {
-      stream: true,
-      throwHttpErrors: false,
-      headers: form.getHeaders(),
-      body: form
-    };
-
-    return got.post(`${gwDomain}${ADD_FILE_PATH}`, options);
-  },
-  /**
-   * Fetch file from distributed storage
-   * @param meta Unique identifier of stored file
-   * @param token Account authentication token
-   * @returns {StreamResponse<**CONTENT_FILE**>}
-   */
-  fetchProxy: async (meta, token) => {
-    const options = {
-      stream: true,
-      throwHttpErrors: false,
-      json: true,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      query: {
-        meta,
-        token
-      },
-    };
-
-    return got.get(`${gwDomain}${FETCH_FILE_PATH}`, options);
+  add: (owner, password, file, stream = false) => {
+    const options = stream
+      ? {stream: true, throwHttpErrors: false }
+      : {stream: false, throwHttpErrors: true };
+    return request.postFile(`${gwDomain}${ADD_FILE_PATH}`, {
+      owner,
+      password,
+    }, file, options);
   },
 
   /**
    * Fetch file from distributed storage
    * @param meta Unique identifier of stored file
    * @param token Account authentication token
-   * @param options Got lib options
+   * @param stream stream file up
+   * @returns {StreamResponse<**CONTENT_FILE**>} || <**CONTENT_FILE**>
    */
-  fetch: async (meta, token, options = {}) => {
-    const defaultOptions = {
-      throwHttpErrors: true,
-      json: true,
+  fetch: (meta, token, stream = false) => {
+    const options = stream
+      ? { stream: true, throwHttpErrors: false }
+      : { stream: false, throwHttpErrors: true };
+    return request.fetchFile(`${gwDomain}${FETCH_FILE_PATH}`, {
+      meta,
+      token
+    }, {
+      ...options,
       headers: {
         'Content-Type': 'application/json'
-      },
-    };
-
-    return got.get(`${gwDomain}${FETCH_FILE_PATH}`, {
-      ...defaultOptions,
-      ...options,
-      query: {
-        meta,
-        token
-      },
-    });
-  },
-
-  /**
-   * Uploaded new file into distributed storage
-   * @param owner Address of the owner of the file
-   * @param password The password that unlocks the owner
-   * @param file File to add
-   * @param options Got lib options
-   */
-  add: async (owner, password, file, options = {}) => {
-    var form = new FormData();
-    form.append('owner', owner);
-    form.append('password', password);
-    form.append('file', file);
-
-    const defaultOptions = {
-      throwHttpErrors: true,
-      headers: form.getHeaders(),
-      body: form
-    };
-
-    return got.post(`${gwDomain}${ADD_FILE_PATH}`, {
-      ...defaultOptions,
-      ...options,
+      }
     });
   },
 });

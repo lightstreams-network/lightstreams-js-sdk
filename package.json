@@ -11,7 +11,7 @@
   "bugs": {
     "url": "https://github.com/lightstreams-network/js-sdk-lightstreams/issues"
   },
-  "main": "lib/index.js",
+  "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lightstreams-network/lightstreams-js-sdk.git"
@@ -31,11 +31,12 @@
     "lib/"
   ],
   "scripts": {
-    "build": "babel src -d lib"
+    "build": "babel src -d lib",
+    "build-single": "babel src --out-file ./lib/index.js"
   },
   "dependencies": {
     "form-data": "^2.3.3",
-    "got": "^9.6.0"
+    "node-fetch": "^2.5.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",

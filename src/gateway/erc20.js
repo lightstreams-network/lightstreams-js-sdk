@@ -4,10 +4,7 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const got = require('got');
-
-const { parseResponse } = require('../lib/response');
-const { defaultOptions } = require('../lib/request');
+const request = require('../lib/request');
 
 const ERC20_BALANCE_PATH = `/erc20/balance`;
 const ERC20_TRANSFER_PATH = `/erc20/transfer`;
@@ -20,17 +17,11 @@ module.exports = (gwDomain) => ({
    * @param account Account address for which to check the balance
    * @returns {Promise<{ balance }>}
    */
-  balance: async (erc20_address, account) => {
-    const options = {
-      ...defaultOptions,
-      query: {
-        erc20_address,
-        account
-      },
-    };
-
-    const gwResponse = await got.get(`${gwDomain}${ERC20_BALANCE_PATH}`, options);
-    return parseResponse(gwResponse);
+  balance: (erc20_address, account) => {
+    return request.get(`${gwDomain}${ERC20_BALANCE_PATH}`, {
+      erc20_address,
+      account
+    });
   },
 
   /**
@@ -42,20 +33,14 @@ module.exports = (gwDomain) => ({
    * @param amount Amount in erc20 token
    * @returns {Promise<*>}
    */
-  transfer: async (erc20_address, from, password, to, amount) => {
-    const options = {
-      ...defaultOptions,
-      body: {
-        erc20_address,
-        from,
-        password,
-        to,
-        amount: amount.toString()
-      },
-    };
-
-    const gwResponse = await got.post(`${gwDomain}${ERC20_TRANSFER_PATH}`, options);
-    return parseResponse(gwResponse);
+  transfer: (erc20_address, from, password, to, amount) => {
+    return request.post(`${gwDomain}${ERC20_TRANSFER_PATH}`, {
+      erc20_address,
+      from,
+      password,
+      to,
+      amount: amount.toString()
+    });
   },
   /**
    * Sending tokens to ICO contract and purchase tokens
@@ -66,17 +51,11 @@ module.exports = (gwDomain) => ({
    * @returns {Promise<{ tokens }>}
    */
   purchase: async (erc20_address, account, password, amount_wei) => {
-    const options = {
-      ...defaultOptions,
-      body: {
-        erc20_address,
-        password,
-        account,
-        amount_wei: amount_wei.toString()
-      },
-    };
-
-    const gwResponse = await got.post(`${gwDomain}${ERC20_PURCHASE_PATH}`, options);
-    return parseResponse(gwResponse);
+    return await request.post(`${gwDomain}${ERC20_PURCHASE_PATH}`, {
+      erc20_address,
+      password,
+      account,
+      amount_wei: amount_wei.toString()
+    });
   }
 });

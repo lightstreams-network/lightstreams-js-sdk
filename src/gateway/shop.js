@@ -4,20 +4,11 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const got = require('got');
-
-const { parseResponse, errorResponse } = require('../lib/response');
-const { defaultOptions } = require('../lib/request');
+const request = require('../lib/request');
 
 const CREATE_SHOP_PATH = '/shop/create';
 const SELL_PATH = '/shop/sell';
 const BUY_PATH = '/shop/buy';
-
-const PERMISSIONS = {
-  READ: 'read',
-  WRITE: 'write',
-  ADMIN: 'admin'
-};
 
 module.exports = (gwDomain) => ({
   /**
@@ -26,18 +17,11 @@ module.exports = (gwDomain) => ({
    * @param password The password that unlocks the from account
    * @returns {Promise<{ shop }>} Shop contract address
    */
-  create: async (from, password) => {
-
-    const options = {
-      ...defaultOptions,
-      body: {
-        from,
-        password,
-      },
-    };
-
-    const gwResponse = await got.post(`${gwDomain}${CREATE_SHOP_PATH}`, options);
-    return parseResponse(gwResponse);
+  create: (from, password) => {
+    return request.post(`${gwDomain}${CREATE_SHOP_PATH}`, {
+      from,
+      password,
+    });
   },
 
   /**
@@ -49,21 +33,14 @@ module.exports = (gwDomain) => ({
    * @param priceWei price in wei buyers must pay to get read access to the file
    * @returns {Promise<{ success }>} true or false
    */
-  sell: async (shop, from, password, acl, priceWei) => {
-
-    const options = {
-      ...defaultOptions,
-      body: {
-        shop,
-        from,
-        password,
-        acl,
-        price_wei: priceWei,
-      },
-    };
-
-    const gwResponse = await got.post(`${gwDomain}${SELL_PATH}`, options);
-    return parseResponse(gwResponse);
+  sell: (shop, from, password, acl, priceWei) => {
+    return request.post(`${gwDomain}${SELL_PATH}`, {
+      shop,
+      from,
+      password,
+      acl,
+      price_wei: priceWei,
+    });
   },
 
   /**
@@ -74,19 +51,12 @@ module.exports = (gwDomain) => ({
    * @param acl acl contract address of file intended to sell
    * @returns {Promise<{ success }>} true or false
    */
-  buy: async (shop, from, password, acl) => {
-
-    const options = {
-      ...defaultOptions,
-      body: {
-        shop,
-        from,
-        password,
-        acl
-      },
-    };
-
-    const gwResponse = await got.post(`${gwDomain}${BUY_PATH}`, options);
-    return parseResponse(gwResponse);
+  buy: (shop, from, password, acl) => {
+    return request.post(`${gwDomain}${BUY_PATH}`, {
+      shop,
+      from,
+      password,
+      acl
+    });
   }
 });

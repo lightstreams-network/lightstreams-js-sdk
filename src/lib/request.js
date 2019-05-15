@@ -4,8 +4,88 @@
  * Copyright 2019 (c) Lightstreams, Granada
  */
 
-module.exports.defaultOptions = {
-  json: true,
-  throwHttpErrors: false,
-  followRedirect: false,
-};
+const { parseResponse } = require('./response');
+
+function queryParams(params) {
+  const paramKeys = Object.keys(params);
+  if (!paramKeys.length) {
+      return ''
+  }
+  return '?' + Object.keys(params)
+    .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]))
+    .join('&');
+}
+
+module.exports = (() => {
+  const fetch = require('node-fetch');
+
+  const defaultOptions = {
+    json: true,
+    throwHttpErrors: false,
+    followRedirect: false,
+  };
+
+  const get = (url, data, options = {}) => {
+    return fetch(url + queryParams(data), {
+      ...defaultOptions,
+      method: 'GET',
+      ...options
+    }).then(parseResponse);
+  };
+
+  const post = (url, data, options = {}) => {
+    return fetch(url, {
+      ...defaultOptions,
+      ...options,
+      body: JSON.stringify(data),
+      method: 'POST',
+    }).then(parseResponse);
+  };
+
+  const postFile = (url, data, file, options = {}) => {
+    const FormData = require('form-data');
+    var form = new FormData();
+    form.append('owner', owner);
+    form.append('password', password);
+    form.append('file', file);
+    if (options['stream'] === true ) {
+      return fetch(url, {
+        ...defaultOptions,
+        body: data,
+        headers: form.getHeaders(),
+        method: 'POST',
+        ...options
+      });
+    } else {
+      return fetch(url, {
+        ...defaultOptions,
+        body: data,
+        headers: form.getHeaders(),
+        method: 'POST',
+        ...options
+      }).then(parseResponse);
+    }
+  };
+
+  const fetchFile = (url, data, options = {}) => {
+    if (options['stream'] === true) {
+      // DO SOMETHING
+    } else {
+      // OR SOMETHING ELSE
+    }
+
+    return fetch(url, {
+      ...defaultOptions,
+      body: data,
+      method: 'GET',
+      ...options
+    });
+  };
+
+  return {
+    get,
+    post,
+    postFile,
+    fetchFile
+  }
+})();

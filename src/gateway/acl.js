@@ -4,10 +4,8 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const got = require('got');
-
-const { parseResponse, errorResponse } = require('../lib/response');
-const { defaultOptions } = require('../lib/request');
+const { errorResponse } = require('../lib/response');
+const request = require('../lib/request');
 
 const GRANT_PERMISSIONS_PATH = '/acl/grant';
 
@@ -27,24 +25,20 @@ module.exports = (gwDomain) => ({
    * @param permission Permission type to grant (Enum:"read" "write" "admin")
    * @returns {Promise<{ is_granted }>}
    */
-  grant: async (acl, owner, password, to, permission) => {
+  grant: (acl, owner, password, to, permission) => {
 
     if (Object.values(PERMISSIONS).indexOf(permission) === -1) {
       throw errorResponse(`"${permission}" is not a valid permission`);
     }
 
-    const options = {
-      ...defaultOptions,
-      body: {
+    const data = {
         acl,
         owner,
         password,
         to,
         permission
-      },
     };
 
-    const gwResponse = await got.post(`${gwDomain}${GRANT_PERMISSIONS_PATH}`, options);
-    return parseResponse(gwResponse);
+    return request.post(`${gwDomain}${GRANT_PERMISSIONS_PATH}`, data);
   }
 });
