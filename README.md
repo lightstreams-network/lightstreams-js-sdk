@@ -9,6 +9,16 @@ implemented in the Lightstreams node (also known as the Lightstreams Gateway nod
 
 ## Instructions
 
+### Install
+```
+npm i
+```
+
+### Recompile `lib` from `src`
+```
+npm run build
+```
+
 ### SDK library usage
 
 **Install node module**
