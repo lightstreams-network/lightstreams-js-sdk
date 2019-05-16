@@ -38,7 +38,7 @@ module.exports = (gwApi) => {
     try {
       const attrs = extractRequestAttrs(req, query);
       const reqStream = await gwApi.storage.fetch(attrs.meta, attrs.token, true);
-      reqStream.pipe(res);
+      reqStream.body.pipe(res);
     } catch ( err ) {
       next(err);
     }
