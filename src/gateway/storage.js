@@ -14,10 +14,15 @@ module.exports = (gwDomain) => ({
    * Uploaded new file into distributed storage
    * @param owner {string} Address of the owner of the file
    * @param password {string} The password that unlocks the owner
-   * @param file {ReadableStream} File to add
+   * @param file {ReadableStream|File} File to add
    * @returns {StreamResponse<{ meta, acl }>} | {<{ meta, acl }>}
    */
   add: (owner, password, file) => {
+    if (typeof File !== 'undefined' && file instanceof File) {
+      const reader = new FileReader();
+      const fileBlob = file.slice(0, file.size);
+      reader.readAsBinaryString(fileBlob)
+    }
     return request.postFile(`${gwDomain}${ADD_FILE_PATH}`, {
       owner,
       password,

@@ -42,7 +42,7 @@ module.exports = (() => {
     }).then(parseResponse);
   };
 
-  const postFile = (url, data, file, options = {}) => {
+  const postFile = (url, data, file) => {
     const FormData = require('form-data');
     var form = new FormData();
     form.append('file', file);
@@ -50,12 +50,15 @@ module.exports = (() => {
       form.append(dataKey, data[dataKey]);
     });
 
+    // const headers = (typeof form.getHeaders === 'function')
+    //   ? form.getHeaders()
+    //   : {
+    //     'Content-Type': 'multipart/form-data'
+    //   };
+
     return fetch(url, {
-      ...defaultOptions,
       body: form,
-      headers: form.getHeaders(),
-      method: 'POST',
-      ...options
+      method: 'POST'
     }).then(parseResponse);
   };
 
