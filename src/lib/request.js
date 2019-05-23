@@ -68,10 +68,19 @@ module.exports = (() => {
       ...options,
       method: 'GET',
     }).then((res) => {
-      if(res.status === 200 && options['stream']) {
+      if(options['stream']) {
         return res;
       }
-      return parseResponse(res)
+
+      if (res.status === 200) {
+        return parseResponse(res)
+      } else {
+        // if (res.headers.get('content-type').indexOf('json') !== -1) {
+        return {
+          status: res.status,
+          message: res.statusText
+        }
+      }
     });
   };
 
