@@ -74,12 +74,15 @@ module.exports = (() => {
 
       if (res.status === 200) {
         return parseResponse(res)
-      } else {
-        // if (res.headers.get('content-type').indexOf('json') !== -1) {
-        return {
-          status: res.status,
-          message: res.statusText
-        }
+      }
+
+      if (res.headers.get('content-type').indexOf('json') !== -1) {
+        return parseResponse(res)
+      }
+
+      return {
+        status: res.status,
+        message: res.statusText
       }
     });
   };
