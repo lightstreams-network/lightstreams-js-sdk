@@ -33,28 +33,27 @@ const { balance } = await gateway.wallet.balance(account)
 
 Gateway SDK interface is made to match, one to one, every available [smart vault endpoints](https://docs.lightstreams.network/api-docs).
 
-- [/user/signup](https://docs.lightstreams.network/api-docs/#operation/userSignup) &nbsp;-> `gateway.user.signUp(password)`
-- [/user/signin](https://docs.lightstreams.network/api-docs/#operation/userSignin) &nbsp;-> `gateway.user.signIn(account, password)`
+- [/user/signup](https://docs.lightstreams.network/api-docs/#operation/userSignup)  ->  `gateway.user.signUp(password)`
+- [/user/signin](https://docs.lightstreams.network/api-docs/#operation/userSignin)  ->  `gateway.user.signIn(account, password)`
 
-- [/wallet/balance](https://docs.lightstreams.network/api-docs/#operation/walletBalance) &nbsp;-> `gateway.wallet.balance(account)`
-- [/wallet/transfer](https://docs.lightstreams.network/api-docs/#operation/walletTransfer) &nbsp;-> `gateway.wallet.transfer(from, password, to, amountWei)`
+- [/wallet/balance](https://docs.lightstreams.network/api-docs/#operation/walletBalance)    ->  `gateway.wallet.balance(account)`
+- [/wallet/transfer](https://docs.lightstreams.network/api-docs/#operation/walletTransfer)  ->  `gateway.wallet.transfer(from, password, to, amountWei)`
 
-- [/storage/add](https://docs.lightstreams.network/api-docs/#tag/Storage) &nbsp;-> `gateway.storage.add(owner, password, file)`
-- [/storage/fetch](https://docs.lightstreams.network/api-docs/#operation/storageFetch) &nbsp;-> `gateway.storage.fetch(meta, token, stream)`
+- [/storage/add](https://docs.lightstreams.network/api-docs/#tag/Storage)   ->  `gateway.storage.add(owner, password, file)`
+- [/storage/fetch](https://docs.lightstreams.network/api-docs/#operation/storageFetch)  ->  `gateway.storage.fetch(meta, token, stream)`
 
-- [/acl/grant](https://docs.lightstreams.network/api-docs/#operation/aclGrant) &nbsp;-> `gateway.acl.grant(acl, owner, password, to, permission)`
-- /acl/revoke &nbsp;-> `gateway.acl.revoke(acl, owner, password, to)`
-- /acl/grantPublic &nbsp;-> `gateway.acl.revoke(acl, owner, password)`
-- /acl/revokePublic &nbsp;-> `gateway.acl.revoke(acl, owner, password)`
+- [/acl/grant](https://docs.lightstreams.network/api-docs/#operation/aclGrant)  ->  `gateway.acl.grant(acl, owner, password, to, permission)`
+- /acl/revoke   ->  `gateway.acl.revoke(acl, owner, password, to)`
+- /acl/grant-public ->  `gateway.acl.grantPublic(acl, owner, password)`
+- /acl/revoke-public    ->  `gateway.acl.revokePublic(acl, owner, password)`
 
-- [/shop/create](https://docs.lightstreams.network/api-docs/#operation/shopCreate) &nbsp;-> `gateway.shop.create(from, password)`
-- [/shop/shell](https://docs.lightstreams.network/api-docs/#operation/shopSell) &nbsp;-> `gateway.shop.sell(shop, from, password, acl, priceWei)`
-- [/shop/buy](https://docs.lightstreams.network/api-docs/#operation/shopBuy) &nbsp;-> `gateway.shop.buy(shop, from, password, acl)`
+- [/shop/create](https://docs.lightstreams.network/api-docs/#operation/shopCreate)  ->  `gateway.shop.create(from, password)`
+- [/shop/shell](https://docs.lightstreams.network/api-docs/#operation/shopSell) ->  `gateway.shop.sell(shop, from, password, acl, priceWei)`
+- [/shop/buy](https://docs.lightstreams.network/api-docs/#operation/shopBuy)    ->  `gateway.shop.buy(shop, from, password, acl)`
 
-- [/erc20/balance](https://docs.lightstreams.network/api-docs/#operation/erc20Balance) &nbsp;-> `gateway.erc20.balance(erc20_address, account)`
-- [/erc20/transfer](https://docs.lightstreams.network/api-docs/#operation/erc20Transfer) &nbsp;-> `gateway.erc20.transfer(erc20_address, from, password, to, amount)`
-- [/erc20/purchase](https://docs.lightstreams.network/api-docs/#operation/erc20Purchase) &nbsp;-> `gateway.erc20.purchase(erc20_address, account, password, amount_wei)`
-
+- [/erc20/balance](https://docs.lightstreams.network/api-docs/#operation/erc20Balance)  ->  `gateway.erc20.balance(erc20_address, account)`
+- [/erc20/transfer](https://docs.lightstreams.network/api-docs/#operation/erc20Transfer)    ->  `gateway.erc20.transfer(erc20_address, from, password, to, amount)`
+- [/erc20/purchase](https://docs.lightstreams.network/api-docs/#operation/erc20Purchase)    -> `gateway.erc20.purchase(erc20_address, account, password, amount_wei)`
 
 ## Smart Vault
 
@@ -68,6 +67,7 @@ https://gateway.sirius.lightstreams.io
 ```
 
 **Local**
+
 You also can run your own local node of lightstreams smart vault. Follow the instructions [here](https://docs.lightstreams.network/getting-started/quick-start/#running-lightstreams-node)
 
 ## Development
@@ -86,7 +86,6 @@ npm run build
 - [Gateway Proxy Server](https://github.com/lightstreams-network/lightstreams-js-sdk/tree/master/example/gateway-proxy)
 - [Gateway Browser](https://github.com/lightstreams-network/lightstreams-js-sdk/tree/master/example/gateway-proxy) (Veryyy drafted)
 
-## Help
-In case you have questions regarding the usage of this repository
-create a new [question issue](https://github.com/lightstreams-network/lightstreams-js-sdk/issues/new)
-and Lightstreams team will reply as soon as possible.
+## Bugs, Issues, Questions
+If you find any bugs or simply have a question, please [write an issue](https://github.com/lightstreams-network/lightstreams-js-sdk/issues) and we'll try and help as best we can.
+
