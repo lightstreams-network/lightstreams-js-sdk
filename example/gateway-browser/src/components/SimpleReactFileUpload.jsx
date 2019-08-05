@@ -4,10 +4,10 @@
  * Copyright 2019 (c) Lightstreams, Granada
  */
 
-import React from 'react'
+import React, { Component } from 'react'
 import Gateway from 'lightstreams-js-sdk'
 
-class SimpleReactFileUpload extends React.Component {
+class SimpleReactFileUpload extends Component {
 
   constructor(props) {
     super(props);

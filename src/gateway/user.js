@@ -4,7 +4,7 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const request = require('../lib/request');
+const request = require('../http/request');
 
 const SIGN_IN_PATH = '/user/signin';
 const SIGN_UP_PATH = '/user/signup';

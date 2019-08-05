@@ -4,8 +4,8 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const { errorResponse } = require('../lib/response');
-const request = require('../lib/request');
+const { errorResponse } = require('../http/response');
+const request = require('../http/request');
 
 const GRANT_PERMISSIONS_PATH = '/acl/grant';
 const GRANT_PUBLIC_PATH = '/acl/grant-public';

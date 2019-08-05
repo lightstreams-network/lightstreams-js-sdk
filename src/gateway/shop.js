@@ -4,7 +4,7 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const request = require('../lib/request');
+const request = require('../http/request');
 
 const CREATE_SHOP_PATH = '/shop/create';
 const SELL_PATH = '/shop/sell';

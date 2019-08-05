@@ -1,12 +1,10 @@
 import React from 'react';
 
-import SimpleReactFileUpload from './SimpleReactFileUpload';
+import SimpleReactFileUpload from '../components/SimpleReactFileUpload';
 
-const Home = () => (
+export default () => (
   <div>
     <h2>Upload File</h2>
     <SimpleReactFileUpload />
   </div>
 );
-
-export default Home;

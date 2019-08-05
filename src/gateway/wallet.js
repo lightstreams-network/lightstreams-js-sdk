@@ -4,7 +4,7 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const request = require('../lib/request');
+const request = require('../http/request');
 
 const WALLET_BALANCE_PATH = '/wallet/balance';
 const WALLET_TRANSFER_PATH = '/wallet/transfer';

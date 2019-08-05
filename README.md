@@ -4,7 +4,7 @@ This repository is a Javascript SDK to facilitate the usage of functionalities
 implemented in the Lightstreams node (also known as the Lightstreams Gateway node, or simply Gateway), [http api](https://docs.lightstreams.network/api-docs).
 
 ## Requirements
-- Node > 10
+- Node >= 10
 - Lightstreams Smart Vault (Optional). [How to install](https://docs.lightstreams.network/getting-started/install/)
 
 ### How to use
@@ -44,8 +44,8 @@ Gateway SDK interface is made to match, one to one, every available [smart vault
 
 - [/acl/grant](https://docs.lightstreams.network/api-docs/#operation/aclGrant)  ->  `gateway.acl.grant(acl, owner, password, to, permission)`
 - /acl/revoke   ->  `gateway.acl.revoke(acl, owner, password, to)`
-- /acl/grant-public ->  `gateway.acl.grantPublic(acl, owner, password)`
-- /acl/revoke-public    ->  `gateway.acl.revokePublic(acl, owner, password)`
+- [/acl/grant-public](https://docs.lightstreams.network/api-docs/#operation/aclGrantPublic) ->  `gateway.acl.grantPublic(acl, owner, password)`
+- [/acl/revoke-public](https://docs.lightstreams.network/api-docs/#operation/aclRevoke)    ->  `gateway.acl.revokePublic(acl, owner, password)`
 
 - [/shop/create](https://docs.lightstreams.network/api-docs/#operation/shopCreate)  ->  `gateway.shop.create(from, password)`
 - [/shop/shell](https://docs.lightstreams.network/api-docs/#operation/shopSell) ->  `gateway.shop.sell(shop, from, password, acl, priceWei)`

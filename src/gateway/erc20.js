@@ -4,7 +4,7 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 
-const request = require('../lib/request');
+const request = require('../http/request');
 
 const ERC20_BALANCE_PATH = `/erc20/balance`;
 const ERC20_TRANSFER_PATH = `/erc20/transfer`;

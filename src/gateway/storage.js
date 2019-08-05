@@ -7,7 +7,7 @@
 const ADD_FILE_PATH = `/storage/add`;
 const FETCH_FILE_PATH = `/storage/fetch`;
 
-const request = require('../lib/request');
+const request = require('../http/request');
 
 module.exports = (gwDomain) => ({
   /**

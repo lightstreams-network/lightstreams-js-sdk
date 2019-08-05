@@ -3,8 +3,6 @@ import { BrowserRouter, Link } from 'react-router-dom';
 
 import Routes from './Routes';
 
-import reactLogo from './assets/React-icon.png';
-
 const App = () => (
   <BrowserRouter>
     <main className="container">
@@ -13,7 +11,10 @@ const App = () => (
           <Link to="/">Home</Link>
         </li>
         <li>
-          <Link to="/about">About</Link>
+          <Link to="/uploader">Uploader</Link>
+        </li>
+        <li>
+          <Link to="/account">Account</Link>
         </li>
       </ul>
       <Routes />
