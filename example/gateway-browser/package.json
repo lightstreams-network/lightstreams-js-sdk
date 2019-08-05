@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=development webpack-dev-server -d",
+    "start:dev": "npm run postinstall-dev && cross-env NODE_ENV=development webpack-dev-server -d",
     "build": "cross-env NODE_ENV=production webpack -p",
     "postinstall-dev": "rm -rf ./node_modules/lightstreams-js-sdk ; ln -s ../../../ node_modules/lightstreams-js-sdk"
   },
@@ -12,6 +13,7 @@
   "author": "Gabriel Garrido",
   "license": "GPLv3",
   "dependencies": {
+    "dotenv-webpack": "^1.7.0",
     "lightstreams-js-sdk": "git+ssh://git@github.com/lightstreams-network/lightstreams-js-sdk.git#master",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
@@ -29,7 +31,6 @@
     "@babel/preset-react": "^7.0.0",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.2",
-    "babel-jest": "^24.8.0",
     "babel-loader": "^8.0.6",
     "cross-env": "^5.2.0",
     "css-loader": "^2.1.1",

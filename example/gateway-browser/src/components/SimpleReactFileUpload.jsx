@@ -5,18 +5,14 @@
  */
 
 import React, { Component } from 'react'
-import Gateway from 'lightstreams-js-sdk'
+import { Gateway } from 'lightstreams-js-sdk'
 
 class SimpleReactFileUpload extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      file: null,
-      owner: '',
-      password: ''
-    };
-    this.gateway = Gateway('https://gateway.node1.lightstreams.io');
+    this.state = { file: null, owner: '', password: '' };
+    this.gateway = Gateway(process.env.GATEWAY_DOMAIN);
     this.onFormSubmit = this.onFormSubmit.bind(this);
     this.onChange = this.onChange.bind(this)
   }
@@ -39,10 +35,10 @@ class SimpleReactFileUpload extends Component {
     return (
       <form onSubmit={this.onFormSubmit}>
         <label>Owner</label>
-        <input type="text" value={owner} onChange={(value) => this.setState({owner: value})}/>
+        <input type="text" value={owner} onChange={(e) => this.setState({owner: e.target.value})}/>
          <br />
         <label>Password</label>
-        <input type="password" value={password} onChange={(value) => this.setState({ password: value })} />
+        <input type="password" value={password} onChange={(e) => this.setState({ password: e.target.value })} />
          <br/>
         <label>File</label>
         <input type="file" onChange={this.onChange} />

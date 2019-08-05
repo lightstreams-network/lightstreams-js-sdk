@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
+const Dotenv = require('dotenv-webpack');
 
 const dev = process.env.NODE_ENV !== 'production';
 
@@ -24,6 +25,7 @@ module.exports = {
     },
     historyApiFallback: true,
   },
+  devtool: 'source-map',
   entry: ['@babel/polyfill', 'whatwg-fetch', 'react-hot-loader/patch', path.join(__dirname, '/src/index.jsx')],
   module: {
     rules: [
@@ -54,6 +56,6 @@ module.exports = {
   },
   mode: dev ? 'development' : 'production',
   plugins: dev
-    ? [HTMLWebpackPluginConfig, new webpack.HotModuleReplacementPlugin()]
-    : [HTMLWebpackPluginConfig, DefinePluginConfig],
+    ? [HTMLWebpackPluginConfig, new Dotenv(), new webpack.HotModuleReplacementPlugin()]
+    : [HTMLWebpackPluginConfig, new Dotenv(), DefinePluginConfig],
 };

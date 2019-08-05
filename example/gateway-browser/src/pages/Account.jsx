@@ -1,17 +1,24 @@
+/**
+ * User: ggarrido
+ * Date: 17/05/19 14:33
+ * Copyright 2019 (c) Lightstreams, Granada
+ */
+
 import React, { Component } from 'react';
 
-export default class SimpleReactFileUpload extends Component {
+import { Web3 } from 'lightstreams-js-sdk';
+
+class AccountPage extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      file: null,
-      owner: '',
-      password: ''
-    };
+    console.log(Web3);
+    this.web3 = Web3(process.env.WEB3_PROVIDER);
+    this.createAccount = this.createAccount.bind(this);
   }
 
   createAccount() {
+    this.web3.wallet.createPrivateKey();
     console.log('Create Account');
   }
 
@@ -25,3 +32,5 @@ export default class SimpleReactFileUpload extends Component {
     )
   }
 }
+
+export default AccountPage;
