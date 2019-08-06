@@ -18,6 +18,4 @@ module.exports.Gateway = (gwDomain) => ({
   erc20: require('./gateway/erc20')(gwDomain),
 });
 
-module.exports.Web3 = (web3provider) => ({
-  wallet: require('./web3/wallet')(web3provider)
-});
+module.exports.Lightwallet = require('./lightwallet');
