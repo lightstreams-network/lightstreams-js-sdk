@@ -12,6 +12,11 @@
     "url": "https://github.com/lightstreams-network/js-sdk-lightstreams/issues"
   },
   "main": "src/index.js",
+  "scripts": {
+    "build": "babel src -d build/src",
+    "build-single": "babel src --out-file ./build/src/index.js",
+    "compile": "truffle compile --all --reset"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lightstreams-network/lightstreams-js-sdk.git"
@@ -28,12 +33,8 @@
   ],
   "files": [
     "src/",
-    "lib/"
+    "build/src"
   ],
-  "scripts": {
-    "build": "babel src -d lib",
-    "build-single": "babel src --out-file ./lib/index.js"
-  },
   "dependencies": {
     "entropy-string": "^4.2.0",
     "eth-lightwallet": "^4.0.0",
@@ -46,6 +47,7 @@
   "devDependencies": {
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5"
+    "@babel/preset-env": "^7.5.5",
+    "truffle": "^5.0.30"
   }
 }

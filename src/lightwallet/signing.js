@@ -5,11 +5,31 @@
  */
 
 
-var Util = require('ethereumjs-util');
+const Util = require('ethereumjs-util');
 const { signing, txutils } = require('eth-lightwallet');
 
 module.exports = ({
-  signSendValueTx: async (web3, keystore, {from, password, to, value}) => {
+  signDeployContractTx: async (web3, keystore, pwDerivedKey, { from, bytecode }) => {
+    debugger;
+    const gasPrice = await web3.eth.getGasPrice();
+    const nonce = await web3.eth.getTransactionCount(from);
+    const gasLimit = await web3.eth.estimateGas({ data: bytecode });
+    txOptions = {
+      gasPrice: parseInt(gasPrice),
+      gasLimit: parseInt(gasLimit),
+      value: 0,
+      nonce: parseInt(nonce),
+      data: bytecode
+    };
+
+    const sendingAddr = Util.stripHexPrefix(from);
+    const contractData = txutils.createContractTx(sendingAddr, txOptions);
+
+    const signedTx = signing.signTx(keystore, pwDerivedKey, contractData.tx, sendingAddr);
+    return Util.addHexPrefix(signedTx);
+  },
+  signSendValueTx: async (web3, keystore, pwDerivedKey, { from, to, value }) => {
+    debugger;
     const gasPrice = await web3.eth.getGasPrice();
     const nonce = await web3.eth.getTransactionCount(from);
 
@@ -21,19 +41,10 @@ module.exports = ({
       to: Util.stripHexPrefix(to)
     };
 
-    return await new Promise((resolve, reject) => {
-      var rawTx = txutils.valueTx(txOptions);
-      var signingAddress = Util.stripHexPrefix(from);
+    const rawTx = txutils.valueTx(txOptions);
+    const signingAddress = Util.stripHexPrefix(from);
 
-      keystore.keyFromPassword(password, function(err, pwDerivedKey) {
-        if (err) {
-          reject(err);
-        }
-
-        var signedTx = signing.signTx(keystore, pwDerivedKey, rawTx, signingAddress);
-        var rawSignedTx = Util.addHexPrefix(signedTx);
-        resolve(rawSignedTx);
-      });
-    });
+    const signedTx = signing.signTx(keystore, pwDerivedKey, rawTx, signingAddress);
+    return Util.addHexPrefix(signedTx);
   }
 });

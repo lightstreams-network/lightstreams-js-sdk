@@ -61,18 +61,22 @@ module.exports = {
       });
     });
   },
-  getKsVault: (keystoreId) => {
-    return global_keystore[keystoreId];
-  },
-  getWeb3Provider: (keystoreId, host) => {
+  pwDerivedKey: (keystoreId, password) => {
     if (typeof global_keystore[keystoreId] === 'undefined') {
       throw new Error(`Keystore ${keystoreId} does not exists`);
     }
+    return new Promise((resolve, reject) => {
+      global_keystore[keystoreId].keyFromPassword(password, function(err, pwDerivedKey) {
+        if (err) {
+          reject(err);
+        }
 
-    return new HookedWeb3Provider({
-      host,
-      transaction_signer: global_keystore[keystoreId]
+        resolve(pwDerivedKey);
+      });
     });
+  },
+  getKsVault: (keystoreId) => {
+    return global_keystore[keystoreId];
   },
   getAccounts: (keystoreId) => {
     if (typeof global_keystore[keystoreId] === 'undefined') {
