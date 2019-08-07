@@ -16,16 +16,16 @@ var _require = require('eth-lightwallet'),
     txutils = _require.txutils;
 
 module.exports = {
-  signSendValueTx: function () {
-    var _signSendValueTx = _asyncToGenerator(
+  signDeployContractTx: function () {
+    var _signDeployContractTx = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee(web3, keystore, _ref) {
-      var from, password, to, value, gasPrice, nonce, txOptions;
+    regeneratorRuntime.mark(function _callee(web3, keystore, pwDerivedKey, _ref) {
+      var from, bytecode, gasPrice, nonce, gasLimit, sendingAddr, contractData, signedTx;
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              from = _ref.from, password = _ref.password, to = _ref.to, value = _ref.value;
+              from = _ref.from, bytecode = _ref.bytecode;
               _context.next = 3;
               return web3.eth.getGasPrice();
 
@@ -36,32 +36,26 @@ module.exports = {
 
             case 6:
               nonce = _context.sent;
-              txOptions = {
-                gasPrice: parseInt(gasPrice),
-                gasLimit: 21000,
-                value: parseInt(value),
-                nonce: parseInt(nonce),
-                to: Util.stripHexPrefix(to)
-              };
-              _context.next = 10;
-              return new Promise(function (resolve, reject) {
-                var rawTx = txutils.valueTx(txOptions);
-                var signingAddress = Util.stripHexPrefix(from);
-                keystore.keyFromPassword(password, function (err, pwDerivedKey) {
-                  if (err) {
-                    reject(err);
-                  }
-
-                  var signedTx = signing.signTx(keystore, pwDerivedKey, rawTx, signingAddress);
-                  var rawSignedTx = Util.addHexPrefix(signedTx);
-                  resolve(rawSignedTx);
-                });
+              _context.next = 9;
+              return web3.eth.estimateGas({
+                data: bytecode
               });
 
-            case 10:
-              return _context.abrupt("return", _context.sent);
+            case 9:
+              gasLimit = _context.sent;
+              sendingAddr = Util.stripHexPrefix(from);
+              txOptions = {
+                gasPrice: parseInt(gasPrice),
+                gasLimit: parseInt(gasLimit),
+                value: 0,
+                nonce: parseInt(nonce),
+                data: bytecode
+              };
+              contractData = txutils.createContractTx(sendingAddr, txOptions);
+              signedTx = signing.signTx(keystore, pwDerivedKey, contractData.tx, sendingAddr);
+              return _context.abrupt("return", Util.addHexPrefix(signedTx));
 
-            case 11:
+            case 15:
             case "end":
               return _context.stop();
           }
@@ -69,7 +63,106 @@ module.exports = {
       }, _callee);
     }));
 
-    function signSendValueTx(_x, _x2, _x3) {
+    function signDeployContractTx(_x, _x2, _x3, _x4) {
+      return _signDeployContractTx.apply(this, arguments);
+    }
+
+    return signDeployContractTx;
+  }(),
+  signContractMethodTx: function () {
+    var _signContractMethodTx = _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee2(web3, keystore, pwDerivedKey, _ref2) {
+      var from, value, method, params, abi, address, gasPrice, nonce, sendingAddr, contractInstance, gasLimit, setValueTx, signedTx;
+      return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              from = _ref2.from, value = _ref2.value, method = _ref2.method, params = _ref2.params, abi = _ref2.abi, address = _ref2.address;
+              _context2.next = 3;
+              return web3.eth.getGasPrice();
+
+            case 3:
+              gasPrice = _context2.sent;
+              _context2.next = 6;
+              return web3.eth.getTransactionCount(from);
+
+            case 6:
+              nonce = _context2.sent;
+              sendingAddr = Util.stripHexPrefix(from);
+              contractInstance = new web3.eth.Contract(abi, address);
+              _context2.next = 11;
+              return contractInstance.methods[method](params).estimateGas();
+
+            case 11:
+              gasLimit = _context2.sent;
+              // @TODO: Sanity checks over ABI against params+method
+              txOptions = {
+                gasPrice: parseInt(gasPrice),
+                gasLimit: parseInt(gasLimit),
+                value: parseInt(value || 0),
+                nonce: parseInt(nonce),
+                to: address
+              };
+              setValueTx = txutils.functionTx(abi, method, params, txOptions);
+              signedTx = signing.signTx(keystore, pwDerivedKey, setValueTx, sendingAddr);
+              return _context2.abrupt("return", Util.addHexPrefix(signedTx));
+
+            case 16:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2);
+    }));
+
+    function signContractMethodTx(_x5, _x6, _x7, _x8) {
+      return _signContractMethodTx.apply(this, arguments);
+    }
+
+    return signContractMethodTx;
+  }(),
+  signSendValueTx: function () {
+    var _signSendValueTx = _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee3(web3, keystore, pwDerivedKey, _ref3) {
+      var from, to, value, gasPrice, nonce, signingAddress, txOptions, rawTx, signedTx;
+      return regeneratorRuntime.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              from = _ref3.from, to = _ref3.to, value = _ref3.value;
+              _context3.next = 3;
+              return web3.eth.getGasPrice();
+
+            case 3:
+              gasPrice = _context3.sent;
+              _context3.next = 6;
+              return web3.eth.getTransactionCount(from);
+
+            case 6:
+              nonce = _context3.sent;
+              signingAddress = Util.stripHexPrefix(from);
+              txOptions = {
+                gasPrice: parseInt(gasPrice),
+                gasLimit: 21000,
+                value: parseInt(value),
+                nonce: parseInt(nonce),
+                to: Util.stripHexPrefix(to)
+              };
+              rawTx = txutils.valueTx(txOptions);
+              signedTx = signing.signTx(keystore, pwDerivedKey, rawTx, signingAddress);
+              return _context3.abrupt("return", Util.addHexPrefix(signedTx));
+
+            case 12:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3);
+    }));
+
+    function signSendValueTx(_x9, _x10, _x11, _x12) {
       return _signSendValueTx.apply(this, arguments);
     }
 
