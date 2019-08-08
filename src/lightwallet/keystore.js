@@ -33,20 +33,17 @@ module.exports = {
     const randomEntropy = generateEntropy();
     return keystore.generateRandomSeed(randomEntropy);
   },
-  createPrivateKeys: (keystoreId, seed, password = '', nKeys = 1) => {
-    if (password === '') {
-      password = prompt('Enter password to generate addresses', 'Password');
-    }
-
-    if(!keystore.isSeedValid(seed)) {
-      throw new Error(`Invalid seed phrase`);
-    }
-
-    if (typeof global_keystore[keystoreId] !== 'undefined') {
-      return newAddresses(global_keystore[keystoreId], password, nKeys);
-    }
-
+  createPrivateKeys: (keystoreId, seed, password, nKeys = 1) => {
     return new Promise((resolve, reject) => {
+      if (!keystore.isSeedValid(seed)) {
+        reject(`Invalid seed phrase`);
+      }
+
+      if (typeof global_keystore[keystoreId] !== 'undefined') {
+        newAddresses(global_keystore[keystoreId], password, nKeys);
+        resolve(global_keystore[keystoreId])
+      }
+
       console.log('Creating new keystore vault...');
       keystore.createVault({
         password: password,
@@ -57,32 +54,39 @@ module.exports = {
           reject(err)
         }
         global_keystore[keystoreId] = ks;
-        newAddresses(global_keystore[keystoreId], password, nKeys).then(resolve).catch(reject);
+        newAddresses(global_keystore[keystoreId], password, nKeys)
+          .then(() => resolve(ks))
+          .catch(reject);
       });
     });
   },
   pwDerivedKey: (keystoreId, password) => {
-    if (typeof global_keystore[keystoreId] === 'undefined') {
-      throw new Error(`Keystore ${keystoreId} does not exists`);
-    }
     return new Promise((resolve, reject) => {
+      if (typeof global_keystore[keystoreId] === 'undefined') {
+        reject(`Keystore ${keystoreId} does not exists`);
+      }
       global_keystore[keystoreId].keyFromPassword(password, function(err, pwDerivedKey) {
         if (err) {
           reject(err);
         }
-
         resolve(pwDerivedKey);
       });
     });
   },
-  getKsVault: (keystoreId) => {
+  keystoreVault: (keystoreId) => {
     return global_keystore[keystoreId];
   },
-  getAccounts: (keystoreId) => {
+  restoreKeystoreVault: (keystoreId, serializedVault) => {
+    global_keystore[keystoreId] = keystore.deserialize(serializedVault);
+  },
+  globalKeystoreVault: () => {
+    return global_keystore;
+  },
+  accounts: (keystoreId) => {
     if (typeof global_keystore[keystoreId] === 'undefined') {
       return [];
     }
 
-    return global_keystore[keystoreId].getAddresses();
+    return global_keystore[keystoreId].addresses;
   }
 };

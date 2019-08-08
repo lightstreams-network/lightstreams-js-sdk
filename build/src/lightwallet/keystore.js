@@ -32,7 +32,7 @@ var newAddresses = function newAddresses(keystore, password) {
       }
 
       keystore.generateNewAddress(pwDerivedKey, nKeys);
-      resolve();
+      resolve(keystore);
     });
   });
 };
@@ -75,11 +75,11 @@ module.exports = {
     });
   },
   pwDerivedKey: function pwDerivedKey(keystoreId, password) {
-    if (typeof global_keystore[keystoreId] === 'undefined') {
-      throw new Error("Keystore ".concat(keystoreId, " does not exists"));
-    }
-
     return new Promise(function (resolve, reject) {
+      if (typeof global_keystore[keystoreId] === 'undefined') {
+        reject("Keystore ".concat(keystoreId, " does not exists"));
+      }
+
       global_keystore[keystoreId].keyFromPassword(password, function (err, pwDerivedKey) {
         if (err) {
           reject(err);
@@ -89,10 +89,19 @@ module.exports = {
       });
     });
   },
-  getKsVault: function getKsVault(keystoreId) {
+  keystoreVault: function keystoreVault(keystoreId) {
     return global_keystore[keystoreId];
   },
-  getAccounts: function getAccounts(keystoreId) {
+  setKeystoreVault: function setKeystoreVault(keystoreId, vault) {
+    global_keystore[keystoreId] = vault;
+  },
+  globalKeystoreVault: function globalKeystoreVault() {
+    return global_keystore;
+  },
+  setGlobalKeystoreVault: function setGlobalKeystoreVault(nextKeystoreVault) {
+    global_keystore = nextKeystoreVault;
+  },
+  accounts: function accounts(keystoreId) {
     if (typeof global_keystore[keystoreId] === 'undefined') {
       return [];
     }
