@@ -21,7 +21,7 @@ class AccountPage extends Component {
       addresses: []
     };
 
-    this.web3 = lw.Web3.create();
+    this.web3 = lw.Web3.initialize();
     this.createAccount = this.createAccount.bind(this);
     this.sendFunds = this.sendFunds.bind(this);
     this.generateSeed = this.generateSeed.bind(this);

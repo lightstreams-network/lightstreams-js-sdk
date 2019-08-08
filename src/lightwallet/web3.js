@@ -29,14 +29,31 @@ const fetchTxReceipt = async (web3, txHash, expiredAt) => {
   return receipt
 };
 
+if (typeof web3 === 'undefined') {
+  web3 = null;
+}
+
 module.exports = ({
-  create: (provider, options = {}) => {
-    return new Web3(provider || defaultCfg.provider, net, {
-      defaultGasPrice: options.gasPrice || defaultCfg.gasPrice,
+  initialize: async (provider, options = {}) => {
+    return new Promise(async (resolve, reject) => {
+      if (web3 === null) {
+        try {
+          web3 = new Web3(provider || defaultCfg.provider, net, {
+            defaultGasPrice: options.gasPrice || defaultCfg.gasPrice,
+          });
+        } catch(err) {
+          reject(err);
+        }
+      }
+      resolve(web3);
     });
   },
-  getTxReceipt: (web3, txHash, timeoutInSec = 30) => {
+  getTxReceipt: (txHash, timeoutInSec = 30) => {
     return new Promise((resolve, reject) => {
+      if (typeof web3 === 'undefined') {
+        reject('Web3 was not initialized');
+      }
+
       fetchTxReceipt(web3, txHash, (new Date()).getTime() + timeoutInSec*1000).then(receipt => {
         if(!receipt) {
           reject()
@@ -45,8 +62,26 @@ module.exports = ({
       })
     });
   },
-  sendRawTransaction: (web3, rawSignedTx) => {
+  getBalance: (address) => {
+    return new Promise(async (resolve, reject) => {
+      if (typeof web3 === 'undefined') {
+        reject('Web3 was not initialized');
+      }
+
+      try {
+        const balance = await web3.eth.getBalance(address);
+        resolve(balance);
+      } catch(err) {
+        reject(err)
+      }
+    })
+  },
+  sendRawTransaction: (rawSignedTx) => {
     return new Promise((resolve, reject) => {
+      if (typeof web3 === 'undefined') {
+        reject('Web3 was not initialized');
+      }
+
       web3.eth.sendSignedTransaction(rawSignedTx, (err, hash) => {
         if (err) {
           reject(err);

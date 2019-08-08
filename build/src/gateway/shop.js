@@ -19,7 +19,7 @@ module.exports = function (gwDomain) {
      * @param password The password that unlocks the from account
      * @returns {Promise<{ shop }>} Shop contract address
      */
-    create: function create(from, password) {
+    initialize: function initialize(from, password) {
       return request.post("".concat(gwDomain).concat(CREATE_SHOP_PATH), {
         from: from,
         password: password
