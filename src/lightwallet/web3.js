@@ -85,5 +85,16 @@ module.exports = ({
         resolve(hash);
       });
     });
+  },
+  contractCall: (web3, { abi, address, method, params }) => {
+    return new Promise(async (resolve, reject) => {
+      const contract = new web3.eth.Contract(abi, address);
+      try {
+        const result = await contract.methods[method](params).call();
+        resolve(result);
+      } catch(err) {
+        reject(err);
+      }
+    });
   }
 });
