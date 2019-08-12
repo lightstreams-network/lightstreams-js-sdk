@@ -68,10 +68,6 @@ function () {
   };
 }();
 
-if (typeof web3 === 'undefined') {
-  web3 = null;
-}
-
 module.exports = {
   initialize: function () {
     var _initialize = _asyncToGenerator(
@@ -90,23 +86,21 @@ module.exports = {
                 var _ref2 = _asyncToGenerator(
                 /*#__PURE__*/
                 regeneratorRuntime.mark(function _callee2(resolve, reject) {
+                  var web3;
                   return regeneratorRuntime.wrap(function _callee2$(_context2) {
                     while (1) {
                       switch (_context2.prev = _context2.next) {
                         case 0:
-                          if (typeof web3 === 'undefined') {
-                            try {
-                              web3 = new Web3(provider || defaultCfg.provider, net, {
-                                defaultGasPrice: options.gasPrice || defaultCfg.gasPrice
-                              });
-                            } catch (err) {
-                              reject(err);
-                            }
+                          try {
+                            web3 = new Web3(provider || defaultCfg.provider, net, {
+                              defaultGasPrice: options.gasPrice || defaultCfg.gasPrice
+                            });
+                            resolve(web3);
+                          } catch (err) {
+                            reject(err);
                           }
 
-                          resolve(web3);
-
-                        case 2:
+                        case 1:
                         case "end":
                           return _context2.stop();
                       }
@@ -133,8 +127,8 @@ module.exports = {
 
     return initialize;
   }(),
-  getTxReceipt: function getTxReceipt(txHash) {
-    var timeoutInSec = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 30;
+  getTxReceipt: function getTxReceipt(web3, txHash) {
+    var timeoutInSec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 30;
     return new Promise(function (resolve, reject) {
       if (typeof web3 === 'undefined') {
         reject('Web3 was not initialized');
@@ -149,7 +143,51 @@ module.exports = {
       });
     });
   },
-  sendRawTransaction: function sendRawTransaction(rawSignedTx) {
+  getBalance: function getBalance(web3, address) {
+    return new Promise(
+    /*#__PURE__*/
+    function () {
+      var _ref3 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee4(resolve, reject) {
+        var balance;
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                if (typeof web3 === 'undefined') {
+                  reject('Web3 was not initialized');
+                }
+
+                _context4.prev = 1;
+                _context4.next = 4;
+                return web3.eth.getBalance(address);
+
+              case 4:
+                balance = _context4.sent;
+                resolve(balance);
+                _context4.next = 11;
+                break;
+
+              case 8:
+                _context4.prev = 8;
+                _context4.t0 = _context4["catch"](1);
+                reject(_context4.t0);
+
+              case 11:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, null, [[1, 8]]);
+      }));
+
+      return function (_x7, _x8) {
+        return _ref3.apply(this, arguments);
+      };
+    }());
+  },
+  sendRawTransaction: function sendRawTransaction(web3, rawSignedTx) {
     return new Promise(function (resolve, reject) {
       if (typeof web3 === 'undefined') {
         reject('Web3 was not initialized');

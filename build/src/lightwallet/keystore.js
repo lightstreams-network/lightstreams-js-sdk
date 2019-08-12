@@ -11,10 +11,6 @@ var _require = require('eth-lightwallet'),
 var _require2 = require('entropy-string'),
     Entropy = _require2.Entropy;
 
-if (typeof global_keystore === 'undefined') {
-  global_keystore = {};
-}
-
 var generateEntropy = function generateEntropy() {
   var entropy = new Entropy({
     total: 1e6,
@@ -42,16 +38,11 @@ module.exports = {
     var randomEntropy = generateEntropy();
     return keystore.generateRandomSeed(randomEntropy);
   },
-  createPrivateKeys: function createPrivateKeys(keystoreId, seed, password) {
-    var nKeys = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
+  createKeystoreVault: function createKeystoreVault(seed, password) {
+    var nKeys = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
     return new Promise(function (resolve, reject) {
       if (!keystore.isSeedValid(seed)) {
         reject("Invalid seed phrase");
-      }
-
-      if (typeof global_keystore[keystoreId] !== 'undefined') {
-        newAddresses(global_keystore[keystoreId], password, nKeys);
-        resolve(global_keystore[keystoreId]);
       }
 
       console.log('Creating new keystore vault...');
@@ -64,20 +55,21 @@ module.exports = {
           reject(err);
         }
 
-        global_keystore[keystoreId] = ks;
-        newAddresses(global_keystore[keystoreId], password, nKeys).then(function () {
+        newAddresses(ks, password, nKeys).then(function () {
           return resolve(ks);
         })["catch"](reject);
       });
     });
   },
-  pwDerivedKey: function pwDerivedKey(keystoreId, password) {
+  createPrivateKey: function createPrivateKey(ksVault, password) {
+    var nKeys = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+    return newAddresses(ks, password, nKeys).then(function () {
+      return resolve(ks);
+    })["catch"](reject);
+  },
+  pwDerivedKey: function pwDerivedKey(ksVault, password) {
     return new Promise(function (resolve, reject) {
-      if (typeof global_keystore[keystoreId] === 'undefined') {
-        reject("Keystore ".concat(keystoreId, " does not exists"));
-      }
-
-      global_keystore[keystoreId].keyFromPassword(password, function (err, pwDerivedKey) {
+      ksVault.keyFromPassword(password, function (err, pwDerivedKey) {
         if (err) {
           reject(err);
         }
@@ -86,20 +78,13 @@ module.exports = {
       });
     });
   },
-  keystoreVault: function keystoreVault(keystoreId) {
-    return global_keystore[keystoreId];
+  addresses: function addresses(ksVault) {
+    return ksVault.addresses;
   },
-  restoreKeystoreVault: function restoreKeystoreVault(keystoreId, serializedVault) {
-    global_keystore[keystoreId] = keystore.deserialize(serializedVault);
+  deserializeKeystoreVault: function deserializeKeystoreVault(serializedVault) {
+    return keystore.deserialize(serializedVault);
   },
-  globalKeystoreVault: function globalKeystoreVault() {
-    return global_keystore;
-  },
-  accounts: function accounts(keystoreId) {
-    if (typeof global_keystore[keystoreId] === 'undefined') {
-      return [];
-    }
-
-    return global_keystore[keystoreId].addresses;
+  serializeKeystoreVault: function serializeKeystoreVault(ksVault) {
+    return ksVault.serialize();
   }
 };
