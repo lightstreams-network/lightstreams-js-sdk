@@ -80,7 +80,7 @@ module.exports = {
   },
   addresses: function addresses(ksVault) {
     return ksVault.addresses.map(function (address) {
-      return "0x".concat(address);
+      return "0x".concat(address.toLowerCase());
     });
   },
   deserializeKeystoreVault: function deserializeKeystoreVault(serializedVault) {
