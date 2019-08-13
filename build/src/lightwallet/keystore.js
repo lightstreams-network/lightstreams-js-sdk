@@ -79,7 +79,9 @@ module.exports = {
     });
   },
   addresses: function addresses(ksVault) {
-    return ksVault.addresses;
+    return ksVault.addresses.map(function (address) {
+      return "0x".concat(address);
+    });
   },
   deserializeKeystoreVault: function deserializeKeystoreVault(serializedVault) {
     return keystore.deserialize(serializedVault);
