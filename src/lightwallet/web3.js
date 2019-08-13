@@ -90,7 +90,9 @@ module.exports = ({
     return new Promise(async (resolve, reject) => {
       const contract = new web3.eth.Contract(abi, address);
       try {
-        const result = await contract.methods[method](params).call();
+        const result = await contract.methods[method](...params).call({
+          from: address
+        });
         resolve(result);
       } catch(err) {
         reject(err);

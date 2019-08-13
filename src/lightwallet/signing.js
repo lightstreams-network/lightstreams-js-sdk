@@ -33,7 +33,7 @@ module.exports = ({
     const nonce = await web3.eth.getTransactionCount(from);
     const sendingAddr = Util.stripHexPrefix(from);
     const contractInstance = new web3.eth.Contract(abi, address);
-    const gasLimit = await contractInstance.methods[method](params).estimateGas();
+    const gasLimit = await contractInstance.methods[method](...params).estimateGas();
     // @TODO: Sanity checks over ABI against params+method
 
     txOptions = {

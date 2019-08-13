@@ -67,7 +67,7 @@ module.exports = {
     });
   },
   addresses: (ksVault) => {
-    return ksVault.addresses;
+    return ksVault.addresses.map(address => `0x${address}`);
   },
   deserializeKeystoreVault: (serializedVault) => {
     return keystore.deserialize(serializedVault);
