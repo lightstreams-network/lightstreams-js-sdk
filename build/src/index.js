@@ -21,3 +21,7 @@ module.exports.Gateway = function (gwDomain) {
 
 module.exports.Lightwallet = require('./lightwallet');
 module.exports.MetaMask = require('./metamask');
+module.exports.Web3 = require('./web3');
+module.exports.Contract = {
+  profile: require('../build/contracts/Profile.json')
+};
