@@ -37,18 +37,23 @@ module.exports = ({
         const web3 = new Web3(provider || defaultCfg.provider, net, {
           defaultGasPrice: options.gasPrice || defaultCfg.gasPrice,
         });
+
         resolve(web3);
       } catch(err) {
         reject(err);
       }
     });
   },
+  networkVersion: (web3) => {
+    return new Promise((resolve, reject) => {
+      web3.eth.net.getId((err, netId) => {
+        if(err) reject(err);
+        resolve(netId);
+      })
+    })
+  },
   getTxReceipt: (web3, txHash, timeoutInSec = 30) => {
     return new Promise((resolve, reject) => {
-      if (typeof web3 === 'undefined') {
-        reject('Web3 was not initialized');
-      }
-
       fetchTxReceipt(web3, txHash, (new Date()).getTime() + timeoutInSec*1000).then(receipt => {
         if(!receipt) {
           reject()
@@ -59,10 +64,6 @@ module.exports = ({
   },
   getBalance: (web3, address) => {
     return new Promise(async (resolve, reject) => {
-      if (typeof web3 === 'undefined') {
-        reject('Web3 was not initialized');
-      }
-
       try {
         const balance = await web3.eth.getBalance(address);
         resolve(balance);
@@ -73,10 +74,6 @@ module.exports = ({
   },
   sendRawTransaction: (web3, rawSignedTx) => {
     return new Promise((resolve, reject) => {
-      if (typeof web3 === 'undefined') {
-        reject('Web3 was not initialized');
-      }
-
       web3.eth.sendSignedTransaction(rawSignedTx, (err, hash) => {
         if (err) {
           reject(err);
@@ -88,8 +85,8 @@ module.exports = ({
   },
   contractCall: (web3, { abi, address, method, params }) => {
     return new Promise(async (resolve, reject) => {
-      const contract = new web3.eth.Contract(abi, address);
       try {
+        const contract = new web3.eth.Contract(abi, address);
         const result = await contract.methods[method](...params).call({
           from: address
         });

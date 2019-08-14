@@ -135,13 +135,17 @@ module.exports = {
 
     return initialize;
   }(),
+  networkVersion: function networkVersion(web3) {
+    return new Promise(function (resolve, reject) {
+      web3.eth.net.getId(function (err, netId) {
+        if (err) reject(err);
+        resolve(netId);
+      });
+    });
+  },
   getTxReceipt: function getTxReceipt(web3, txHash) {
     var timeoutInSec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 30;
     return new Promise(function (resolve, reject) {
-      if (typeof web3 === 'undefined') {
-        reject('Web3 was not initialized');
-      }
-
       fetchTxReceipt(web3, txHash, new Date().getTime() + timeoutInSec * 1000).then(function (receipt) {
         if (!receipt) {
           reject();
@@ -163,31 +167,27 @@ module.exports = {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                if (typeof web3 === 'undefined') {
-                  reject('Web3 was not initialized');
-                }
-
-                _context4.prev = 1;
-                _context4.next = 4;
+                _context4.prev = 0;
+                _context4.next = 3;
                 return web3.eth.getBalance(address);
 
-              case 4:
+              case 3:
                 balance = _context4.sent;
                 resolve(balance);
-                _context4.next = 11;
+                _context4.next = 10;
                 break;
 
-              case 8:
-                _context4.prev = 8;
-                _context4.t0 = _context4["catch"](1);
+              case 7:
+                _context4.prev = 7;
+                _context4.t0 = _context4["catch"](0);
                 reject(_context4.t0);
 
-              case 11:
+              case 10:
               case "end":
                 return _context4.stop();
             }
           }
-        }, _callee4, null, [[1, 8]]);
+        }, _callee4, null, [[0, 7]]);
       }));
 
       return function (_x7, _x8) {
@@ -197,10 +197,6 @@ module.exports = {
   },
   sendRawTransaction: function sendRawTransaction(web3, rawSignedTx) {
     return new Promise(function (resolve, reject) {
-      if (typeof web3 === 'undefined') {
-        reject('Web3 was not initialized');
-      }
-
       web3.eth.sendSignedTransaction(rawSignedTx, function (err, hash) {
         if (err) {
           reject(err);
@@ -221,14 +217,14 @@ module.exports = {
       var _ref5 = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee5(resolve, reject) {
-        var contract, _contract$methods, result;
+        var _contract$methods, contract, result;
 
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
+                _context5.prev = 0;
                 contract = new web3.eth.Contract(abi, address);
-                _context5.prev = 1;
                 _context5.next = 4;
                 return (_contract$methods = contract.methods)[method].apply(_contract$methods, _toConsumableArray(params)).call({
                   from: address
@@ -242,7 +238,7 @@ module.exports = {
 
               case 8:
                 _context5.prev = 8;
-                _context5.t0 = _context5["catch"](1);
+                _context5.t0 = _context5["catch"](0);
                 reject(_context5.t0);
 
               case 11:
@@ -250,7 +246,7 @@ module.exports = {
                 return _context5.stop();
             }
           }
-        }, _callee5, null, [[1, 8]]);
+        }, _callee5, null, [[0, 8]]);
       }));
 
       return function (_x9, _x10) {

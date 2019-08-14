@@ -19,3 +19,4 @@ module.exports.Gateway = (gwDomain) => ({
 });
 
 module.exports.Lightwallet = require('./lightwallet');
+module.exports.MetaMask = require('./metamask');
