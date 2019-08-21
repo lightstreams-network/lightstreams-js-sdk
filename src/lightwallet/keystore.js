@@ -16,10 +16,11 @@ const newAddresses = (keystore, password, nKeys = 1) => {
   return new Promise((resolve, reject) => {
     keystore.keyFromPassword(password, function(err, pwDerivedKey) {
       if (err) {
-        reject(err)
+        reject(err);
+      } else {
+        keystore.generateNewAddress(pwDerivedKey, nKeys);
+        resolve();
       }
-      keystore.generateNewAddress(pwDerivedKey, nKeys);
-      resolve();
     });
   });
 };
@@ -32,10 +33,10 @@ module.exports = {
   createKeystoreVault: (seed, password, nKeys = 1) => {
     return new Promise((resolve, reject) => {
       if (!keystore.isSeedValid(seed)) {
-        reject(`Invalid seed phrase`);
+        reject(new Error(`Invalid seed phrase`));
+        return;
       }
 
-      console.log('Creating new keystore vault...');
       keystore.createVault({
         password: password,
         seedPhrase: seed,
@@ -43,11 +44,11 @@ module.exports = {
       }, function(err, ks) {
         if (err) {
           reject(err)
+        } else {
+          newAddresses(ks, password, nKeys)
+            .then(() => resolve(ks))
+            .catch(reject);
         }
-
-        newAddresses(ks, password, nKeys)
-          .then(() => resolve(ks))
-          .catch(reject);
       });
     });
   },
@@ -61,8 +62,9 @@ module.exports = {
       ksVault.keyFromPassword(password, function(err, pwDerivedKey) {
         if (err) {
           reject(err);
+        } else {
+          resolve(pwDerivedKey);
         }
-        resolve(pwDerivedKey);
       });
     });
   },

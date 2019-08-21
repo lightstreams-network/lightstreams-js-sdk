@@ -39,7 +39,13 @@ module.exports = function () {
     var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     return fetch(url + queryParams(data), _objectSpread({}, defaultOptions, {
       method: 'GET'
-    }, options)).then(parseResponse);
+    }, options)).then(parseResponse)["catch"](function (err) {
+      if (err.message === 'Failed to fetch') {
+        throw new Error("Request failed: ".concat(url));
+      }
+
+      throw err;
+    });
   };
 
   var post = function post(url, data) {
@@ -47,7 +53,13 @@ module.exports = function () {
     return fetch(url, _objectSpread({}, defaultOptions, {}, options, {
       body: JSON.stringify(data),
       method: 'POST'
-    })).then(parseResponse);
+    })).then(parseResponse)["catch"](function (err) {
+      if (err.message === 'Failed to fetch') {
+        throw new Error("Request failed: ".concat(url));
+      }
+
+      throw err;
+    });
   };
 
   var postFile = function postFile(url, data, file) {
