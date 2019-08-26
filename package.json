@@ -15,7 +15,8 @@
   "scripts": {
     "build": "babel src -d build/src",
     "build-single": "babel src --out-file ./build/src/index.js",
-    "compile": "truffle compile --all"
+    "compile": "rm -rf ./build/contracts/*; truffle compile --all --reset",
+    "test-standalone": "cp .env.standalone .env && truffle test --network standalone"
   },
   "repository": {
     "type": "git",
@@ -48,6 +49,9 @@
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
-    "truffle": "^5.0.30"
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "dotenv": "^8.1.0",
+    "truffle": "^5.0.5"
   }
 }

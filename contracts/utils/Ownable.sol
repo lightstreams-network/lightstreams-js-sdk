@@ -1,71 +1,24 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.4.26;
 
-/**
- * @title Ownable
- * @dev The Ownable contract has an owner address, and provides basic authorization control
- * functions, this simplifies the implementation of "user permissions".
- */
 contract Ownable {
-    address private _owner;
+    address public owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    /**
-   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
-   * account.
-   */
-    constructor () internal {
-        _owner = msg.sender;
-        emit OwnershipTransferred(address(0), _owner);
+    constructor(address _owner) public {
+        owner = _owner;
     }
 
-    /**
-   * @return the address of the owner.
-   */
-    function owner() public view returns (address) {
-        return _owner;
-    }
-
-    function owners() public view returns (address[1] memory) {
-        address pOwner;
-        if (_owner != address(0x0)) {
-            pOwner = _owner;
-        }
-
-        address[1] memory aOwners = [pOwner];
-        return aOwners;
-    }
-
-    /**
-   * @dev Throws if called by any account other than the owner.
-   */
-    modifier onlyOwner() {
+    modifier onlyOwner {
         require(isOwner());
         _;
     }
 
-    /**
-   * @return true if `msg.sender` is the owner of the contract.
-   */
     function isOwner() public view returns (bool) {
-        return msg.sender == _owner;
+        return msg.sender == owner;
     }
 
-    /**
-   * @dev Allows the current owner to transfer control of the contract to a newOwner.
-   * @param newOwner The address to transfer ownership to.
-   */
-    function transferOwnership(address newOwner) public onlyOwner {
-        _transferOwnership(newOwner);
-    }
+    function transferOwnership(address _newOwner) public onlyOwner {
+        require(_newOwner != address(0));
 
-    /**
-   * @dev Transfers control of the contract to a newOwner.
-   * @param newOwner The address to transfer ownership to.
-   */
-    function _transferOwnership(address newOwner) internal {
-        require(newOwner != address(0));
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
+        owner = _newOwner;
     }
 }
