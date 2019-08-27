@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 
-import { Lightwallet as lw } from 'lightstreams-js-sdk';
+import { Lightwallet as lw, Web3 } from 'lightstreams-js-sdk';
 
 class AccountPage extends Component {
 
@@ -31,7 +31,7 @@ class AccountPage extends Component {
   }
 
   componentDidMount() {
-    lw.Web3.initialize('https://node.sirius.lightstreams.io').then(web3 => {
+    Web3.initialize('http://localhost:8545').then(web3 => {
       this.setState({ web3 })
     });
   }

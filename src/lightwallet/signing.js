@@ -22,7 +22,7 @@ var encodeConstructorParams = function(web3, abi, params) {
 
 module.exports = ({
   signDeployContractTx: async (web3, keystore, pwDerivedKey, { from, bytecode, abi, params }) => {
-    const encodeParams = encodeConstructorParams(web3, abi, params);
+    const encodeParams = encodeConstructorParams(web3, abi, params || []);
     const gasLimit = await web3.eth.estimateGas({ data: bytecode + encodeParams, from });
     const gasPrice = await web3.eth.getGasPrice();
     const nonce = await web3.eth.getTransactionCount(from);

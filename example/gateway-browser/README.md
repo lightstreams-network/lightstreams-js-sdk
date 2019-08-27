@@ -26,7 +26,7 @@ npm install -g n
 
 To start dev server with hot reload, it's live on localhost:3000
 ```
-npm run start
+npm run start:dev
 ```
 
 To build prod bundle, it includes both treeshaking and uglify to optimize the code as much as possible.

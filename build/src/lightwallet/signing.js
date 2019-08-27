@@ -46,7 +46,7 @@ module.exports = {
           switch (_context.prev = _context.next) {
             case 0:
               from = _ref.from, bytecode = _ref.bytecode, abi = _ref.abi, params = _ref.params;
-              encodeParams = encodeConstructorParams(web3, abi, params);
+              encodeParams = encodeConstructorParams(web3, abi, params || []);
               _context.next = 4;
               return web3.eth.estimateGas({
                 data: bytecode + encodeParams,

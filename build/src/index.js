@@ -25,3 +25,6 @@ module.exports.Web3 = require('./web3');
 module.exports.Contract = {
   Profile: require('./contracts/profile')
 };
+module.exports.ENS = {
+  FIFSRegistrar: require('./ens/FIFSRegistrar')
+};
