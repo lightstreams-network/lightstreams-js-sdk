@@ -9,10 +9,12 @@ const Signing = require('../lightwallet/signing');
 const MetaMask = require('../metamask');
 const contract = require('../../build/contracts/Profile.json');
 
-module.exports.deployProfileLightwallet = (web3, ksVault, pwDerivedKey, { from }) => {
+module.exports.deployProfileLightwallet = (web3, ksVault, pwDerivedKey, { from, owner, recoveryAccount }) => {
   return Signing.signDeployContractTx(web3, ksVault, pwDerivedKey, {
     from,
-    bytecode: contract.bytecode
+    bytecode: contract.bytecode,
+    abi: contract.abi,
+    params: [owner, recoveryAccount || '0x0000000000000000000000000000000000000000']
   }).then(rawSignedTx => {
     return Web3.sendRawTransaction(web3, rawSignedTx);
   }).then(txHash => {

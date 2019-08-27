@@ -8,21 +8,34 @@
 const Util = require('ethereumjs-util');
 const { signing, txutils } = require('eth-lightwallet');
 
+var encodeConstructorParams = function(web3, abi, params) {
+  return abi.filter(function(json) {
+    return json.type === 'constructor' && json.inputs.length === params.length;
+  }).map(function(json) {
+    return json.inputs.map(function(input) {
+      return input.type;
+    });
+  }).map(function(types) {
+    return web3.eth.abi.encodeParameters(types, params).slice(2); // Remove initial 0x
+  })[0] || '';
+};
+
 module.exports = ({
-  signDeployContractTx: async (web3, keystore, pwDerivedKey, { from, bytecode }) => {
+  signDeployContractTx: async (web3, keystore, pwDerivedKey, { from, bytecode, abi, params }) => {
+    const encodeParams = encodeConstructorParams(web3, abi, params);
+    const gasLimit = await web3.eth.estimateGas({ data: bytecode + encodeParams, from });
     const gasPrice = await web3.eth.getGasPrice();
     const nonce = await web3.eth.getTransactionCount(from);
-    const gasLimit = await web3.eth.estimateGas({ data: bytecode });
-    const sendingAddr = Util.stripHexPrefix(from);
 
     txOptions = {
       gasPrice: parseInt(gasPrice),
       gasLimit: parseInt(gasLimit),
       value: 0,
       nonce: parseInt(nonce),
-      data: bytecode
+      data: bytecode + encodeParams
     };
 
+    const sendingAddr = Util.stripHexPrefix(from);
     const contractData = txutils.createContractTx(sendingAddr, txOptions);
 
     const signedTx = signing.signTx(keystore, pwDerivedKey, contractData.tx, sendingAddr);

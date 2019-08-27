@@ -23,47 +23,61 @@ var _require = require('eth-lightwallet'),
     signing = _require.signing,
     txutils = _require.txutils;
 
+var encodeConstructorParams = function encodeConstructorParams(web3, abi, params) {
+  return abi.filter(function (json) {
+    return json.type === 'constructor' && json.inputs.length === params.length;
+  }).map(function (json) {
+    return json.inputs.map(function (input) {
+      return input.type;
+    });
+  }).map(function (types) {
+    return web3.eth.abi.encodeParameters(types, params).slice(2); // Remove initial 0x
+  })[0] || '';
+};
+
 module.exports = {
   signDeployContractTx: function () {
     var _signDeployContractTx = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee(web3, keystore, pwDerivedKey, _ref) {
-      var from, bytecode, gasPrice, nonce, gasLimit, sendingAddr, contractData, signedTx;
+      var from, bytecode, abi, params, encodeParams, gasLimit, gasPrice, nonce, sendingAddr, contractData, signedTx;
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              from = _ref.from, bytecode = _ref.bytecode;
-              _context.next = 3;
-              return web3.eth.getGasPrice();
-
-            case 3:
-              gasPrice = _context.sent;
-              _context.next = 6;
-              return web3.eth.getTransactionCount(from);
-
-            case 6:
-              nonce = _context.sent;
-              _context.next = 9;
+              from = _ref.from, bytecode = _ref.bytecode, abi = _ref.abi, params = _ref.params;
+              encodeParams = encodeConstructorParams(web3, abi, params);
+              _context.next = 4;
               return web3.eth.estimateGas({
-                data: bytecode
+                data: bytecode + encodeParams,
+                from: from
               });
 
-            case 9:
+            case 4:
               gasLimit = _context.sent;
-              sendingAddr = Util.stripHexPrefix(from);
+              _context.next = 7;
+              return web3.eth.getGasPrice();
+
+            case 7:
+              gasPrice = _context.sent;
+              _context.next = 10;
+              return web3.eth.getTransactionCount(from);
+
+            case 10:
+              nonce = _context.sent;
               txOptions = {
                 gasPrice: parseInt(gasPrice),
                 gasLimit: parseInt(gasLimit),
                 value: 0,
                 nonce: parseInt(nonce),
-                data: bytecode
+                data: bytecode + encodeParams
               };
+              sendingAddr = Util.stripHexPrefix(from);
               contractData = txutils.createContractTx(sendingAddr, txOptions);
               signedTx = signing.signTx(keystore, pwDerivedKey, contractData.tx, sendingAddr);
               return _context.abrupt("return", Util.addHexPrefix(signedTx));
 
-            case 15:
+            case 16:
             case "end":
               return _context.stop();
           }
