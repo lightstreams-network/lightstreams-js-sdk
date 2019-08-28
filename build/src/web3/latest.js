@@ -144,6 +144,14 @@ module.exports.networkVersion = function (web3) {
   });
 };
 
+module.exports.unlockAccount = function (web3, address, password) {
+  var timeInMilliseconds = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1000;
+  return new Promise(function (resolve, reject) {
+    debugger;
+    web3.eth.personal.unlockAccount(address, password, timeInMilliseconds).then(resolve)["catch"](reject);
+  });
+};
+
 module.exports.getTxReceipt = function (web3, txHash) {
   var timeoutInSec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 30;
   return new Promise(function (resolve, reject) {
@@ -213,12 +221,12 @@ module.exports.sendRawTransaction = function (web3, rawSignedTx) {
 module.exports.sendTransaction = function (web3, _ref5) {
   var to = _ref5.to,
       value = _ref5.value;
-  throw new Exception('Missing implementation');
+  throw new Error('Missing implementation');
 };
 
-module.exports.contractCall = function (web3, _ref6) {
+module.exports.contractCall = function (web3, contractAddress, _ref6) {
   var abi = _ref6.abi,
-      address = _ref6.address,
+      from = _ref6.from,
       method = _ref6.method,
       params = _ref6.params;
   return new Promise(
@@ -234,7 +242,7 @@ module.exports.contractCall = function (web3, _ref6) {
           switch (_context5.prev = _context5.next) {
             case 0:
               _context5.prev = 0;
-              contract = new web3.eth.Contract(abi, address);
+              contract = new web3.eth.Contract(abi, contractAddress);
               _context5.next = 4;
               return (_contract$methods = contract.methods)[method].apply(_contract$methods, _toConsumableArray(params)).call({
                 from: address
@@ -265,17 +273,114 @@ module.exports.contractCall = function (web3, _ref6) {
   }());
 };
 
-module.exports.deployContract = function (web3, _ref8) {
+module.exports.contractSendTx = function (web3, contractAddress, _ref8) {
   var abi = _ref8.abi,
-      bytecode = _ref8.bytecode,
-      params = _ref8.params;
-  throw new Exception('Missing implementation');
+      from = _ref8.from,
+      method = _ref8.method,
+      params = _ref8.params,
+      value = _ref8.value;
+  return new Promise(
+  /*#__PURE__*/
+  function () {
+    var _ref9 = _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee6(resolve, reject) {
+      var _contract$methods2, _contract$methods3, contract, sendTx, estimatedGas;
+
+      return regeneratorRuntime.wrap(function _callee6$(_context6) {
+        while (1) {
+          switch (_context6.prev = _context6.next) {
+            case 0:
+              _context6.prev = 0;
+              contract = new web3.eth.Contract(abi, contractAddress);
+              sendTx = (_contract$methods2 = contract.methods)[method].apply(_contract$methods2, _toConsumableArray(params));
+              debugger;
+              _context6.next = 6;
+              return new Promise(function (resolve, reject) {
+                sendTx.estimateGas({
+                  from: from
+                }, function (err, gas) {
+                  // if (err) reject(err);
+                  if (err) resolve(9000000);else resolve(gas);
+                });
+              });
+
+            case 6:
+              estimatedGas = _context6.sent;
+
+              (_contract$methods3 = contract.methods)[method].apply(_contract$methods3, _toConsumableArray(params)).send({
+                from: from,
+                gas: estimatedGas,
+                value: value || 0
+              }).on('transactionHash', resolve).on('error', reject);
+
+              _context6.next = 13;
+              break;
+
+            case 10:
+              _context6.prev = 10;
+              _context6.t0 = _context6["catch"](0);
+              reject(_context6.t0);
+
+            case 13:
+            case "end":
+              return _context6.stop();
+          }
+        }
+      }, _callee6, null, [[0, 10]]);
+    }));
+
+    return function (_x11, _x12) {
+      return _ref9.apply(this, arguments);
+    };
+  }());
 };
 
-module.exports.contractSendTransaction = function (web3, _ref9) {
-  var abi = _ref9.abi,
-      address = _ref9.address,
-      method = _ref9.method,
-      params = _ref9.params;
-  throw new Exception('Missing implementation');
+module.exports.deployContract = function (web3, _ref10) {
+  var from = _ref10.from,
+      abi = _ref10.abi,
+      bytecode = _ref10.bytecode,
+      params = _ref10.params;
+  return new Promise(
+  /*#__PURE__*/
+  function () {
+    var _ref11 = _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee7(resolve, reject) {
+      var contract, contractDeploy, estimatedGas;
+      return regeneratorRuntime.wrap(function _callee7$(_context7) {
+        while (1) {
+          switch (_context7.prev = _context7.next) {
+            case 0:
+              contract = new web3.eth.Contract(abi);
+              contractDeploy = contract.deploy({
+                data: bytecode,
+                arguments: params || []
+              });
+              _context7.next = 4;
+              return new Promise(function (resolve, reject) {
+                contractDeploy.estimateGas(function (err, gas) {
+                  if (err) reject(err);else resolve(gas);
+                });
+              });
+
+            case 4:
+              estimatedGas = _context7.sent;
+              contractDeploy.send({
+                from: from,
+                gas: estimatedGas
+              }).on('error', reject).on('transactionHash', resolve);
+
+            case 6:
+            case "end":
+              return _context7.stop();
+          }
+        }
+      }, _callee7);
+    }));
+
+    return function (_x13, _x14) {
+      return _ref11.apply(this, arguments);
+    };
+  }());
 };

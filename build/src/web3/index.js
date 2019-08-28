@@ -34,6 +34,16 @@ module.exports.networkVersion = function (web3) {
   }
 };
 
+module.exports.unlockAccount = function (web3, address, password) {
+  if (isLatest(web3)) {
+    return latest.unlockAccount(web3, address, password);
+  } else if (isV0_20(web3)) {
+    return v0_20.unlockAccount(web3, address, password);
+  } else {
+    throw new Error('Not supported method');
+  }
+};
+
 module.exports.getTxReceipt = function (web3, txHash) {
   var timeoutInSec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 30;
 
@@ -66,73 +76,31 @@ module.exports.sendRawTransaction = function (web3, rawSignedTx) {
   }
 };
 
-module.exports.deployContract = function (web3, _ref) {
-  var abi = _ref.abi,
-      bytecode = _ref.bytecode,
-      params = _ref.params;
-
+module.exports.deployContract = function (web3, payload) {
   if (isLatest(web3)) {
-    return latest.deployContract(web3, {
-      abi: abi,
-      bytecode: bytecode,
-      params: params
-    });
+    return latest.deployContract(web3, payload);
   } else if (isV0_20(web3)) {
-    return v0_20.deployContract(web3, {
-      abi: abi,
-      bytecode: bytecode,
-      params: params
-    });
+    return v0_20.deployContract(web3, payload);
   } else {
     throw new Error('Not supported method');
   }
 };
 
-module.exports.contractCall = function (web3, _ref2) {
-  var abi = _ref2.abi,
-      address = _ref2.address,
-      method = _ref2.method,
-      params = _ref2.params;
-
+module.exports.contractCall = function (web3, contractAddress, payload) {
   if (isLatest(web3)) {
-    return latest.contractCall(web3, {
-      abi: abi,
-      address: address,
-      method: method,
-      params: params
-    });
+    return latest.contractCall(web3, contractAddress, payload);
   } else if (isV0_20(web3)) {
-    return v0_20.contractCall(web3, {
-      abi: abi,
-      address: address,
-      method: method,
-      params: params
-    });
+    return v0_20.contractCall(web3, contractAddress, payload);
   } else {
     throw new Error('Not supported method');
   }
 };
 
-module.exports.contractSendTransaction = function (web3, _ref3) {
-  var abi = _ref3.abi,
-      address = _ref3.address,
-      method = _ref3.method,
-      params = _ref3.params;
-
+module.exports.contractSendTx = function (web3, contractAddress, payload) {
   if (isLatest(web3)) {
-    return latest.contractSendTransaction(web3, {
-      abi: abi,
-      address: address,
-      method: method,
-      params: params
-    });
+    return latest.contractSendTx(web3, contractAddress, payload);
   } else if (isV0_20(web3)) {
-    return v0_20.contractSendTransaction(web3, {
-      abi: abi,
-      address: address,
-      method: method,
-      params: params
-    });
+    return v0_20.contractSendTx(web3, contractAddress, payload);
   } else {
     throw new Error('Not supported method');
   }

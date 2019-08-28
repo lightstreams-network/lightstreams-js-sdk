@@ -31,6 +31,16 @@ module.exports.networkVersion = (web3) => {
   }
 };
 
+module.exports.unlockAccount = (web3, address, password) => {
+  if (isLatest(web3)) {
+    return latest.unlockAccount(web3, address, password)
+  } else if (isV0_20(web3)) {
+    return v0_20.unlockAccount(web3, address, password)
+  } else {
+    throw new Error('Not supported method');
+  }
+};
+
 module.exports.getTxReceipt = (web3, txHash, timeoutInSec = 30) => {
   if (isLatest(web3)) {
     return latest.getTxReceipt(web3, txHash, timeoutInSec);
@@ -61,32 +71,31 @@ module.exports.sendRawTransaction = (web3, rawSignedTx) => {
   }
 };
 
-module.exports.deployContract = (web3, { abi, bytecode, params }) => {
+module.exports.deployContract = (web3, payload) => {
   if (isLatest(web3)) {
-    return latest.deployContract(web3, { abi, bytecode, params })
+    return latest.deployContract(web3, payload)
   } else if (isV0_20(web3)) {
-    return v0_20.deployContract(web3, { abi, bytecode, params })
+    return v0_20.deployContract(web3, payload)
   } else {
     throw new Error('Not supported method');
   }
 };
 
-module.exports.contractCall = (web3, { abi, address, method, params }) => {
+module.exports.contractCall = (web3, contractAddress, payload) => {
   if (isLatest(web3)) {
-    return latest.contractCall(web3, { abi, address, method, params })
+    return latest.contractCall(web3, contractAddress, payload)
   } else if (isV0_20(web3)) {
-    return v0_20.contractCall(web3, { abi, address, method, params })
+    return v0_20.contractCall(web3, contractAddress, payload)
   } else {
     throw new Error('Not supported method');
   }
 };
 
-
-module.exports.contractSendTransaction = (web3, { abi, address, method, params }) => {
+module.exports.contractSendTx = (web3, contractAddress, payload) => {
   if (isLatest(web3)) {
-    return latest.contractSendTransaction(web3, { abi, address, method, params })
+    return latest.contractSendTx(web3, contractAddress, payload)
   } else if (isV0_20(web3)) {
-    return v0_20.contractSendTransaction(web3, { abi, address, method, params })
+    return v0_20.contractSendTx(web3, contractAddress, payload)
   } else {
     throw new Error('Not supported method');
   }

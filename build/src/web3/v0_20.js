@@ -189,9 +189,8 @@ module.exports.sendTransaction = function (web3, _ref4) {
   }());
 };
 
-module.exports.contractCall = function (web3, _ref6) {
+module.exports.contractCall = function (web3, contractAddress, _ref6) {
   var abi = _ref6.abi,
-      address = _ref6.address,
       method = _ref6.method,
       params = _ref6.params;
   return new Promise(
@@ -212,7 +211,7 @@ module.exports.contractCall = function (web3, _ref6) {
               }
 
               contract = window.web3.eth.contract(abi);
-              contractInstance = contract.at(address); // const callData = contractInstance[method].getData(...params);
+              contractInstance = contract.at(contractAddress); // const callData = contractInstance[method].getData(...params);
               // window.web3.eth.call({ to: address, data: callData }, (err, result) => {
               //   debugger;
               //   if (err) reject(err);
@@ -238,9 +237,8 @@ module.exports.contractCall = function (web3, _ref6) {
   }());
 };
 
-module.exports.contractSendTransaction = function (web3, _ref8) {
+module.exports.contractSendTx = function (web3, contractAddress, _ref8) {
   var abi = _ref8.abi,
-      address = _ref8.address,
       method = _ref8.method,
       params = _ref8.params;
   return new Promise(
@@ -259,7 +257,7 @@ module.exports.contractSendTransaction = function (web3, _ref8) {
               }
 
               contract = web3.eth.contract(abi);
-              contractInstance = contract.at(address);
+              contractInstance = contract.at(contractAddress);
               _context4.next = 5;
               return new Promise(function (resolve, reject) {
                 var _contractInstance$met2;
@@ -301,5 +299,9 @@ module.exports.contractSendTransaction = function (web3, _ref8) {
 
 module.exports.getTxReceipt = function (web3, txHash) {
   var timeoutInSec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 30;
+  throw new Error('Missing implementation');
+};
+
+module.exports.unlockAccount = function (web3, address, password) {
   throw new Error('Missing implementation');
 };

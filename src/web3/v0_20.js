@@ -104,14 +104,14 @@ module.exports.sendTransaction = (web3, { to, value }) => {
   });
 };
 
-module.exports.contractCall = (web3, { abi, address, method, params }) => {
+module.exports.contractCall = (web3, contractAddress, { abi, method, params }) => {
   return new Promise(async (resolve, reject) => {
     if (!web3.isConnected()) {
       reject(new Error('Web3 is not connected'));
     }
 
     const contract = window.web3.eth.contract(abi);
-    const contractInstance = contract.at(address);
+    const contractInstance = contract.at(contractAddress);
 
     // const callData = contractInstance[method].getData(...params);
     // window.web3.eth.call({ to: address, data: callData }, (err, result) => {
@@ -127,14 +127,14 @@ module.exports.contractCall = (web3, { abi, address, method, params }) => {
   });
 };
 
-module.exports.contractSendTransaction = (web3, { abi, address, method, params }) => {
+module.exports.contractSendTx = (web3, contractAddress, { abi, method, params }) => {
   return new Promise(async (resolve, reject) => {
     if (!web3.isConnected()) {
       reject(new Error('Web3 is not connected'));
     }
 
     const contract = web3.eth.contract(abi);
-    const contractInstance = contract.at(address);
+    const contractInstance = contract.at(contractAddress);
     const estimatedGas = await (new Promise((resolve, reject) => {
       contractInstance[method].estimateGas(...params, (err, data) => {
         if (err) reject(err);
@@ -155,5 +155,9 @@ module.exports.contractSendTransaction = (web3, { abi, address, method, params }
 };
 
 module.exports.getTxReceipt = (web3, txHash, timeoutInSec = 30) => {
+  throw new Error('Missing implementation');
+};
+
+module.exports.unlockAccount = (web3, address, password) => {
   throw new Error('Missing implementation');
 };

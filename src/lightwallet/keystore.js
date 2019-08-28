@@ -6,6 +6,7 @@
 
 const { keystore } = require('eth-lightwallet');
 const { Entropy } = require('entropy-string');
+const { HookedWeb3Provider } = require('./web3provider');
 
 const generateEntropy = () => {
   const entropy = new Entropy({ total: 1e6, risk: 1e9 });

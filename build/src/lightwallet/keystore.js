@@ -11,6 +11,9 @@ var _require = require('eth-lightwallet'),
 var _require2 = require('entropy-string'),
     Entropy = _require2.Entropy;
 
+var _require3 = require('./web3provider'),
+    HookedWeb3Provider = _require3.HookedWeb3Provider;
+
 var generateEntropy = function generateEntropy() {
   var entropy = new Entropy({
     total: 1e6,

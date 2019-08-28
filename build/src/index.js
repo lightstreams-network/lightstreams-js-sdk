@@ -26,5 +26,7 @@ module.exports.Contract = {
   Profile: require('./contracts/profile')
 };
 module.exports.ENS = {
-  FIFSRegistrar: require('./ens/FIFSRegistrar')
+  FIFSRegistrar: require('./ens/FIFSRegistrar'),
+  ENSRegistry: require('./ens/ENSRegistry'),
+  PublicResolver: require('./ens/PublicResolver')
 };

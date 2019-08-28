@@ -1,5 +1,15 @@
 "use strict";
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -191,5 +201,47 @@ module.exports = {
     }
 
     return signSendValueTx;
-  }()
+  }(),
+  signRawTx: function signRawTx(keystore, pwDerivedKey, payload) {
+    var gas = payload.gas,
+        params = _objectWithoutProperties(payload, ["gas"]);
+
+    var txObj = _objectSpread({}, params, {
+      gasLimit: gas
+    });
+
+    var tx = txutils.createTx(txObj);
+    var rawTx = txutils.txToHexString(tx);
+    var signingAddress = Util.stripHexPrefix(params.from);
+    var signedTx = signing.signTx(keystore, pwDerivedKey, rawTx, signingAddress);
+    return Util.addHexPrefix(signedTx);
+  } // signRawTxDeprecated: (keystore, pwDerivedKey, payload ) => {
+  //   const { from, gasPrice, gas, nonce, value, data, to } = payload;
+  //   let rawTx;
+  //   let txOptions = {
+  //     gasPrice: gasPrice,
+  //     gasLimit: gas,
+  //     nonce: nonce,
+  //     value: value || 0,
+  //   };
+  //
+  //   if (!to) { // We are going to assume it is contract deployment
+  //     txOptions = { ...txOptions, data };
+  //     const sendingAddr = Util.stripHexPrefix(from);
+  //     const contractData = txutils.createContractTx(sendingAddr, txOptions);
+  //     rawTx = contractData.tx;
+  //   } else if(data) { // We are going to assume it is a contract method call
+  //     debugger;
+  //     txOptions = { ...txOptions, data, to };
+  //     rawTx = txutils.functionTx(abi, method, params, txOptions);
+  //   } else {
+  //     txOptions = { ...txOptions, to };
+  //     rawTx = txutils.valueTx(txOptions);
+  //   }
+  //
+  //   const signingAddress = Util.stripHexPrefix(from);
+  //   const signedTx = signing.signTx(keystore, pwDerivedKey, rawTx, signingAddress);
+  //   return Util.addHexPrefix(signedTx);
+  // }
+
 };

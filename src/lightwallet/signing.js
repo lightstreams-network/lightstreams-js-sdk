@@ -77,5 +77,46 @@ module.exports = ({
     const rawTx = txutils.valueTx(txOptions);
     const signedTx = signing.signTx(keystore, pwDerivedKey, rawTx, signingAddress);
     return Util.addHexPrefix(signedTx);
-  }
+  },
+  signRawTx: (keystore, pwDerivedKey, payload) => {
+    const { gas, ...params } = payload;
+    const txObj = {
+      ...params,
+      gasLimit: gas,
+    };
+
+    const tx = txutils.createTx(txObj);
+    const rawTx = txutils.txToHexString(tx);
+    const signingAddress = Util.stripHexPrefix(params.from);
+    const signedTx = signing.signTx(keystore, pwDerivedKey, rawTx, signingAddress);
+    return Util.addHexPrefix(signedTx);
+  },
+  // signRawTxDeprecated: (keystore, pwDerivedKey, payload ) => {
+  //   const { from, gasPrice, gas, nonce, value, data, to } = payload;
+  //   let rawTx;
+  //   let txOptions = {
+  //     gasPrice: gasPrice,
+  //     gasLimit: gas,
+  //     nonce: nonce,
+  //     value: value || 0,
+  //   };
+  //
+  //   if (!to) { // We are going to assume it is contract deployment
+  //     txOptions = { ...txOptions, data };
+  //     const sendingAddr = Util.stripHexPrefix(from);
+  //     const contractData = txutils.createContractTx(sendingAddr, txOptions);
+  //     rawTx = contractData.tx;
+  //   } else if(data) { // We are going to assume it is a contract method call
+  //     debugger;
+  //     txOptions = { ...txOptions, data, to };
+  //     rawTx = txutils.functionTx(abi, method, params, txOptions);
+  //   } else {
+  //     txOptions = { ...txOptions, to };
+  //     rawTx = txutils.valueTx(txOptions);
+  //   }
+  //
+  //   const signingAddress = Util.stripHexPrefix(from);
+  //   const signedTx = signing.signTx(keystore, pwDerivedKey, rawTx, signingAddress);
+  //   return Util.addHexPrefix(signedTx);
+  // }
 });

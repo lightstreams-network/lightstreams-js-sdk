@@ -52,6 +52,15 @@ module.exports.networkVersion = (web3) => {
   })
 };
 
+module.exports.unlockAccount = (web3, address, password, timeInMilliseconds = 1000) => {
+  return new Promise((resolve, reject) => {
+    debugger;
+    web3.eth.personal.unlockAccount(address, password, timeInMilliseconds)
+      .then(resolve)
+      .catch(reject)
+  });
+};
+
 module.exports.getTxReceipt = (web3, txHash, timeoutInSec = 30) => {
   return new Promise((resolve, reject) => {
     fetchTxReceipt(web3, txHash, (new Date()).getTime() + timeoutInSec * 1000).then(receipt => {
@@ -87,13 +96,13 @@ module.exports.sendRawTransaction = (web3, rawSignedTx) => {
 };
 
 module.exports.sendTransaction = (web3, { to, value }) => {
-  throw new Exception('Missing implementation');
+  throw new Error('Missing implementation');
 };
 
-module.exports.contractCall = (web3, { abi, address, method, params }) => {
+module.exports.contractCall = (web3, contractAddress, { abi, from, method, params }) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const contract = new web3.eth.Contract(abi, address);
+      const contract = new web3.eth.Contract(abi, contractAddress);
       const result = await contract.methods[method](...params).call({
         from: address
       });
@@ -104,10 +113,44 @@ module.exports.contractCall = (web3, { abi, address, method, params }) => {
   });
 };
 
-module.exports.deployContract = (web3, { abi, bytecode, params }) => {
-  throw new Exception('Missing implementation');
+module.exports.contractSendTx = (web3, contractAddress, { abi, from, method, params, value }) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const contract = new web3.eth.Contract(abi, contractAddress);
+      const sendTx = contract.methods[method](...params);
+      debugger;
+      const estimatedGas = await (new Promise((resolve, reject) => {
+        sendTx.estimateGas({ from }, (err, gas) => {
+          // if (err) reject(err);
+          if (err) resolve(9000000);
+          else resolve(gas);
+        });
+      }));
+      contract.methods[method](...params).send({
+        from,
+        gas: estimatedGas,
+        value: value || 0
+      }).on('transactionHash', resolve)
+        .on('error', reject);
+    } catch ( err ) {
+      reject(err);
+    }
+  });
 };
 
-module.exports.contractSendTransaction = (web3, { abi, address, method, params }) => {
-  throw new Exception('Missing implementation');
+module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
+  return new Promise(async (resolve, reject) => {
+    const contract = new web3.eth.Contract(abi);
+    const contractDeploy = contract.deploy({ data: bytecode, arguments: params || [] });
+    const estimatedGas = await( new Promise((resolve, reject) => {
+      contractDeploy.estimateGas((err, gas) => {
+          if (err) reject(err);
+          else resolve(gas);
+        });
+    }));
+
+    contractDeploy.send({ from, gas: estimatedGas })
+      .on('error', reject)
+      .on('transactionHash', resolve)
+  });
 };

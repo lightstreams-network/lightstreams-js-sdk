@@ -2,26 +2,28 @@
 
 /**
  * User: ggarrido
- * Date: 14/08/19 15:44
+ * Date: 27/08/19 16:54
  * Copyright 2019 (c) Lightstreams, Granada
  */
 var Web3 = require('../web3');
 
 var Signing = require('../lightwallet/signing');
 
-var contract = require('../../build/contracts/Profile.json');
+var FIFSRegistrar = require('@ensdomains/ens/build/contracts/FIFSRegistrar.json');
+
+var namehash = require('eth-ens-namehash');
 
 module.exports.lightwallet = function (web3, ksVault, pwDerivedKey) {
   return {
     deploy: function deploy(_ref) {
       var from = _ref.from,
-          owner = _ref.owner,
-          recoveryAccount = _ref.recoveryAccount;
+          ensAddress = _ref.ensAddress,
+          rootNode = _ref.rootNode;
       return Signing.signDeployContractTx(web3, ksVault, pwDerivedKey, {
         from: from,
-        bytecode: contract.bytecode,
-        abi: contract.abi,
-        params: [owner, recoveryAccount || '0x0000000000000000000000000000000000000000']
+        bytecode: FIFSRegistrar.bytecode,
+        abi: FIFSRegistrar.abi,
+        params: [ensAddress, namehash.hash(rootNode)]
       }).then(function (rawSignedTx) {
         return Web3.sendRawTransaction(web3, rawSignedTx);
       }).then(function (txHash) {
@@ -34,12 +36,12 @@ module.exports.lightwallet = function (web3, ksVault, pwDerivedKey) {
 module.exports.web3 = function (web3) {
   return {
     deploy: function deploy(_ref2) {
-      var owner = _ref2.owner,
-          recoveryAccount = _ref2.recoveryAccount;
+      var ensAddress = _ref2.ensAddress,
+          rootNode = _ref2.rootNode;
       return Web3.deployContract(web3, {
-        abi: contract.abi,
-        bytecode: contract.bytecode,
-        params: [owner, recoveryAccount || '0x0000000000000000000000000000000000000000']
+        abi: FIFSRegistrar.abi,
+        bytecode: FIFSRegistrar.bytecode,
+        params: [ensAddress, namehash.hash(rootNode)]
       }).then(function (txHash) {
         return Web3.getTxReceipt(web3, txHash);
       });
