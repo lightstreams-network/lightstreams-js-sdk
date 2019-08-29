@@ -24,7 +24,7 @@ npm install -g n
 
 ## How to use
 
-To start dev server with hot reload, it's live on localhost:3000
+To start dev server with hot reload, it's live on localhost:3001
 ```
 npm run start:dev
 ```
