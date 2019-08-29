@@ -8,7 +8,7 @@ const Web3 = require('../web3');
 const Signing = require('../lightwallet/signing');
 const ENS = require('@ensdomains/ens/build/contracts/ENSRegistry.json');
 const namehash = require('eth-ens-namehash');
-
+const utils = require('web3-utils');
 
 module.exports.lightwallet = (web3, ksVault, pwDerivedKey) => ({
   deploy: ({ from }) => {
@@ -29,7 +29,7 @@ module.exports.lightwallet = (web3, ksVault, pwDerivedKey) => ({
     return Signing.signContractMethodTx(web3, ksVault, pwDerivedKey, {
       from,
       method: 'setSubnodeOwner',
-      params: [namehash.hash(rootNode), namehash.hash(subNode), owner || from],
+      params: [namehash.hash(rootNode), utils.sha3(subNode), owner || from],
       abi: ENS.abi,
       address: contractAddress,
     }).then(rawSignedTx => {
@@ -63,27 +63,44 @@ module.exports.web3 = (web3) => ({
       return Web3.getTxReceipt(web3, txHash);
     })
   },
-  registerNode: (contractAddress, { from, rootNode, subNode, owner }) => {
-    if(!rootNode || !subNode) {
+  registerNode: (contractAddress, { from, parentNode, node, owner }) => {
+    if(!parentNode || !node) {
       throw new Error(`Missing required value`);
     }
+
     return Web3.contractSendTx(web3, contractAddress, {
-      from,
+      from: from || owner,
       abi: ENS.abi,
       method: 'setSubnodeOwner',
-      params: [namehash.hash(rootNode), namehash.hash(subNode), owner || from],
+      params: [
+        parentNode.indexOf('0x') === 0 ? parentNode : namehash.hash(parentNode), // domain
+        node.indexOf('0x') === 0 ? node : utils.sha3(node), // subdomain
+        owner || from
+      ],
     }).then((txHash) => {
       return Web3.getTxReceipt(web3, txHash);
     });
   },
-  setResolver: (contractAddress, { from, resolverAddress, node }) => {
+  setResolver: (contractAddress, { from, resolverAddress, node, owner }) => {
     return Web3.contractSendTx(web3, contractAddress, {
-      from,
+      from: from || owner,
       abi: ENS.abi,
       method: 'setResolver',
-      params: [namehash.hash(node), resolverAddress],
+      params: [
+        node.indexOf('0x') === 0 ? node : namehash.hash(node), //node
+        resolverAddress
+      ],
     }).then((txHash) => {
       return Web3.getTxReceipt(web3, txHash);
     });
+  },
+  resolver: (contractAddress, { node }) => {
+    return Web3.contractCall(web3, contractAddress, {
+      abi: ENS.abi,
+      method: 'resolver',
+      params: [
+        node.indexOf('0x') === 0 ? node : namehash.hash(node) // node
+      ]
+    })
   }
 });

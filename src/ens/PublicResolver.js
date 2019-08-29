@@ -7,6 +7,7 @@
 const Web3 = require('../web3');
 const Signing = require('../lightwallet/signing');
 const PublicResolver = require('@ensdomains/resolver/build/contracts/PublicResolver.json');
+const namehash = require('eth-ens-namehash');
 
 module.exports.lightwallet = (web3, ksVault, pwDerivedKey) => ({
   deploy: ({ from, ensAddress }) => {
@@ -33,5 +34,18 @@ module.exports.web3 = (web3) => ({
     }).then((txHash) => {
       return Web3.getTxReceipt(web3, txHash);
     })
+  },
+  setAddr: (contractAddress, { from, node, address, owner }) => {
+    return Web3.contractSendTx(web3, contractAddress, {
+      from: from || owner,
+      abi: PublicResolver.abi,
+      method: 'setAddr',
+      params: [
+        node.indexOf('0x') === 0 ? node : namehash.hash(node), //node
+        address
+      ],
+    }).then((txHash) => {
+      return Web3.getTxReceipt(web3, txHash);
+    });
   }
 });

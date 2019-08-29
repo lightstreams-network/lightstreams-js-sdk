@@ -103,9 +103,7 @@ module.exports.contractCall = (web3, contractAddress, { abi, from, method, param
   return new Promise(async (resolve, reject) => {
     try {
       const contract = new web3.eth.Contract(abi, contractAddress);
-      const result = await contract.methods[method](...params).call({
-        from: address
-      });
+      const result = await contract.methods[method](...params).call({ from });
       resolve(result);
     } catch ( err ) {
       reject(err);
@@ -118,7 +116,6 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, from, method, par
     try {
       const contract = new web3.eth.Contract(abi, contractAddress);
       const sendTx = contract.methods[method](...params);
-      debugger;
       const estimatedGas = await (new Promise((resolve, reject) => {
         sendTx.estimateGas({ from }, (err, gas) => {
           // if (err) reject(err);
