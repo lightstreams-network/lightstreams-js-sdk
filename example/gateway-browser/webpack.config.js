@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
-const Dotenv = require('dotenv-webpack');
+const DotenvPlugin = require('dotenv-webpack');
 
 const dev = process.env.NODE_ENV !== 'production';
 
@@ -15,11 +15,18 @@ const DefinePluginConfig = new webpack.DefinePlugin({
   'process.env.NODE_ENV': JSON.stringify('production'),
 });
 
+const DotenvPluginCfg = new DotenvPlugin({
+  path: path.resolve(__dirname, '.env'),
+  silent: false, // hide any errors
+  defaults: false // load '.env.defaults' as the default values if empty.
+});
+
 module.exports = {
   devServer: {
     host: 'localhost',
     port: '3001',
     hot: true,
+    inline: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
     },
@@ -56,6 +63,6 @@ module.exports = {
   },
   mode: dev ? 'development' : 'production',
   plugins: dev
-    ? [HTMLWebpackPluginConfig, new Dotenv(), new webpack.HotModuleReplacementPlugin()]
-    : [HTMLWebpackPluginConfig, new Dotenv(), DefinePluginConfig],
+    ? [HTMLWebpackPluginConfig, DefinePluginConfig, new webpack.HotModuleReplacementPlugin(), DotenvPluginCfg]
+    : [HTMLWebpackPluginConfig, DefinePluginConfig, DotenvPluginCfg],
 };

@@ -31,7 +31,7 @@ class AccountPage extends Component {
   }
 
   componentDidMount() {
-    Web3.initialize('http://localhost:8545').then(web3 => {
+    Web3.initialize(window.process.env.WEB3_PROVIDER).then(web3 => {
       this.setState({ web3 })
     });
   }

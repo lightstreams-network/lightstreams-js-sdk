@@ -17,6 +17,13 @@ import './style.scss';
 
 const root = document.getElementById('root');
 
+// AWFUL HACK caused of a unknown issue with Webpack-dotenv
+window.process = {
+  'env': {
+    WEB3_PROVIDER: 'http://localhost:8545'
+  }
+};
+
 const render = (Component) => {
   ReactDOM.render(
     <AppContainer>

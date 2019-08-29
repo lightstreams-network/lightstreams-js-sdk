@@ -26,7 +26,7 @@ export default class ENSPage extends Component {
   }
 
   componentDidMount() {
-    Web3.initialize('http://localhost:8545').then(web3 => {
+    Web3.initialize(window.process.env.WEB3_PROVIDER).then(web3 => {
       this.setState({ web3 });
       window.web3 = this.state.web3;
     });
@@ -41,7 +41,7 @@ export default class ENSPage extends Component {
       // const addresses = lw.Keystore.addresses(ksVault);
       // const address = addresses[0];
       const web3Provider = lw.Web3Provider.HookedWeb3Provider(ksVault, pwDerivedKey, {
-        host: web3.eth.currentProvider.host
+        host: web3.eth.currentProvider.host || web3.eth.currentProvider.connection.url
       });
       this.state.web3.setProvider(web3Provider);
       const accounts = await this.state.web3.eth.getAccounts();

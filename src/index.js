@@ -18,7 +18,11 @@ module.exports.Gateway = (gwDomain) => ({
   erc20: require('./gateway/erc20')(gwDomain),
 });
 
-module.exports.Lightwallet = require('./lightwallet');
+module.exports.Lightwallet = {
+  Keystore: require('./lightwallet/keystore'),
+  Signing: require('./lightwallet/signing'),
+  Web3Provider: require('./lightwallet/web3provider')
+};
 module.exports.MetaMask = require('./metamask');
 module.exports.Web3 = require('./web3');
 module.exports.Contract = {
@@ -30,4 +34,8 @@ module.exports.ENS = {
   ENSRegistry: require('./ens/ENSRegistry'),
   PublicResolver: require('./ens/PublicResolver'),
   SDK: require('./ens/sdk'),
+};
+
+module.exports.EthersWallet = {
+  Keystore: require('./etherswallet/keystore'),
 };
