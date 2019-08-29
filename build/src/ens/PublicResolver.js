@@ -11,6 +11,8 @@ var Signing = require('../lightwallet/signing');
 
 var PublicResolver = require('@ensdomains/resolver/build/contracts/PublicResolver.json');
 
+var namehash = require('eth-ens-namehash');
+
 module.exports.lightwallet = function (web3, ksVault, pwDerivedKey) {
   return {
     deploy: function deploy(_ref) {
@@ -40,6 +42,21 @@ module.exports.web3 = function (web3) {
         abi: PublicResolver.abi,
         bytecode: PublicResolver.bytecode,
         params: [ensAddress]
+      }).then(function (txHash) {
+        return Web3.getTxReceipt(web3, txHash);
+      });
+    },
+    setAddr: function setAddr(contractAddress, _ref3) {
+      var from = _ref3.from,
+          node = _ref3.node,
+          address = _ref3.address,
+          owner = _ref3.owner;
+      return Web3.contractSendTx(web3, contractAddress, {
+        from: from || owner,
+        abi: PublicResolver.abi,
+        method: 'setAddr',
+        params: [node.indexOf('0x') === 0 ? node : namehash.hash(node), //node
+        address]
       }).then(function (txHash) {
         return Web3.getTxReceipt(web3, txHash);
       });

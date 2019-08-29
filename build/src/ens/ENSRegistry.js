@@ -13,6 +13,8 @@ var ENS = require('@ensdomains/ens/build/contracts/ENSRegistry.json');
 
 var namehash = require('eth-ens-namehash');
 
+var utils = require('web3-utils');
+
 module.exports.lightwallet = function (web3, ksVault, pwDerivedKey) {
   return {
     deploy: function deploy(_ref) {
@@ -40,7 +42,7 @@ module.exports.lightwallet = function (web3, ksVault, pwDerivedKey) {
       return Signing.signContractMethodTx(web3, ksVault, pwDerivedKey, {
         from: from,
         method: 'setSubnodeOwner',
-        params: [namehash.hash(rootNode), namehash.hash(subNode), owner || from],
+        params: [namehash.hash(rootNode), utils.sha3(subNode), owner || from],
         abi: ENS.abi,
         address: contractAddress
       }).then(function (rawSignedTx) {
@@ -82,19 +84,21 @@ module.exports.web3 = function (web3) {
     },
     registerNode: function registerNode(contractAddress, _ref5) {
       var from = _ref5.from,
-          rootNode = _ref5.rootNode,
-          subNode = _ref5.subNode,
+          parentNode = _ref5.parentNode,
+          node = _ref5.node,
           owner = _ref5.owner;
 
-      if (!rootNode || !subNode) {
+      if (!parentNode || !node) {
         throw new Error("Missing required value");
       }
 
       return Web3.contractSendTx(web3, contractAddress, {
-        from: from,
+        from: from || owner,
         abi: ENS.abi,
         method: 'setSubnodeOwner',
-        params: [namehash.hash(rootNode), namehash.hash(subNode), owner || from]
+        params: [parentNode.indexOf('0x') === 0 ? parentNode : namehash.hash(parentNode), // domain
+        node.indexOf('0x') === 0 ? node : utils.sha3(node), // subdomain
+        owner || from]
       }).then(function (txHash) {
         return Web3.getTxReceipt(web3, txHash);
       });
@@ -102,14 +106,25 @@ module.exports.web3 = function (web3) {
     setResolver: function setResolver(contractAddress, _ref6) {
       var from = _ref6.from,
           resolverAddress = _ref6.resolverAddress,
-          node = _ref6.node;
+          node = _ref6.node,
+          owner = _ref6.owner;
       return Web3.contractSendTx(web3, contractAddress, {
-        from: from,
+        from: from || owner,
         abi: ENS.abi,
         method: 'setResolver',
-        params: [namehash.hash(node), resolverAddress]
+        params: [node.indexOf('0x') === 0 ? node : namehash.hash(node), //node
+        resolverAddress]
       }).then(function (txHash) {
         return Web3.getTxReceipt(web3, txHash);
+      });
+    },
+    resolver: function resolver(contractAddress, _ref7) {
+      var node = _ref7.node;
+      return Web3.contractCall(web3, contractAddress, {
+        abi: ENS.abi,
+        method: 'resolver',
+        params: [node.indexOf('0x') === 0 ? node : namehash.hash(node) // node
+        ]
       });
     }
   };

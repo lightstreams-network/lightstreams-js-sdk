@@ -36,9 +36,11 @@ module.exports.lightwallet = function (web3, ksVault, pwDerivedKey) {
 module.exports.web3 = function (web3) {
   return {
     deploy: function deploy(_ref2) {
-      var ensAddress = _ref2.ensAddress,
+      var from = _ref2.from,
+          ensAddress = _ref2.ensAddress,
           rootNode = _ref2.rootNode;
       return Web3.deployContract(web3, {
+        from: from,
         abi: FIFSRegistrar.abi,
         bytecode: FIFSRegistrar.bytecode,
         params: [ensAddress, namehash.hash(rootNode)]

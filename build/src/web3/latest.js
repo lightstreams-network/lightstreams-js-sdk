@@ -245,7 +245,7 @@ module.exports.contractCall = function (web3, contractAddress, _ref6) {
               contract = new web3.eth.Contract(abi, contractAddress);
               _context5.next = 4;
               return (_contract$methods = contract.methods)[method].apply(_contract$methods, _toConsumableArray(params)).call({
-                from: address
+                from: from
               });
 
             case 4:
@@ -294,8 +294,7 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref8) {
               _context6.prev = 0;
               contract = new web3.eth.Contract(abi, contractAddress);
               sendTx = (_contract$methods2 = contract.methods)[method].apply(_contract$methods2, _toConsumableArray(params));
-              debugger;
-              _context6.next = 6;
+              _context6.next = 5;
               return new Promise(function (resolve, reject) {
                 sendTx.estimateGas({
                   from: from
@@ -305,7 +304,7 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref8) {
                 });
               });
 
-            case 6:
+            case 5:
               estimatedGas = _context6.sent;
 
               (_contract$methods3 = contract.methods)[method].apply(_contract$methods3, _toConsumableArray(params)).send({
@@ -314,20 +313,20 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref8) {
                 value: value || 0
               }).on('transactionHash', resolve).on('error', reject);
 
-              _context6.next = 13;
+              _context6.next = 12;
               break;
 
-            case 10:
-              _context6.prev = 10;
+            case 9:
+              _context6.prev = 9;
               _context6.t0 = _context6["catch"](0);
               reject(_context6.t0);
 
-            case 13:
+            case 12:
             case "end":
               return _context6.stop();
           }
         }
-      }, _callee6, null, [[0, 10]]);
+      }, _callee6, null, [[0, 9]]);
     }));
 
     return function (_x11, _x12) {
