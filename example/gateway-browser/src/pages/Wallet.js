@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 
-import { Web3, EthersWallet as EW } from 'lightstreams-js-sdk';
+import { Web3, EthersWallet as EW, ENS } from 'lightstreams-js-sdk';
 
 export default class WalletPage extends Component {
 
@@ -17,14 +17,20 @@ export default class WalletPage extends Component {
       password: 'WelcomeToSirius',
       encryptedJson: '',
       wallet: '',
+      tld: 'lsn',
       address: null,
+      web3: null,
+      ensAddress: '',
+      resolverAddress: ''
     };
   }
 
   componentDidMount() {
-    Web3.initialize(window.process.env.WEB3_PROVIDER).then(web3 => {
+    const provider = EW.Web3Provider({ rpcUrl: window.process.env.WEB3_PROVIDER});
+    Web3.initialize(provider).then(web3 => {
       this.setState({ web3 });
       window.web3 = this.state.web3;
+      window.ethers = require('ethers');
     });
   }
 
@@ -34,13 +40,28 @@ export default class WalletPage extends Component {
   };
 
   createAccount = async () => {
-    const encryptedJson = await EW.Keystore.createRandomWallet(this.state.password);
-    const wallet = await EW.Keystore.decryptWallet(encryptedJson, this.state.password);
-    this.setState({ encryptedJson, address: encryptedJson.address, wallet });
+    const { web3 } = this.state;
+    const encryptedJson = await EW.Keystore.createWallet(this.state.seed, this.state.password);
+    const account = EW.createAccount(encryptedJson);
+    window.account = account;
+    web3.currentProvider.appendAccount(account);
+    await account.unlock(this.state.password);
+    this.setState({ encryptedJson, address: account.address });
+  };
+
+  registryTld = async (tld) => {
+    const { web3, address } = this.state;
+    try {
+      const { ensAddress, resolverAddress } = await ENS.SDK.deployNewRegistry(web3, { from: address });
+      await ENS.SDK.registerNode(web3, { ensAddress, from: address, node: tld });
+      this.setState({ ensAddress, resolverAddress });
+    } catch ( err ) {
+      console.error(err);
+    }
   };
 
   render() {
-    const { seed, password } = this.state;
+    const { seed, password, tld } = this.state;
     return (
       <div>
         <h2>ENS Test</h2>
@@ -57,11 +78,27 @@ export default class WalletPage extends Component {
         <button onClick={() => this.randomizeSeedPhrase()}>Randomize Seed Phrase</button>
         <button onClick={() => this.createAccount()}>Create Account</button>
         <h3>Step 2: Unlock account</h3>
-        <label>Seed:
+        <label>Address:
           <input disabled value={this.state.address} style={{ width: '500px' }} />
         </label>
         <br />
-        <textarea disabled value={JSON.stringify(this.state.encryptedJson)} rows="20" cols="50"/>
+        <br/>
+        <textarea disabled value={JSON.stringify(this.state.encryptedJson)} rows="12" cols="50"/>
+        <h3>Step 3: Deploy ENS</h3>
+        <label>TLD:
+          <input type='input' style={{ width: '150px' }} value={this.state.tld}
+                 onChange={(e) => this.setState({ tld: e.target.value })}/>
+        </label>
+        <br/>
+        <label>ENS Registry contract:
+          <input value={this.state.ensAddress} disabled style={{ width: '300px' }}/>
+        </label>
+        <br/>
+        <label>Resolver contract:
+          <input value={this.state.resolverAddress} disabled style={{ width: '300px' }}/>
+        </label>
+        <br/>
+        <button onClick={() => this.registryTld(this.state.tld)}>Registry TLD</button>
       </div>
     )
   }

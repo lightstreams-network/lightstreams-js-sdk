@@ -21,6 +21,7 @@ const root = document.getElementById('root');
 window.process = {
   'env': {
     WEB3_PROVIDER: 'http://localhost:8545'
+    // WEB3_PROVIDER: 'ws://localhost:8546'
   }
 };
 

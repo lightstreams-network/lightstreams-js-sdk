@@ -9,9 +9,10 @@ const ProviderEngine = require('web3-provider-engine')
 // const FixtureSubprovider = require('web3-provider-engine/subproviders/fixture.js')
 // const FilterSubprovider = require('web3-provider-engine/subproviders/filters.js')
 // const VmSubprovider = require('web3-provider-engine/subproviders/vm.js')
-const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet')
-const NonceSubprovider = require('web3-provider-engine/subproviders/nonce-tracker')
-const RpcSubprovider = require('web3-provider-engine/subproviders/rpc')
+const SubscriptionsSubProvider = require('web3-provider-engine/subproviders/subscriptions');
+const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet');
+const NonceSubprovider = require('web3-provider-engine/subproviders/nonce-tracker');
+const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 
 module.exports.HookedWeb3Provider = (ksVault, pwDerivedKey, { host }) => {
   const engine = new ProviderEngine();
@@ -27,6 +28,9 @@ module.exports.HookedWeb3Provider = (ksVault, pwDerivedKey, { host }) => {
 
 // filters
 //   engine.addProvider(new FilterSubprovider());
+
+// subscription
+  engine.addProvider(new SubscriptionsSubProvider());
 
 // pending nonce
   engine.addProvider(new NonceSubprovider());

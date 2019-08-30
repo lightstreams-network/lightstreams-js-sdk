@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 
-import { Lightwallet as lw, Web3, ENS } from 'lightstreams-js-sdk';
+import { Lightwallet as lw, Web3, ENS, EthersWallet as EW } from 'lightstreams-js-sdk';
 
 export default class ENSPage extends Component {
 
@@ -20,33 +20,26 @@ export default class ENSPage extends Component {
       domain: 'fanbase.lsn',
       ensAddress: '',
       resolverAddress: '',
-      pwDerivedKey: null,
-      ksVault: null
+      ens: null
     };
   }
 
   componentDidMount() {
-    Web3.initialize(window.process.env.WEB3_PROVIDER).then(web3 => {
+    const provider = EW.Web3Provider({ rpcUrl: window.process.env.WEB3_PROVIDER });
+    Web3.initialize(provider).then(web3 => {
       this.setState({ web3 });
       window.web3 = this.state.web3;
+      window.ethers = require('ethers');
     });
   }
 
   createAccount = async () => {
-    const { seed, password } = this.state;
+    const { seed, password, web3 } = this.state;
     try {
-      console.log(`Creating keystorevault...`);
-      const ksVault = await lw.Keystore.createKeystoreVault(seed, password);
-      const pwDerivedKey = await lw.Keystore.pwDerivedKey(ksVault, password);
-      // const addresses = lw.Keystore.addresses(ksVault);
-      // const address = addresses[0];
-      const web3Provider = lw.Web3Provider.HookedWeb3Provider(ksVault, pwDerivedKey, {
-        host: web3.eth.currentProvider.host || web3.eth.currentProvider.connection.url
-      });
-      this.state.web3.setProvider(web3Provider);
-      const accounts = await this.state.web3.eth.getAccounts();
-      // await Web3.unlockAccount(this.state.web3, address, password);
-      this.setState({ ksVault, account: accounts[0] });
+      const encryptedJson = await EW.Keystore.createWallet(seed, password);
+      const account = EW.createAccount(encryptedJson);
+      web3.currentProvider.appendAccount(account);
+      this.setState({ account: account.address });
     } catch(err) {
       console.error(err);
     }
@@ -55,18 +48,25 @@ export default class ENSPage extends Component {
   registryTld = async (tld) => {
     const { web3, account} = this.state;
     try {
+      if (web3.currentProvider.getAccount(account).isLocked()) {
+        await web3.currentProvider.getAccount(account).unlock(this.state.password);
+      }
       const { ensAddress, resolverAddress }= await ENS.SDK.deployNewRegistry(web3, { from: account });
       await ENS.SDK.registerNode(web3, { ensAddress, from: account, node: tld});
-      this.setState({ ensAddress, resolverAddress });
+      const ens = ENS.SDK.initializeManager(web3.currentProvider, ensAddress);
+      this.setState({ ensAddress, resolverAddress, ens });
     } catch(err) {
       console.error(err);
     }
   };
 
   registryDomain = async (domain) => {
-    const { web3, account, ensAddress, resolverAddress } = this.state;
+    const { web3, account, resolverAddress, ens } = this.state;
     try {
-      const ens = ENS.SDK.initializeManager(web3.currentProvider, ensAddress);
+      if (web3.currentProvider.getAccount(account).isLocked()) {
+        await web3.currentProvider.getAccount(account).unlock(this.state.password);
+      }
+
       console.log(`Registering ${domain}...`);
       await ens.setSubnodeOwner(domain, account, { from: account });
       console.log(`Setting resolver ...`);
