@@ -47,9 +47,10 @@ export default class ENSPage extends Component {
   registryTld = async (tld) => {
     const { web3, account} = this.state;
     try {
-      if (web3.currentProvider.getAccount(account).isLocked()) {
-        await web3.currentProvider.getAccount(account).unlock(this.state.password);
+      if (web3.currentProvider.isAccountLocked(account)) {
+        await Web3.unlockAccount(web3, {address: account, password: this.state.password});
       }
+
       const { ensAddress, resolverAddress }= await ENS.SDK.deployNewRegistry(web3, { from: account });
       await ENS.SDK.registerNode(web3, { ensAddress, from: account, node: tld});
       const ens = ENS.SDK.initializeManager(web3.currentProvider, ensAddress);

@@ -54,7 +54,6 @@ module.exports.networkVersion = (web3) => {
 
 module.exports.lockAccount = (web3, { address }) => {
   return new Promise((resolve, reject) => {
-    debugger;
     web3.eth.personal.lockAccount(address)
       .then(resolve)
       .catch(reject)
@@ -63,7 +62,6 @@ module.exports.lockAccount = (web3, { address }) => {
 
 module.exports.unlockAccount = (web3, { address, password, duration }) => {
   return new Promise((resolve, reject) => {
-    debugger;
     web3.eth.personal.unlockAccount(address, password, duration || 1000)
       .then(resolve)
       .catch(reject)
