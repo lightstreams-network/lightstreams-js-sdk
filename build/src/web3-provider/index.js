@@ -94,7 +94,8 @@ module.exports = function () {
   engine.addProvider(new NonceSubprovider());
   engine.addProvider(new HookedWalletSubprovider({
     getAccounts: function getAccounts(cb) {
-      var addresses = engine.getAccounts();
+      var addresses = engine._getAccounts();
+
       cb(null, addresses);
     },
     signTransaction: function signTransaction(payload, cb) {
@@ -107,7 +108,8 @@ module.exports = function () {
           gasLimit: gas
         });
 
-        var account = engine.getAccount(from);
+        var account = engine._getAccount(from);
+
         account.signTx(_objectSpread({}, txParams, {
           chainId: network.chainId
         }), cb);
@@ -118,7 +120,8 @@ module.exports = function () {
   }));
   engine.addProvider(new PersonalSubprovider({
     getAccounts: function getAccounts(cb) {
-      var addresses = engine.getAccounts();
+      var addresses = engine._getAccounts();
+
       cb(null, addresses);
     },
     newAccount: function newAccount(_ref, cb) {
@@ -134,7 +137,8 @@ module.exports = function () {
       var address = _ref2.address;
 
       try {
-        var account = engine.getAccount(address);
+        var account = engine._getAccount(address);
+
         account.lock(address);
         cb(null, "Account \"".concat(address, "\" is locked"));
       } catch (err) {
@@ -147,7 +151,8 @@ module.exports = function () {
           duration = _ref3.duration;
 
       try {
-        var account = engine.getAccount(address);
+        var account = engine._getAccount(address);
+
         account.unlock(password, duration || 0).then(function () {
           cb(null, "Account \"".concat(address, "\" was unlock"));
         });

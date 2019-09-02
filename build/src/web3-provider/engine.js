@@ -58,7 +58,7 @@ function (_Web3ProviderEngine) {
     key: "exportAccount",
     value: function exportAccount(address) {
       var self = this;
-      address = Util.addHexPrefix(address).toLowerCase();
+      address = Account.formatAddress(address);
 
       if (typeof self.wallets[address] === 'undefined') {
         throw new Error("Address ".concat(address, " is not found."));
@@ -67,10 +67,22 @@ function (_Web3ProviderEngine) {
       return self.wallets[address]["export"]();
     }
   }, {
-    key: "getAccount",
-    value: function getAccount(address) {
+    key: "isAccountLocked",
+    value: function isAccountLocked(address) {
       var self = this;
-      address = Util.addHexPrefix(address).toLowerCase();
+      address = Account.formatAddress(address);
+
+      if (typeof self.wallets[address] === 'undefined') {
+        throw new Error("Address ".concat(address, " is not found."));
+      }
+
+      return self.wallets[address].isLocked();
+    }
+  }, {
+    key: "_getAccount",
+    value: function _getAccount(address) {
+      var self = this;
+      address = Account.formatAddress(address);
 
       if (typeof self.wallets[address] === 'undefined') {
         throw new Error("Address ".concat(address, " is not found."));
@@ -79,8 +91,8 @@ function (_Web3ProviderEngine) {
       return self.wallets[address];
     }
   }, {
-    key: "getAccounts",
-    value: function getAccounts() {
+    key: "_getAccounts",
+    value: function _getAccounts() {
       var self = this;
       return Object.keys(self.wallets).map(Account.formatAddress);
     } // Copyrights to @Portis team

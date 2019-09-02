@@ -34,33 +34,37 @@ module.exports.networkVersion = function (web3) {
   }
 };
 
-module.exports.unlockAccount = function (web3, address, password) {
-  if (isLatest(web3)) {
-    return latest.unlockAccount(web3, address, password);
-  } else if (isV0_20(web3)) {
-    return v0_20.unlockAccount(web3, address, password);
+module.exports.lockAccount = function (web3, payload) {
+  if (isLatest(web3) || isV0_20(web3)) {
+    return latest.lockAccount(web3, payload);
   } else {
     throw new Error('Not supported method');
   }
 };
 
-module.exports.getTxReceipt = function (web3, txHash) {
-  var timeoutInSec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 30;
-
-  if (isLatest(web3)) {
-    return latest.getTxReceipt(web3, txHash, timeoutInSec);
-  } else if (isV0_20(web3)) {
-    return v0_20.getTxReceipt(web3, address);
+module.exports.unlockAccount = function (web3, payload) {
+  if (isLatest(web3) || isV0_20(web3)) {
+    return latest.unlockAccount(web3, payload);
   } else {
     throw new Error('Not supported method');
   }
 };
 
-module.exports.getBalance = function (web3, address) {
+module.exports.getTxReceipt = function (web3, payload) {
   if (isLatest(web3)) {
-    return latest.getBalance(web3, address);
+    return latest.getTxReceipt(web3, payload);
   } else if (isV0_20(web3)) {
-    return v0_20.getBalance(web3, address);
+    return v0_20.getTxReceipt(web3, payload);
+  } else {
+    throw new Error('Not supported method');
+  }
+};
+
+module.exports.getBalance = function (web3, payload) {
+  if (isLatest(web3)) {
+    return latest.getBalance(web3, payload);
+  } else if (isV0_20(web3)) {
+    return v0_20.getBalance(web3, payload);
   } else {
     throw new Error('Not supported method');
   }

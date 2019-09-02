@@ -51,7 +51,8 @@ module.exports.networkVersion = function (web3) {
   });
 };
 
-module.exports.getBalance = function (web3, address) {
+module.exports.getBalance = function (web3, _ref2) {
+  var address = _ref2.address;
   return new Promise(function (resolve, reject) {
     if (!_this.isConnected()) {
       reject(new Error('Web3 is not connected'));
@@ -67,14 +68,14 @@ module.exports.getBalance = function (web3, address) {
   });
 };
 
-module.exports.deployContract = function (web3, _ref2) {
-  var abi = _ref2.abi,
-      bytecode = _ref2.bytecode,
-      params = _ref2.params;
+module.exports.deployContract = function (web3, _ref3) {
+  var abi = _ref3.abi,
+      bytecode = _ref3.bytecode,
+      params = _ref3.params;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref3 = _asyncToGenerator(
+    var _ref4 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee(resolve, reject) {
       var contract, gasPrice, estimatedGas;
@@ -130,7 +131,7 @@ module.exports.deployContract = function (web3, _ref2) {
     }));
 
     return function (_x, _x2) {
-      return _ref3.apply(this, arguments);
+      return _ref4.apply(this, arguments);
     };
   }());
 };
@@ -139,13 +140,13 @@ module.exports.sendRawTransaction = function (web3, rawSignedTx) {
   throw new Error('Missing implementation');
 };
 
-module.exports.sendTransaction = function (web3, _ref4) {
-  var to = _ref4.to,
-      value = _ref4.value;
+module.exports.sendTransaction = function (web3, _ref5) {
+  var to = _ref5.to,
+      value = _ref5.value;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref5 = _asyncToGenerator(
+    var _ref6 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee2(resolve, reject) {
       var gasPrice;
@@ -184,19 +185,19 @@ module.exports.sendTransaction = function (web3, _ref4) {
     }));
 
     return function (_x3, _x4) {
-      return _ref5.apply(this, arguments);
+      return _ref6.apply(this, arguments);
     };
   }());
 };
 
-module.exports.contractCall = function (web3, contractAddress, _ref6) {
-  var abi = _ref6.abi,
-      method = _ref6.method,
-      params = _ref6.params;
+module.exports.contractCall = function (web3, contractAddress, _ref7) {
+  var abi = _ref7.abi,
+      method = _ref7.method,
+      params = _ref7.params;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref7 = _asyncToGenerator(
+    var _ref8 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee3(resolve, reject) {
       var _contractInstance$met;
@@ -232,19 +233,19 @@ module.exports.contractCall = function (web3, contractAddress, _ref6) {
     }));
 
     return function (_x5, _x6) {
-      return _ref7.apply(this, arguments);
+      return _ref8.apply(this, arguments);
     };
   }());
 };
 
-module.exports.contractSendTx = function (web3, contractAddress, _ref8) {
-  var abi = _ref8.abi,
-      method = _ref8.method,
-      params = _ref8.params;
+module.exports.contractSendTx = function (web3, contractAddress, _ref9) {
+  var abi = _ref9.abi,
+      method = _ref9.method,
+      params = _ref9.params;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref9 = _asyncToGenerator(
+    var _ref10 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee4(resolve, reject) {
       var contract, contractInstance, estimatedGas, gasPrice;
@@ -292,16 +293,13 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref8) {
     }));
 
     return function (_x7, _x8) {
-      return _ref9.apply(this, arguments);
+      return _ref10.apply(this, arguments);
     };
   }());
 };
 
-module.exports.getTxReceipt = function (web3, txHash) {
-  var timeoutInSec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 30;
-  throw new Error('Missing implementation');
-};
-
-module.exports.unlockAccount = function (web3, address, password) {
+module.exports.getTxReceipt = function (web3, _ref11) {
+  var txHash = _ref11.txHash,
+      timeoutInSec = _ref11.timeoutInSec;
   throw new Error('Missing implementation');
 };

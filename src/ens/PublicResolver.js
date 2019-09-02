@@ -5,26 +5,11 @@
  */
 
 const Web3 = require('../web3');
-const Signing = require('../lightwallet/signing');
 const PublicResolver = require('@ensdomains/resolver/build/contracts/PublicResolver.json');
 const namehash = require('eth-ens-namehash');
 
-module.exports.lightwallet = (web3, ksVault, pwDerivedKey) => ({
-  deploy: ({ from, ensAddress }) => {
-    return Signing.signDeployContractTx(web3, ksVault, pwDerivedKey, {
-      from,
-      bytecode: PublicResolver.bytecode,
-      abi: PublicResolver.abi,
-      params: [ensAddress]
-    }).then(rawSignedTx => {
-      return Web3.sendRawTransaction(web3, rawSignedTx);
-    }).then(txHash => {
-      return Web3.getTxReceipt(web3, txHash);
-    })
-  },
-});
 
-module.exports.web3 = (web3) => ({
+module.exports = (web3) => ({
   deploy: ({ from, ensAddress }) => {
     return Web3.deployContract(web3, {
       from,
@@ -32,7 +17,7 @@ module.exports.web3 = (web3) => ({
       bytecode: PublicResolver.bytecode,
       params: [ensAddress]
     }).then((txHash) => {
-      return Web3.getTxReceipt(web3, txHash);
+      return Web3.getTxReceipt(web3, { txHash });
     })
   },
   setAddr: (contractAddress, { from, node, address, owner }) => {
@@ -45,7 +30,7 @@ module.exports.web3 = (web3) => ({
         address
       ],
     }).then((txHash) => {
-      return Web3.getTxReceipt(web3, txHash);
+      return Web3.getTxReceipt(web3, { txHash });
     });
   }
 });

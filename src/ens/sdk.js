@@ -32,7 +32,7 @@ module.exports.deployNewRegistry = async (web3, { from }) => {
 module.exports.registerNode = async (web3, {ensAddress, parentNode, from, node, resolverAddress, toAddress }) => {
   // In case of not resolver defined we use parent resolver
   if(!resolverAddress) {
-    resolverAddress = await ENSRegistry.web3(web3).resolver(ensAddress,
+    resolverAddress = await ENSRegistry(web3).resolver(ensAddress,
       { node: parentNode || defaultResolverNodeId }
     );
   }
@@ -47,7 +47,7 @@ module.exports.registerNode = async (web3, {ensAddress, parentNode, from, node, 
   await setNodeResolver(web3, { from, ensAddress, resolverAddress, node });
   if (toAddress) {
     console.log(`Set node address to ${toAddress}....`);
-    const txReceipt = await PublicResolver.web3(web3).setAddr(resolverAddress,
+    const txReceipt = await PublicResolver(web3).setAddr(resolverAddress,
       { from: from, node, address: toAddress }
     );
     if (txReceipt.status !== true) {
@@ -69,7 +69,7 @@ module.exports.registerNode = async (web3, {ensAddress, parentNode, from, node, 
 
 const registerNode = async(web3, { from, ensAddress, parentNode, node }) => {
   console.log(`Registering node "${node}.${parentNode}"...`);
-  const txReceipt = await ENSRegistry.web3(web3).registerNode(ensAddress, {
+  const txReceipt = await ENSRegistry(web3).registerNode(ensAddress, {
     from,
     owner: from,
     parentNode,
@@ -86,7 +86,7 @@ const registerNode = async(web3, { from, ensAddress, parentNode, node }) => {
 
 const setNodeResolver = async (web3, { from, node, ensAddress, resolverAddress }) => {
   console.log(`Set resolver for "${node}"...`);
-  let txReceipt = await ENSRegistry.web3(web3).setResolver(ensAddress,
+  let txReceipt = await ENSRegistry(web3).setResolver(ensAddress,
     { from, resolverAddress, node });
   if (txReceipt.status !== true) {
     console.error(txReceipt);
@@ -97,8 +97,8 @@ const setNodeResolver = async (web3, { from, node, ensAddress, resolverAddress }
 };
 
 const deployRegistry = async (web3, { from }) => {
-  console.log(`Deploying registry`);
-  const txReceipt = await ENSRegistry.web3(web3).deploy({ from: from });
+  console.log(`Deploying registry...`);
+  const txReceipt = await ENSRegistry(web3).deploy({ from: from });
   const address = txReceipt.contractAddress;
   if (txReceipt.status !== true) {
     console.error(txReceipt);
@@ -112,7 +112,7 @@ const deployRegistry = async (web3, { from }) => {
 
 const deployResolver = async (web3, { from, ensAddress }) => {
   console.log(`Deploying resolver...`);
-  const txReceipt = await PublicResolver.web3(web3).deploy({ from: from, ensAddress });
+  const txReceipt = await PublicResolver(web3).deploy({ from: from, ensAddress });
   const address = txReceipt.contractAddress;
   if (txReceipt.status !== true) {
     console.error(txReceipt);

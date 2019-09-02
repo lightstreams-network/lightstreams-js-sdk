@@ -144,18 +144,29 @@ module.exports.networkVersion = function (web3) {
   });
 };
 
-module.exports.unlockAccount = function (web3, address, password) {
-  var timeInMilliseconds = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1000;
+module.exports.lockAccount = function (web3, _ref4) {
+  var address = _ref4.address;
   return new Promise(function (resolve, reject) {
     debugger;
-    web3.eth.personal.unlockAccount(address, password, timeInMilliseconds).then(resolve)["catch"](reject);
+    web3.eth.personal.lockAccount(address).then(resolve)["catch"](reject);
   });
 };
 
-module.exports.getTxReceipt = function (web3, txHash) {
-  var timeoutInSec = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 30;
+module.exports.unlockAccount = function (web3, _ref5) {
+  var address = _ref5.address,
+      password = _ref5.password,
+      duration = _ref5.duration;
   return new Promise(function (resolve, reject) {
-    fetchTxReceipt(web3, txHash, new Date().getTime() + timeoutInSec * 1000).then(function (receipt) {
+    debugger;
+    web3.eth.personal.unlockAccount(address, password, duration || 1000).then(resolve)["catch"](reject);
+  });
+};
+
+module.exports.getTxReceipt = function (web3, _ref6) {
+  var txHash = _ref6.txHash,
+      timeoutInSec = _ref6.timeoutInSec;
+  return new Promise(function (resolve, reject) {
+    fetchTxReceipt(web3, txHash, new Date().getTime() + (timeoutInSec || 30) * 1000).then(function (receipt) {
       if (!receipt) {
         reject();
       }
@@ -165,11 +176,12 @@ module.exports.getTxReceipt = function (web3, txHash) {
   });
 };
 
-module.exports.getBalance = function (web3, address) {
+module.exports.getBalance = function (web3, _ref7) {
+  var address = _ref7.address;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref4 = _asyncToGenerator(
+    var _ref8 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee4(resolve, reject) {
       var balance;
@@ -201,7 +213,7 @@ module.exports.getBalance = function (web3, address) {
     }));
 
     return function (_x7, _x8) {
-      return _ref4.apply(this, arguments);
+      return _ref8.apply(this, arguments);
     };
   }());
 };
@@ -218,21 +230,21 @@ module.exports.sendRawTransaction = function (web3, rawSignedTx) {
   });
 };
 
-module.exports.sendTransaction = function (web3, _ref5) {
-  var to = _ref5.to,
-      value = _ref5.value;
+module.exports.sendTransaction = function (web3, _ref9) {
+  var to = _ref9.to,
+      value = _ref9.value;
   throw new Error('Missing implementation');
 };
 
-module.exports.contractCall = function (web3, contractAddress, _ref6) {
-  var abi = _ref6.abi,
-      from = _ref6.from,
-      method = _ref6.method,
-      params = _ref6.params;
+module.exports.contractCall = function (web3, contractAddress, _ref10) {
+  var abi = _ref10.abi,
+      from = _ref10.from,
+      method = _ref10.method,
+      params = _ref10.params;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref7 = _asyncToGenerator(
+    var _ref11 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee5(resolve, reject) {
       var _contract$methods, contract, result;
@@ -268,21 +280,21 @@ module.exports.contractCall = function (web3, contractAddress, _ref6) {
     }));
 
     return function (_x9, _x10) {
-      return _ref7.apply(this, arguments);
+      return _ref11.apply(this, arguments);
     };
   }());
 };
 
-module.exports.contractSendTx = function (web3, contractAddress, _ref8) {
-  var abi = _ref8.abi,
-      from = _ref8.from,
-      method = _ref8.method,
-      params = _ref8.params,
-      value = _ref8.value;
+module.exports.contractSendTx = function (web3, contractAddress, _ref12) {
+  var abi = _ref12.abi,
+      from = _ref12.from,
+      method = _ref12.method,
+      params = _ref12.params,
+      value = _ref12.value;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref9 = _asyncToGenerator(
+    var _ref13 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee6(resolve, reject) {
       var _contract$methods2, _contract$methods3, contract, sendTx, estimatedGas;
@@ -330,20 +342,20 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref8) {
     }));
 
     return function (_x11, _x12) {
-      return _ref9.apply(this, arguments);
+      return _ref13.apply(this, arguments);
     };
   }());
 };
 
-module.exports.deployContract = function (web3, _ref10) {
-  var from = _ref10.from,
-      abi = _ref10.abi,
-      bytecode = _ref10.bytecode,
-      params = _ref10.params;
+module.exports.deployContract = function (web3, _ref14) {
+  var from = _ref14.from,
+      abi = _ref14.abi,
+      bytecode = _ref14.bytecode,
+      params = _ref14.params;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref11 = _asyncToGenerator(
+    var _ref15 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee7(resolve, reject) {
       var contract, contractDeploy, estimatedGas;
@@ -379,7 +391,7 @@ module.exports.deployContract = function (web3, _ref10) {
     }));
 
     return function (_x13, _x14) {
-      return _ref11.apply(this, arguments);
+      return _ref15.apply(this, arguments);
     };
   }());
 };
