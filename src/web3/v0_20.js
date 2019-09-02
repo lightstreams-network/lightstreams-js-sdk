@@ -32,7 +32,7 @@ module.exports.networkVersion = (web3) => {
   });
 };
 
-module.exports.getBalance = (web3, address) => {
+module.exports.getBalance = (web3, { address }) => {
   return new Promise((resolve, reject) => {
     if (!this.isConnected()) {
       reject(new Error('Web3 is not connected'));
@@ -154,10 +154,6 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, method, params })
   });
 };
 
-module.exports.getTxReceipt = (web3, txHash, timeoutInSec = 30) => {
-  throw new Error('Missing implementation');
-};
-
-module.exports.unlockAccount = (web3, address, password) => {
+module.exports.getTxReceipt = (web3, { txHash, timeoutInSec }) => {
   throw new Error('Missing implementation');
 };

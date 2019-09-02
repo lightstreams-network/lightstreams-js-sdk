@@ -52,18 +52,27 @@ module.exports.networkVersion = (web3) => {
   })
 };
 
-module.exports.unlockAccount = (web3, address, password, timeInMilliseconds = 1000) => {
+module.exports.lockAccount = (web3, { address }) => {
   return new Promise((resolve, reject) => {
     debugger;
-    web3.eth.personal.unlockAccount(address, password, timeInMilliseconds)
+    web3.eth.personal.lockAccount(address)
       .then(resolve)
       .catch(reject)
   });
 };
 
-module.exports.getTxReceipt = (web3, txHash, timeoutInSec = 30) => {
+module.exports.unlockAccount = (web3, { address, password, duration }) => {
   return new Promise((resolve, reject) => {
-    fetchTxReceipt(web3, txHash, (new Date()).getTime() + timeoutInSec * 1000).then(receipt => {
+    debugger;
+    web3.eth.personal.unlockAccount(address, password, duration || 1000)
+      .then(resolve)
+      .catch(reject)
+  });
+};
+
+module.exports.getTxReceipt = (web3, { txHash, timeoutInSec }) => {
+  return new Promise((resolve, reject) => {
+    fetchTxReceipt(web3, txHash, (new Date()).getTime() + (timeoutInSec||30) * 1000).then(receipt => {
       if (!receipt) {
         reject()
       }
@@ -72,7 +81,7 @@ module.exports.getTxReceipt = (web3, txHash, timeoutInSec = 30) => {
   });
 };
 
-module.exports.getBalance = (web3, address) => {
+module.exports.getBalance = (web3, { address }) => {
   return new Promise(async (resolve, reject) => {
     try {
       const balance = await web3.eth.getBalance(address);

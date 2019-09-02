@@ -24,7 +24,7 @@ class ProviderEngine extends Web3ProviderEngine {
 
   exportAccount(address) {
     const self = this;
-    address = Util.addHexPrefix(address).toLowerCase();
+    address = Account.formatAddress(address);
     if (typeof self.wallets[address] === 'undefined') {
       throw new Error(`Address ${address} is not found.`);
     }
@@ -32,16 +32,26 @@ class ProviderEngine extends Web3ProviderEngine {
     return self.wallets[address].export();
   };
 
-  getAccount(address) {
+  isAccountLocked(address) {
     const self = this;
-    address = Util.addHexPrefix(address).toLowerCase();
+    address = Account.formatAddress(address);
+    if (typeof self.wallets[address] === 'undefined') {
+      throw new Error(`Address ${address} is not found.`);
+    }
+
+    return self.wallets[address].isLocked();
+  }
+
+  _getAccount(address) {
+    const self = this;
+    address = Account.formatAddress(address);
     if (typeof self.wallets[address] === 'undefined') {
       throw new Error(`Address ${address} is not found.`);
     }
     return self.wallets[address];
   };
 
-  getAccounts() {
+  _getAccounts() {
     const self = this;
     return Object.keys(self.wallets).map(Account.formatAddress)
   }

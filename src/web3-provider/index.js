@@ -60,7 +60,7 @@ module.exports = (opts = {}) => {
 
   engine.addProvider(new HookedWalletSubprovider({
     getAccounts: (cb) => {
-      const addresses = engine.getAccounts();
+      const addresses = engine._getAccounts();
       cb(null, addresses);
     },
     signTransaction: (payload, cb) => {
@@ -71,7 +71,7 @@ module.exports = (opts = {}) => {
           gasLimit: gas,
         };
 
-        const account = engine.getAccount(from);
+        const account = engine._getAccount(from);
         account.signTx({ ...txParams, chainId: network.chainId}, cb);
       } catch ( err ) {
         if (typeof cb === 'function') cb(err, '0x0');
@@ -82,7 +82,7 @@ module.exports = (opts = {}) => {
 
   engine.addProvider(new PersonalSubprovider({
     getAccounts: (cb) => {
-      const addresses = engine.getAccounts();
+      const addresses = engine._getAccounts();
       cb(null, addresses);
     },
     newAccount: ({ password }, cb) => {
@@ -97,7 +97,7 @@ module.exports = (opts = {}) => {
     },
     lockAccount: ({ address }, cb) => {
       try {
-        const account = engine.getAccount(address);
+        const account = engine._getAccount(address);
         account.lock(address);
         cb(null, `Account "${address}" is locked`);
       } catch ( err ) {
@@ -106,7 +106,7 @@ module.exports = (opts = {}) => {
     },
     unlockAccount: ({ address, password, duration }, cb) => {
       try {
-        const account = engine.getAccount(address);
+        const account = engine._getAccount(address);
         account.unlock(password, duration || 0).then(() => {
           cb(null, `Account "${address}" was unlock`);
         });
