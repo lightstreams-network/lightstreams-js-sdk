@@ -17,7 +17,7 @@ export default class ENSPage extends Component {
       password: 'WelcomeToSirius',
       account: '',
       tld: 'lsn',
-      domain: 'fanbase.lsn',
+      domain: 'fanbase',
       ensAddress: '',
       resolverAddress: '',
       ens: null
@@ -51,7 +51,7 @@ export default class ENSPage extends Component {
         await Web3.unlockAccount(web3, {address: account, password: this.state.password});
       }
 
-      const { ensAddress, resolverAddress }= await ENS.SDK.deployNewRegistry(web3, { from: account });
+      const { ensAddress, resolverAddress } = await ENS.SDK.deployNewRegistry(web3, { from: account });
       await ENS.SDK.registerNode(web3, { ensAddress, from: account, node: tld});
       const ens = ENS.SDK.initializeManager(web3.currentProvider, ensAddress);
       this.setState({ ensAddress, resolverAddress, ens });

@@ -127,7 +127,7 @@ function () {
               from: from,
               ensAddress: ensAddress,
               resolverAddress: resolverAddress,
-              node: node
+              node: parentNode ? "".concat(node, ".").concat(parentNode) : "".concat(node)
             });
 
           case 9:
@@ -238,7 +238,7 @@ function () {
         switch (_context4.prev = _context4.next) {
           case 0:
             from = _ref7.from, node = _ref7.node, ensAddress = _ref7.ensAddress, resolverAddress = _ref7.resolverAddress;
-            console.log("Set resolver for \"".concat(node, "\"..."));
+            console.log("Set resolver ".concat(resolverAddress, " for \"").concat(node, "\"..."));
             _context4.next = 4;
             return ENSRegistry(web3).setResolver(ensAddress, {
               from: from,

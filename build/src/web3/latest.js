@@ -147,7 +147,6 @@ module.exports.networkVersion = function (web3) {
 module.exports.lockAccount = function (web3, _ref4) {
   var address = _ref4.address;
   return new Promise(function (resolve, reject) {
-    debugger;
     web3.eth.personal.lockAccount(address).then(resolve)["catch"](reject);
   });
 };
@@ -157,7 +156,6 @@ module.exports.unlockAccount = function (web3, _ref5) {
       password = _ref5.password,
       duration = _ref5.duration;
   return new Promise(function (resolve, reject) {
-    debugger;
     web3.eth.personal.unlockAccount(address, password, duration || 1000).then(resolve)["catch"](reject);
   });
 };
