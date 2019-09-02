@@ -12,6 +12,12 @@
     "url": "https://github.com/lightstreams-network/js-sdk-lightstreams/issues"
   },
   "main": "src/index.js",
+  "scripts": {
+    "build": "babel src -d build/src",
+    "build-single": "babel src --out-file ./build/src/index.js",
+    "compile": "rm -rf ./build/contracts/*; truffle compile --all --reset",
+    "test-standalone": "cp .env.standalone .env && truffle test --network standalone"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lightstreams-network/lightstreams-js-sdk.git"
@@ -28,19 +34,30 @@
   ],
   "files": [
     "src/",
-    "lib/"
+    "build/src"
   ],
-  "scripts": {
-    "build": "babel src -d lib",
-    "build-single": "babel src --out-file ./lib/index.js"
-  },
   "dependencies": {
-    "form-data": "^2.3.3",
-    "node-fetch": "^2.5.0"
+    "@ensdomains/ens": "0.3.11",
+    "@ensdomains/resolver": "0.1.9",
+    "entropy-string": "^4.2.0",
+    "eth-ens-namehash": "^2.0.8",
+    "eth-lightwallet": "^4.0.0",
+    "ethereum-ens": "^0.7.7",
+    "ethereumjs-util": "^6.1.0",
+    "ethers": "^4.0.36",
+    "form-data": "^2.5.0",
+    "net": "^1.0.2",
+    "node-fetch": "^2.6.0",
+    "web3": "^1.2.0",
+    "web3-provider-engine": "^15.0.3"
   },
   "devDependencies": {
-    "@babel/cli": "^7.4.4",
-    "@babel/core": "^7.4.4",
-    "@babel/preset-env": "^7.4.4"
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "dotenv": "^8.1.0",
+    "truffle": "5.0.5"
   }
 }

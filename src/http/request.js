@@ -30,7 +30,12 @@ module.exports = (() => {
       ...defaultOptions,
       method: 'GET',
       ...options
-    }).then(parseResponse);
+    }).then(parseResponse).catch((err) => {
+      if (err.message === 'Failed to fetch') {
+        throw new Error(`Request failed: ${url}`)
+      }
+      throw err;
+    });
   };
 
   const post = (url, data, options = {}) => {
@@ -39,7 +44,12 @@ module.exports = (() => {
       ...options,
       body: JSON.stringify(data),
       method: 'POST',
-    }).then(parseResponse);
+    }).then(parseResponse).catch((err) => {
+      if(err.message === 'Failed to fetch') {
+        throw new Error(`Request failed: ${url}`)
+      }
+      throw err;
+    });
   };
 
   const postFile = (url, data, file) => {

@@ -16,9 +16,127 @@ Install `lightstreams-js-sdk` as part of your project dependencies:
 npm install git+ssh://git@github.com:lightstreams-network/lightstreams-js-sdk#master --save
 ```
 
+## Modules
+
+### Wallets (ethers-js)
+
+Learn more about [ethers-js](https://docs.ethers.io/ethers.js/html/api-wallet.html#wallet)
+
+**How to create a random new wallet**
+
+```js
+import { EthersWallet as EW } from 'lightstreams-js-sdk';
+
+const encryptedJson = await EW.Keystore.createRandomWallet(seedPhrase, password);
+```
+
+**How to create a wallet from seed phrase**
+
+```js
+import { EthersWallet as EW } from 'lightstreams-js-sdk';
+
+const encryptedJson = await EW.Keystore.createWallet(seedPhrase, password);
+```
+
+**How to generate a random seed phrase**
+
+```js
+import { EthersWallet as EW } from 'lightstreams-js-sdk';
+
+const randomSeedPhrase = EW.Keystore.generateRandomSeedPhrase();
+```
+
+#### Account
+
+## How to create a new account
+
+```js
+import { EthersWallet as EW } from 'lightstreams-js-sdk';
+const encryptedJson = await EW.Keystore.createRandomWallet(seedPhrase, password);
+const account = EW.Account.createAccount(encryptedJson)
+```
+
+**Public API**
+
+- `lock():void`: Lock wallet account
+- `unlock(password):void`: Unlock wallet account
+- `isLocked():boolean`: Return false is the account is unlock
+- `sign(txParams):string`: Return a signed transaction. Wallet must be unlocked
+- `export():object`: Returns encrypted privatekey in json format
+- `seedPhrase():array`: Return account seed phrase. Wallet must be unlocked
+
+### Web3 provider
+
+In this repository you can find a customize web3 provider which uses a local
+keystorage to sign transactions. In addition other ethereum public API methods
+such as `eth_lockAccount`, `eth_unlockAccount` and `eth_newAccount` are being
+overwritten to use the key local storage.
+
+**How to initialize a LS web3 provider**
+
+```js
+import { Web3, Web3Provider } from 'lightstreams-js-sdk';
+
+const provider = Web3Provider({ rpcUrl: window.process.env.WEB3_PROVIDER});
+Web3.initialize(provider).then(web3 => {
+  window.web3 = this.state.web3;
+});
+```
+
+Using this web3 provider you could create a new account and unlock it as you would regularly do
+web3 engine api methods, such as:
+```js
+
+web3.eth.personal.newAccount("password");
+web3.eth.personal.unlockAccount("0x0Address", "password", 1000);
+```
+
+**How to import a wallet**
+
+```
+import { EthersWallet as EW } from 'lightstreams-js-sdk';
+
+const encryptedJson = await EW.Keystore.createRandomWallet(password);
+web3.currentProvider.importAccount(encryptedJson);
+```
+
+
+### ENS
+
+Learn more about it in [official docs](https://docs.ens.domains/).
+
+**How to register new tld**
+```js
+import { ENS } from 'lightstreams-js-sdk';
+
+const account = "0x0Address"; // Owner account
+const tld = "lsn"
+const { ensAddress, resolverAddress } = await ENS.SDK.deployNewRegistry(web3, { from: account });
+await ENS.SDK.registerNode(web3, { ensAddress, from: account, node: tld});
+```
+
+**How to use ENS official sdk**
+Read docs [here](https://docs.ens.domains/dapp-developer-guide/working-with-ens)
+
+```js
+
+const domain = 'fanbase.lsn';
+const ens = ENS.SDK.initializeManager(web3.currentProvider, ensAddress);
+console.log(`Registering ${domain}...`);
+await ens.setSubnodeOwner(domain, account, { from: account });
+console.log(`Setting resolver ...`);
+await ens.setResolver(domain, resolverAddress, { from: account });
+console.log(`Setting address ...`);
+await ens.resolver(domain).setAddr(account, { from: account });
+let address = await ens.resolver(domain).addr();
+console.log(`${domain} is pointing to ${address}`);
+```
+
+
+### Gateway
 **Sample usage**
 ```
-const useGateway = require('lightstreams-js-sdk')
+const { Gateway as useGateway }  = require('lightstreams-js-sdk')
 const gateway = useGateway('https://gateway.sirius.lightstreams.io')
 ```
 
@@ -55,7 +173,7 @@ Gateway SDK interface is made to match, one to one, every available [smart vault
 - [/erc20/transfer](https://docs.lightstreams.network/api-docs/#operation/erc20Transfer)    ->  `gateway.erc20.transfer(erc20_address, from, password, to, amount)`
 - [/erc20/purchase](https://docs.lightstreams.network/api-docs/#operation/erc20Purchase)    -> `gateway.erc20.purchase(erc20_address, account, password, amount_wei)`
 
-## Smart Vault
+#### Smart Vault
 
 [See available gateway APIs endpoints](#available-gateway-apis)
 
