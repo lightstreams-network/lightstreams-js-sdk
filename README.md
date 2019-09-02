@@ -18,7 +18,7 @@ npm install git+ssh://git@github.com:lightstreams-network/lightstreams-js-sdk#ma
 
 ## Modules
 
-### Wallets (ethers-js)
+### 1. Wallets (ethers-js)
 
 Learn more about [ethers-js](https://docs.ethers.io/ethers.js/html/api-wallet.html#wallet)
 
@@ -46,9 +46,9 @@ import { EthersWallet as EW } from 'lightstreams-js-sdk';
 const randomSeedPhrase = EW.Keystore.generateRandomSeedPhrase();
 ```
 
-#### Account
+#### 1.1 Account
 
-## How to create a new account
+**How to create a new account**
 
 ```js
 import { EthersWallet as EW } from 'lightstreams-js-sdk';
@@ -56,7 +56,7 @@ const encryptedJson = await EW.Keystore.createRandomWallet(seedPhrase, password)
 const account = EW.Account.createAccount(encryptedJson)
 ```
 
-**Public API**
+**Public account object API**
 
 - `lock():void`: Lock wallet account
 - `unlock(password):void`: Unlock wallet account
@@ -65,7 +65,7 @@ const account = EW.Account.createAccount(encryptedJson)
 - `export():object`: Returns encrypted privatekey in json format
 - `seedPhrase():array`: Return account seed phrase. Wallet must be unlocked
 
-### Web3 provider
+### 2. Web3 provider
 
 In this repository you can find a customize web3 provider which uses a local
 keystorage to sign transactions. In addition other ethereum public API methods
@@ -101,7 +101,7 @@ web3.currentProvider.importAccount(encryptedJson);
 ```
 
 
-### ENS
+### 3. ENS
 
 Learn more about it in [official docs](https://docs.ens.domains/).
 
@@ -133,7 +133,10 @@ console.log(`${domain} is pointing to ${address}`);
 ```
 
 
-### Gateway
+### 4. Smart vault
+
+#### 4.1 Gateway proxy
+
 **Sample usage**
 ```
 const { Gateway as useGateway }  = require('lightstreams-js-sdk')
