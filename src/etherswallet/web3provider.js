@@ -13,6 +13,8 @@ const NonceSubprovider = require('web3-provider-engine/subproviders/nonce-tracke
 const FilterSubprovider = require('web3-provider-engine/subproviders/filters');
 const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 const { PersonalSubprovider } = require('./subproviders');
+const Keystore = require('./keystore');
+const Account = require('./account');
 
 
 module.exports = ({ rpcUrl, accounts }) => {
@@ -28,7 +30,7 @@ module.exports = ({ rpcUrl, accounts }) => {
   const jsonProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
   jsonProvider.send('net_version').then(version => {
     chainId = parseInt(version);
-    // The second parameter is not necessary if these values are used
+    // The possible `hardfork` parameter values
     // - `Byzantium`
     // - `Constantinople`
     // - `Petersburg`
@@ -97,7 +99,7 @@ module.exports = ({ rpcUrl, accounts }) => {
         break;
 
       default:
-        var message = `The Portis Web3 object does not support synchronous methods like ${
+        var message = `The Lightstreams Web3 object does not support synchronous methods like ${
           payload.method
           } without a callback parameter.`;
         throw new Error(message);
@@ -144,7 +146,42 @@ module.exports = ({ rpcUrl, accounts }) => {
     },
   }));
 
-  // engine.addProvider(new PersonalSubprovider({ wallets }));
+  engine.addProvider(new PersonalSubprovider({
+    getAccounts: (cb) => {
+      const addresses = Object.keys(wallets);
+      cb(null, addresses);
+    },
+    newAccount: ({ password }, cb) => {
+      Keystore.createRandomWallet(password)
+        .then((encodedJson) => {
+          const account = Account.newAccount(encodedJson);
+          wallets[account.address] = account;
+          cb(null, account.address);
+        })
+        .catch(err => {
+          cb(err, null);
+        });
+    },
+    lockAccount: ({ address }, cb) => {
+      try {
+        const account = engine.getAccount(address);
+        account.lock(address);
+        cb(null, `Account "${address}" is locked`);
+      } catch ( err ) {
+        cb(err, null);
+      }
+    },
+    unlockAccount: ({ address, password, duration }, cb) => {
+      try {
+        const account = engine.getAccount(address);
+        account.unlock(password, duration || 0).then(() => {
+          cb(null, `Account "${address}" was unlock`);
+        });
+      } catch ( err ) {
+        cb(err, null);
+      }
+    }
+  }));
 
   engine.addProvider(new RpcSubprovider({
     rpcUrl: rpcUrl, // Expected to be
@@ -173,3 +210,9 @@ module.exports = ({ rpcUrl, accounts }) => {
 
   return engine;
 };
+
+function mustProvideInConstructor(methodName) {
+  return function(params, cb) {
+    cb(new Error('ProviderEngine - HookedWalletSubprovider - Must provide "' + methodName + '" fn in constructor options'))
+  }
+}

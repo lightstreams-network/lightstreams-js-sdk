@@ -39,5 +39,5 @@ module.exports.ENS = {
 module.exports.EthersWallet = {
   Keystore: require('./etherswallet/keystore'),
   Web3Provider: require('./etherswallet/web3provider'),
-  createAccount: require('./etherswallet/account'),
+  Account: require('./etherswallet/account'),
 };

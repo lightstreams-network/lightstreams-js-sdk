@@ -8,7 +8,7 @@ const Util = require('ethereumjs-util');
 
 const keystore = require('./keystore');
 
-module.exports = (encodedJson) => {
+module.exports.newAccount = (encodedJson) => {
   var wallet = null;
 
   const getAddress = () => {
@@ -22,22 +22,19 @@ module.exports = (encodedJson) => {
     // @TODO Implemented auto-lock based on timeout
     unlock: (password, timeout = 0) => {
       setTimeout(function() {
-        console.log(`Account ${getAddress()} is unlocked`);
         wallet = null;
       }, timeout);
 
       return keystore.decryptWallet(encodedJson, password)
         .then(unlockWallet => {
-          console.log(`Account ${getAddress()} is unlocked`);
           wallet = unlockWallet;
         });
     },
     lock: () => {
-      console.log(`Account ${getAddress()} is unlocked`);
       wallet = null;
     },
     signTx: (txParams, cb) => {
-      if (!wallet) throw new Error(`Account is locked`);
+      if (!wallet) throw new Error(`Account ${encodedJson.address} is locked`);
 
       wallet.sign(txParams)
         .then(signedRawTx => {
