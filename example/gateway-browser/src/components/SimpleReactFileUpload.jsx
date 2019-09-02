@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from 'react'
-import Gateway from 'lightstreams-js-sdk'
+import useGateway from 'lightstreams-js-sdk'
 
 class SimpleReactFileUpload extends Component {
 
@@ -16,7 +16,7 @@ class SimpleReactFileUpload extends Component {
       owner: '',
       password: ''
     };
-    this.gateway = Gateway('https://gateway.node1.lightstreams.io');
+    this.gateway = useGateway('https://gateway.node1.lightstreams.io');
     this.onFormSubmit = this.onFormSubmit.bind(this);
     this.onChange = this.onChange.bind(this)
   }
