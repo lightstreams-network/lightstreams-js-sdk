@@ -23,7 +23,7 @@ module.exports.generateRandomSeedPhrase = (bytes = 16) => {
 
 module.exports.createWallet = async (mnemonic, password) => {
   const wallet = ethers.Wallet.fromMnemonic(mnemonic);
-  return JSON.parse(await wallet.encrypt(password, (progress) => showProgressCb('Create seeded wallet', progress * 100)));
+  return JSON.parse(await wallet.encrypt(password, (progress) => showProgressCb('Encrypt wallet', progress * 100)));
 };
 
 module.exports.decryptWallet = async (encryptedWalletJson, password) => {

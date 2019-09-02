@@ -26,6 +26,7 @@ module.exports.Lightwallet = {
 };
 module.exports.MetaMask = require('./metamask');
 module.exports.Web3 = require('./web3');
+module.exports.Web3Provider = require('./web3-provider');
 module.exports.Contract = {
   Profile: require('./contracts/profile')
 };
@@ -37,6 +38,5 @@ module.exports.ENS = {
 };
 module.exports.EthersWallet = {
   Keystore: require('./etherswallet/keystore'),
-  Web3Provider: require('./etherswallet/web3provider'),
-  createAccount: require('./etherswallet/account')
+  Account: require('./etherswallet/account')
 };

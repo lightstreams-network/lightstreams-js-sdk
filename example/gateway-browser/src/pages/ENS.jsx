@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 
-import { Lightwallet as lw, Web3, ENS, EthersWallet as EW } from 'lightstreams-js-sdk';
+import { Web3, ENS, EthersWallet as EW, Web3Provider } from 'lightstreams-js-sdk';
 
 export default class ENSPage extends Component {
 
@@ -25,7 +25,7 @@ export default class ENSPage extends Component {
   }
 
   componentDidMount() {
-    const provider = EW.Web3Provider({ rpcUrl: window.process.env.WEB3_PROVIDER });
+    const provider = Web3Provider({ rpcUrl: window.process.env.WEB3_PROVIDER });
     Web3.initialize(provider).then(web3 => {
       this.setState({ web3 });
       window.web3 = this.state.web3;
@@ -37,9 +37,8 @@ export default class ENSPage extends Component {
     const { seed, password, web3 } = this.state;
     try {
       const encryptedJson = await EW.Keystore.createWallet(seed, password);
-      const account = EW.createAccount(encryptedJson);
-      web3.currentProvider.appendAccount(account);
-      this.setState({ account: account.address });
+      web3.currentProvider.importAccount(encryptedJson);
+      this.setState({ account: EW.Account.formatAddress(encryptedJson.address) });
     } catch(err) {
       console.error(err);
     }

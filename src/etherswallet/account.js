@@ -9,11 +9,7 @@ const Util = require('ethereumjs-util');
 const keystore = require('./keystore');
 
 module.exports.newAccount = (encodedJson) => {
-  var wallet = null;
-
-  const getAddress = () => {
-    return Util.addHexPrefix(encodedJson.address).toLowerCase()
-  };
+  let wallet = null;
 
   return {
     isLocked: () => {
@@ -33,6 +29,9 @@ module.exports.newAccount = (encodedJson) => {
     lock: () => {
       wallet = null;
     },
+    export: () => {
+      return encodedJson;
+    },
     signTx: (txParams, cb) => {
       if (!wallet) throw new Error(`Account ${encodedJson.address} is locked`);
 
@@ -41,17 +40,13 @@ module.exports.newAccount = (encodedJson) => {
           cb(null, signedRawTx)
         })
         .catch(err => {
-          cb(err, '0x0')
+          cb(err, null)
         })
-
-      // debugger;
-      // const privateKey = Buffer.from(Util.stripHexPrefix(wallet.signingKey.privateKey), 'hex');
-      // // const tx = new EthereumTx(txParams);
-      // const tx = new EthereumTx(txParams, { common: network });
-      // tx.sign(privateKey);
-      // const signedBufferTx = tx.serialize();
-      // return Util.bufferToHex(signedBufferTx);
     },
-    address: getAddress()
+    address: Util.addHexPrefix(encodedJson.address).toLowerCase()
   }
+};
+
+module.exports.formatAddress = (address) => {
+  return Util.addHexPrefix(address).toLowerCase()
 };

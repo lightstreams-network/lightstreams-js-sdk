@@ -4,27 +4,24 @@
  * Copyright 2019 (c) Lightstreams, Granada
  */
 const ethers = require('ethers');
-const Util = require('ethereumjs-util');
 const FixtureSubprovider = require('web3-provider-engine/subproviders/fixture.js');
-const ProviderEngine = require('web3-provider-engine');
+
 const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet');
 const SubscriptionsSubprovider = require('web3-provider-engine/subproviders/subscriptions');
 const NonceSubprovider = require('web3-provider-engine/subproviders/nonce-tracker');
 const FilterSubprovider = require('web3-provider-engine/subproviders/filters');
 const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
+
+const ProviderEngine = require('./engine');
 const { PersonalSubprovider } = require('./subproviders');
-const Keystore = require('./keystore');
-const Account = require('./account');
+const Keystore = require('../etherswallet/keystore');
 
 
-module.exports = ({ rpcUrl, accounts }) => {
-  const engine = new ProviderEngine();
+// @TODO Decouple from etherswallet module
+module.exports = (opts = {}) => {
+  const { rpcUrl, ...engineOpts} = opts;
+  const engine = new ProviderEngine(engineOpts);
   const version = '0.0.1';
-  const wallets = {};
-
-  (accounts || []).forEach(account => {
-    wallets[account.address] = account;
-  });
 
   let network;
   const jsonProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
@@ -49,69 +46,6 @@ module.exports = ({ rpcUrl, accounts }) => {
     }
   });
 
-  // Copyrights to @Portis team
-  // https://github.com/portis-project/web-sdk/blob/master/packages/portis-web3/src/index.ts
-  engine.send = (payload, callback) => {
-    // Web3 1.0 beta.38 (and above) calls `send` with method and parameters
-    if (typeof payload === 'string') {
-      return new Promise((resolve, reject) => {
-        engine.sendAsync(
-          {
-            jsonrpc: '2.0',
-            id: 42,
-            method: payload,
-            params: callback || [],
-          },
-          (error, response) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(response.result);
-            }
-          },
-        );
-      });
-    }
-
-    // Web3 1.0 beta.37 (and below) uses `send` with a callback for async queries
-    if (callback) {
-      engine.sendAsync(payload, callback);
-      return;
-    }
-
-    let result = null;
-    switch ( payload.method ) {
-      case 'eth_accounts':
-        result = this._selectedAddress ? [this._selectedAddress] : [];
-        break;
-
-      case 'eth_coinbase':
-        result = this._selectedAddress ? [this._selectedAddress] : [];
-        break;
-
-      case 'net_version':
-        result = this._network;
-        break;
-
-      case 'eth_uninstallFilter':
-        engine.sendAsync(payload, _ => _);
-        result = true;
-        break;
-
-      default:
-        var message = `The Lightstreams Web3 object does not support synchronous methods like ${
-          payload.method
-          } without a callback parameter.`;
-        throw new Error(message);
-    }
-
-    return {
-      id: payload.id,
-      jsonrpc: payload.jsonrpc,
-      result: result,
-    };
-  };
-
   engine.addProvider(new FixtureSubprovider({
     web3_clientVersion: `Lightstreams/v${version}/javascript`,
     net_listening: true,
@@ -126,7 +60,7 @@ module.exports = ({ rpcUrl, accounts }) => {
 
   engine.addProvider(new HookedWalletSubprovider({
     getAccounts: (cb) => {
-      const addresses = Object.keys(wallets);
+      const addresses = engine.getAccounts();
       cb(null, addresses);
     },
     signTransaction: (payload, cb) => {
@@ -137,7 +71,7 @@ module.exports = ({ rpcUrl, accounts }) => {
           gasLimit: gas,
         };
 
-        const account = wallets[from];
+        const account = engine.getAccount(from);
         account.signTx({ ...txParams, chainId: network.chainId}, cb);
       } catch ( err ) {
         if (typeof cb === 'function') cb(err, '0x0');
@@ -148,15 +82,14 @@ module.exports = ({ rpcUrl, accounts }) => {
 
   engine.addProvider(new PersonalSubprovider({
     getAccounts: (cb) => {
-      const addresses = Object.keys(wallets);
+      const addresses = engine.getAccounts();
       cb(null, addresses);
     },
     newAccount: ({ password }, cb) => {
       Keystore.createRandomWallet(password)
         .then((encodedJson) => {
-          const account = Account.newAccount(encodedJson);
-          wallets[account.address] = account;
-          cb(null, account.address);
+          const address = engine.importAccount(encodedJson);
+          cb(null, address);
         })
         .catch(err => {
           cb(err, null);
@@ -193,26 +126,8 @@ module.exports = ({ rpcUrl, accounts }) => {
     console.error(err.stack)
   });
 
-  engine.appendAccount = (account) => {
-    wallets[account.address] = account;
-  };
-
-  engine.getAccount = (address) => {
-    address = Util.addHexPrefix(address).toLowerCase();
-    if (typeof wallets[address] === 'undefined') {
-      throw new Error(`Address ${address} is not found.`);
-    }
-    return wallets[address];
-  };
-
   // start polling for blocks
   engine.start();
 
   return engine;
 };
-
-function mustProvideInConstructor(methodName) {
-  return function(params, cb) {
-    cb(new Error('ProviderEngine - HookedWalletSubprovider - Must provide "' + methodName + '" fn in constructor options'))
-  }
-}

@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 
-import { Web3, EthersWallet as EW, ENS } from 'lightstreams-js-sdk';
+import { Web3, EthersWallet as EW, ENS, Web3Provider } from 'lightstreams-js-sdk';
 
 export default class WalletPage extends Component {
 
@@ -26,7 +26,7 @@ export default class WalletPage extends Component {
   }
 
   componentDidMount() {
-    const provider = EW.Web3Provider({ rpcUrl: window.process.env.WEB3_PROVIDER});
+    const provider = Web3Provider({ rpcUrl: window.process.env.WEB3_PROVIDER});
     Web3.initialize(provider).then(web3 => {
       this.setState({ web3 });
       window.web3 = this.state.web3;
@@ -42,11 +42,10 @@ export default class WalletPage extends Component {
   createAccount = async () => {
     const { web3 } = this.state;
     const encryptedJson = await EW.Keystore.createWallet(this.state.seed, this.state.password);
-    const account = EW.createAccount(encryptedJson);
-    window.account = account;
-    web3.currentProvider.appendAccount(account);
-    await account.unlock(this.state.password);
-    this.setState({ encryptedJson, address: account.address });
+    const address= EW.Account.formatAddress(encryptedJson.address);
+    web3.currentProvider.importAccount(encryptedJson);
+    await web3.eth.personal.unlockAccount(address, this.state.password);
+    this.setState({ encryptedJson, address: address });
   };
 
   registryTld = async (tld) => {
