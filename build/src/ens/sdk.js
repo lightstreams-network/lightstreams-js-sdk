@@ -105,7 +105,7 @@ function () {
             }
 
             _context2.next = 4;
-            return ENSRegistry.web3(web3).resolver(ensAddress, {
+            return ENSRegistry(web3).resolver(ensAddress, {
               node: parentNode || defaultResolverNodeId
             });
 
@@ -138,7 +138,7 @@ function () {
 
             console.log("Set node address to ".concat(toAddress, "...."));
             _context2.next = 13;
-            return PublicResolver.web3(web3).setAddr(resolverAddress, {
+            return PublicResolver(web3).setAddr(resolverAddress, {
               from: from,
               node: node,
               address: toAddress
@@ -192,7 +192,7 @@ function () {
             from = _ref5.from, ensAddress = _ref5.ensAddress, parentNode = _ref5.parentNode, node = _ref5.node;
             console.log("Registering node \"".concat(node, ".").concat(parentNode, "\"..."));
             _context3.next = 4;
-            return ENSRegistry.web3(web3).registerNode(ensAddress, {
+            return ENSRegistry(web3).registerNode(ensAddress, {
               from: from,
               owner: from,
               parentNode: parentNode,
@@ -240,7 +240,7 @@ function () {
             from = _ref7.from, node = _ref7.node, ensAddress = _ref7.ensAddress, resolverAddress = _ref7.resolverAddress;
             console.log("Set resolver for \"".concat(node, "\"..."));
             _context4.next = 4;
-            return ENSRegistry.web3(web3).setResolver(ensAddress, {
+            return ENSRegistry(web3).setResolver(ensAddress, {
               from: from,
               resolverAddress: resolverAddress,
               node: node
@@ -285,9 +285,9 @@ function () {
         switch (_context5.prev = _context5.next) {
           case 0:
             from = _ref9.from;
-            console.log("Deploying registry");
+            console.log("Deploying registry...");
             _context5.next = 4;
-            return ENSRegistry.web3(web3).deploy({
+            return ENSRegistry(web3).deploy({
               from: from
             });
 
@@ -336,7 +336,7 @@ function () {
             from = _ref11.from, ensAddress = _ref11.ensAddress;
             console.log("Deploying resolver...");
             _context6.next = 4;
-            return PublicResolver.web3(web3).deploy({
+            return PublicResolver(web3).deploy({
               from: from,
               ensAddress: ensAddress
             });

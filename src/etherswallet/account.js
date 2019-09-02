@@ -32,6 +32,10 @@ module.exports.newAccount = (encodedJson) => {
     export: () => {
       return encodedJson;
     },
+    seedPhrase: () => {
+      if (!wallet) throw new Error(`Account ${encodedJson.address} is locked`);
+      return wallet.mnemonic;
+    },
     signTx: (txParams, cb) => {
       if (!wallet) throw new Error(`Account ${encodedJson.address} is locked`);
 

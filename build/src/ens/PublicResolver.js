@@ -22,7 +22,9 @@ module.exports = function (web3) {
         bytecode: PublicResolver.bytecode,
         params: [ensAddress]
       }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, txHash);
+        return Web3.getTxReceipt(web3, {
+          txHash: txHash
+        });
       });
     },
     setAddr: function setAddr(contractAddress, _ref2) {
@@ -37,7 +39,9 @@ module.exports = function (web3) {
         params: [node.indexOf('0x') === 0 ? node : namehash.hash(node), //node
         address]
       }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, txHash);
+        return Web3.getTxReceipt(web3, {
+          txHash: txHash
+        });
       });
     }
   };

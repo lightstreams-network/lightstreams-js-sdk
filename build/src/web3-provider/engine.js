@@ -25,8 +25,6 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
  */
 var Web3ProviderEngine = require('web3-provider-engine');
 
-var Util = require('ethereumjs-util');
-
 var Account = require('../etherswallet/account');
 
 var ProviderEngine =
@@ -97,68 +95,69 @@ function (_Web3ProviderEngine) {
       return Object.keys(self.wallets).map(Account.formatAddress);
     } // Copyrights to @Portis team
     // https://github.com/portis-project/web-sdk/blob/master/packages/portis-web3/src/index.ts
+    // send(payload, callback) {
+    //   debugger;
+    //   const self = this;
+    //   // Web3 1.0 beta.38 (and above) calls `send` with method and parameters
+    //   if (typeof payload === 'string') {
+    //     return new Promise((resolve, reject) => {
+    //       self.sendAsync(
+    //         {
+    //           jsonrpc: '2.0',
+    //           id: 42,
+    //           method: payload,
+    //           params: callback || [],
+    //         },
+    //         (error, response) => {
+    //           if (error) {
+    //             reject(error);
+    //           } else {
+    //             resolve(response.result);
+    //           }
+    //         },
+    //       );
+    //     });
+    //   }
+    //
+    //   // Web3 1.0 beta.37 (and below) uses `send` with a callback for async queries
+    //   if (callback) {
+    //     self.sendAsync(payload, callback);
+    //     return;
+    //   }
+    //
+    //   let result = null;
+    //   switch ( payload.method ) {
+    //     case 'eth_accounts':
+    //       result = this._selectedAddress ? [this._selectedAddress] : [];
+    //       break;
+    //
+    //     case 'eth_coinbase':
+    //       result = this._selectedAddress ? [this._selectedAddress] : [];
+    //       break;
+    //
+    //     case 'net_version':
+    //       result = this._network;
+    //       break;
+    //
+    //     case 'eth_uninstallFilter':
+    //       self.sendAsync(payload, _ => _);
+    //       result = true;
+    //       break;
+    //
+    //     default:
+    //       var message = `The Lightstreams Web3 object does not support synchronous methods like ${
+    //         payload.method
+    //         } without a callback parameter.`;
+    //       throw new Error(message);
+    //   }
+    //
+    //   return {
+    //     id: payload.id,
+    //     jsonrpc: payload.jsonrpc,
+    //     result: result,
+    //   };
+    // }
 
-  }, {
-    key: "send",
-    value: function send(payload, callback) {
-      var self = this; // Web3 1.0 beta.38 (and above) calls `send` with method and parameters
-
-      if (typeof payload === 'string') {
-        return new Promise(function (resolve, reject) {
-          self.sendAsync({
-            jsonrpc: '2.0',
-            id: 42,
-            method: payload,
-            params: callback || []
-          }, function (error, response) {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(response.result);
-            }
-          });
-        });
-      } // Web3 1.0 beta.37 (and below) uses `send` with a callback for async queries
-
-
-      if (callback) {
-        self.sendAsync(payload, callback);
-        return;
-      }
-
-      var result = null;
-
-      switch (payload.method) {
-        case 'eth_accounts':
-          result = this._selectedAddress ? [this._selectedAddress] : [];
-          break;
-
-        case 'eth_coinbase':
-          result = this._selectedAddress ? [this._selectedAddress] : [];
-          break;
-
-        case 'net_version':
-          result = this._network;
-          break;
-
-        case 'eth_uninstallFilter':
-          self.sendAsync(payload, function (_) {
-            return _;
-          });
-          result = true;
-          break;
-
-        default:
-          var message = "The Lightstreams Web3 object does not support synchronous methods like ".concat(payload.method, " without a callback parameter.");
-          throw new Error(message);
-      }
-
-      return {
-        id: payload.id,
-        jsonrpc: payload.jsonrpc,
-        result: result
-      };
-    }
   }]);
 
   return ProviderEngine;

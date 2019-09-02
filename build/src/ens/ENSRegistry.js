@@ -22,7 +22,9 @@ module.exports = function (web3) {
         abi: ENS.abi,
         bytecode: ENS.bytecode
       }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, txHash);
+        return Web3.getTxReceipt(web3, {
+          txHash: txHash
+        });
       });
     },
     registerNode: function registerNode(contractAddress, _ref2) {
@@ -43,7 +45,9 @@ module.exports = function (web3) {
         node.indexOf('0x') === 0 ? node : utils.sha3(node), // subdomain
         owner || from]
       }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, txHash);
+        return Web3.getTxReceipt(web3, {
+          txHash: txHash
+        });
       });
     },
     setResolver: function setResolver(contractAddress, _ref3) {
@@ -58,7 +62,9 @@ module.exports = function (web3) {
         params: [node.indexOf('0x') === 0 ? node : namehash.hash(node), //node
         resolverAddress]
       }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, txHash);
+        return Web3.getTxReceipt(web3, {
+          txHash: txHash
+        });
       });
     },
     resolver: function resolver(contractAddress, _ref4) {

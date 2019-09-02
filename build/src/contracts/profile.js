@@ -19,7 +19,9 @@ module.exports = function (web3) {
         bytecode: contract.bytecode,
         params: [owner, recoveryAccount || '0x0000000000000000000000000000000000000000']
       }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, txHash);
+        return Web3.getTxReceipt(web3, {
+          txHash: txHash
+        });
       });
     }
   };

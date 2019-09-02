@@ -31,6 +31,10 @@ module.exports.newAccount = function (encodedJson) {
     "export": function _export() {
       return encodedJson;
     },
+    seedPhrase: function seedPhrase() {
+      if (!wallet) throw new Error("Account ".concat(encodedJson.address, " is locked"));
+      return wallet.mnemonic;
+    },
     signTx: function signTx(txParams, cb) {
       if (!wallet) throw new Error("Account ".concat(encodedJson.address, " is locked"));
       wallet.sign(txParams).then(function (signedRawTx) {
