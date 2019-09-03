@@ -31,20 +31,28 @@ module.exports.networkVersion = (web3) => {
   }
 };
 
-module.exports.lockAccount = (web3, payload) => {
-  if (isLatest(web3) || isV0_20(web3)) {
-    return latest.lockAccount(web3, payload)
-  } else {
-    throw new Error('Not supported method');
-  }
+module.exports.lockAccount = (web3, { address }) => {
+  return new Promise((resolve, reject) => {
+    web3.eth.personal.lockAccount(address)
+      .then(resolve)
+      .catch(reject)
+  });
 };
 
-module.exports.unlockAccount = (web3, payload) => {
-  if (isLatest(web3) || isV0_20(web3)) {
-    return latest.unlockAccount(web3, payload)
-  } else {
-    throw new Error('Not supported method');
+module.exports.unlockAccount = (web3, { address, password, duration }) => {
+  return new Promise((resolve, reject) => {
+    web3.eth.personal.unlockAccount(address, password, duration || 1000)
+      .then(resolve)
+      .catch(reject)
+  });
+};
+
+module.exports.importAccount = (web3, { encodedJson }) => {
+  if(typeof web3.currentProvider.importAccount !== 'function') {
+    throw new Error(`Not supported method`)
   }
+
+  web3.currentProvider.importAccount(encodedJson);
 };
 
 module.exports.getTxReceipt = (web3, payload) => {

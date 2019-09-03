@@ -34,20 +34,30 @@ module.exports.networkVersion = function (web3) {
   }
 };
 
-module.exports.lockAccount = function (web3, payload) {
-  if (isLatest(web3) || isV0_20(web3)) {
-    return latest.lockAccount(web3, payload);
-  } else {
-    throw new Error('Not supported method');
-  }
+module.exports.lockAccount = function (web3, _ref) {
+  var address = _ref.address;
+  return new Promise(function (resolve, reject) {
+    web3.eth.personal.lockAccount(address).then(resolve)["catch"](reject);
+  });
 };
 
-module.exports.unlockAccount = function (web3, payload) {
-  if (isLatest(web3) || isV0_20(web3)) {
-    return latest.unlockAccount(web3, payload);
-  } else {
-    throw new Error('Not supported method');
+module.exports.unlockAccount = function (web3, _ref2) {
+  var address = _ref2.address,
+      password = _ref2.password,
+      duration = _ref2.duration;
+  return new Promise(function (resolve, reject) {
+    web3.eth.personal.unlockAccount(address, password, duration || 1000).then(resolve)["catch"](reject);
+  });
+};
+
+module.exports.importAccount = function (web3, _ref3) {
+  var encodedJson = _ref3.encodedJson;
+
+  if (typeof web3.currentProvider.importAccount !== 'function') {
+    throw new Error("Not supported method");
   }
+
+  web3.currentProvider.importAccount(encodedJson);
 };
 
 module.exports.getTxReceipt = function (web3, payload) {
