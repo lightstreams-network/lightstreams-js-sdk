@@ -1,4 +1,4 @@
-pragma solidity 0.4.26;
+pragma solidity ^0.5.0;
 
 /**
  * @title MultiOwnable manages ownership
@@ -48,7 +48,7 @@ contract MultiOwnable {
         return exists;
     }
 
-    function getOwners() view public returns (address[]) {
+    function getOwners() view public returns (address[] memory) {
         return owners;
     }
 

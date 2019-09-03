@@ -55,11 +55,11 @@
       "type": "function"
     }
   ],
-  "bytecode": "0x608060405234801561001057600080fd5b506040516020806102e283398101806040528101908080519060200190929190505050806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505061025f806100836000396000f300608060405260043610610057576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680638da5cb5b1461005c5780638f32d59b146100b3578063f2fde38b146100e2575b600080fd5b34801561006857600080fd5b50610071610125565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156100bf57600080fd5b506100c861014a565b604051808215151515815260200191505060405180910390f35b3480156100ee57600080fd5b50610123600480360381019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291905050506101a1565b005b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614905090565b6101a961014a565b15156101b457600080fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16141515156101f057600080fd5b806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550505600a165627a7a723058200d3068a3aa03ff3a5c6f7b8e27941df288752e21910d6f73f46edf7ef0257c910029",
-  "deployedBytecode": "0x608060405260043610610057576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680638da5cb5b1461005c5780638f32d59b146100b3578063f2fde38b146100e2575b600080fd5b34801561006857600080fd5b50610071610125565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156100bf57600080fd5b506100c861014a565b604051808215151515815260200191505060405180910390f35b3480156100ee57600080fd5b50610123600480360381019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291905050506101a1565b005b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614905090565b6101a961014a565b15156101b457600080fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16141515156101f057600080fd5b806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550505600a165627a7a723058200d3068a3aa03ff3a5c6f7b8e27941df288752e21910d6f73f46edf7ef0257c910029",
-  "sourceMap": "25:430:4:-;;;75:66;8:9:-1;5:2;;;30:1;27;20:12;5:2;75:66:4;;;;;;;;;;;;;;;;;;;;;;;;;;;;;128:6;120:5;;:14;;;;;;;;;;;;;;;;;;75:66;25:430;;;;;;",
-  "deployedSourceMap": "25:430:4:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;48:20;;8:9:-1;5:2;;;30:1;27;20:12;5:2;48:20:4;;;;;;;;;;;;;;;;;;;;;;;;;;;218:89;;8:9:-1;5:2;;;30:1;27;20:12;5:2;218:89:4;;;;;;;;;;;;;;;;;;;;;;;;;;;313:140;;8:9:-1;5:2;;;30:1;27;20:12;5:2;313:140:4;;;;;;;;;;;;;;;;;;;;;;;;;;;;48:20;;;;;;;;;;;;;:::o;218:89::-;258:4;295:5;;;;;;;;;;;281:19;;:10;:19;;;274:26;;218:89;:::o;313:140::-;184:9;:7;:9::i;:::-;176:18;;;;;;;;415:1;394:23;;:9;:23;;;;386:32;;;;;;;;437:9;429:5;;:17;;;;;;;;;;;;;;;;;;313:140;:::o",
-  "source": "pragma solidity 0.4.26;\n\ncontract Ownable {\n    address public owner;\n\n    constructor(address _owner) public {\n        owner = _owner;\n    }\n\n    modifier onlyOwner {\n        require(isOwner());\n        _;\n    }\n\n    function isOwner() public view returns (bool) {\n        return msg.sender == owner;\n    }\n\n    function transferOwnership(address _newOwner) public onlyOwner {\n        require(_newOwner != address(0));\n\n        owner = _newOwner;\n    }\n}",
+  "bytecode": "0x608060405234801561001057600080fd5b506040516020806102fe8339810180604052602081101561003057600080fd5b8101908080519060200190929190505050806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505061026d806100916000396000f3fe608060405260043610610057576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680638da5cb5b1461005c5780638f32d59b146100b3578063f2fde38b146100e2575b600080fd5b34801561006857600080fd5b50610071610133565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156100bf57600080fd5b506100c8610158565b604051808215151515815260200191505060405180910390f35b3480156100ee57600080fd5b506101316004803603602081101561010557600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291905050506101af565b005b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614905090565b6101b7610158565b15156101c257600080fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16141515156101fe57600080fd5b806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505056fea165627a7a7230582032eb5de5b422184831677cfc6d4d1cdcdcfbcb21a85c5988757400a85a3c17d00029",
+  "deployedBytecode": "0x608060405260043610610057576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680638da5cb5b1461005c5780638f32d59b146100b3578063f2fde38b146100e2575b600080fd5b34801561006857600080fd5b50610071610133565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156100bf57600080fd5b506100c8610158565b604051808215151515815260200191505060405180910390f35b3480156100ee57600080fd5b506101316004803603602081101561010557600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291905050506101af565b005b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614905090565b6101b7610158565b15156101c257600080fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16141515156101fe57600080fd5b806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505056fea165627a7a7230582032eb5de5b422184831677cfc6d4d1cdcdcfbcb21a85c5988757400a85a3c17d00029",
+  "sourceMap": "25:430:4:-;;;75:66;8:9:-1;5:2;;;30:1;27;20:12;5:2;75:66:4;;;;;;;;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;75:66:4;;;;;;;;;;;;;;;;128:6;120:5;;:14;;;;;;;;;;;;;;;;;;75:66;25:430;;;;;;",
+  "deployedSourceMap": "25:430:4:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;48:20;;8:9:-1;5:2;;;30:1;27;20:12;5:2;48:20:4;;;;;;;;;;;;;;;;;;;;;;;;;;;218:89;;8:9:-1;5:2;;;30:1;27;20:12;5:2;218:89:4;;;;;;;;;;;;;;;;;;;;;;;;;;;313:140;;8:9:-1;5:2;;;30:1;27;20:12;5:2;313:140:4;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;313:140:4;;;;;;;;;;;;;;;;;;;;;;48:20;;;;;;;;;;;;;:::o;218:89::-;258:4;295:5;;;;;;;;;;;281:19;;:10;:19;;;274:26;;218:89;:::o;313:140::-;184:9;:7;:9::i;:::-;176:18;;;;;;;;415:1;394:23;;:9;:23;;;;386:32;;;;;;;;437:9;429:5;;:17;;;;;;;;;;;;;;;;;;313:140;:::o",
+  "source": "pragma solidity ^0.5.0;\n\ncontract Ownable {\n    address public owner;\n\n    constructor(address _owner) public {\n        owner = _owner;\n    }\n\n    modifier onlyOwner {\n        require(isOwner());\n        _;\n    }\n\n    function isOwner() public view returns (bool) {\n        return msg.sender == owner;\n    }\n\n    function transferOwnership(address _newOwner) public onlyOwner {\n        require(_newOwner != address(0));\n\n        owner = _newOwner;\n    }\n}",
   "sourcePath": "/home/ggarrido/lightstreams/workspace/lightstreams-js-sdk/contracts/utils/Ownable.sol",
   "ast": {
     "absolutePath": "/home/ggarrido/lightstreams/workspace/lightstreams-js-sdk/contracts/utils/Ownable.sol",
@@ -75,8 +75,9 @@
         "id": 871,
         "literals": [
           "solidity",
-          "0.4",
-          ".26"
+          "^",
+          "0.5",
+          ".0"
         ],
         "nodeType": "PragmaDirective",
         "src": "0:23:4"
@@ -112,6 +113,7 @@
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "48:7:4",
+              "stateMutability": "nonpayable",
               "typeDescriptions": {
                 "typeIdentifier": "t_address",
                 "typeString": "address"
@@ -177,8 +179,7 @@
             "documentation": null,
             "id": 883,
             "implemented": true,
-            "isConstructor": true,
-            "isDeclaredConst": false,
+            "kind": "constructor",
             "modifiers": [],
             "name": "",
             "nodeType": "FunctionDefinition",
@@ -204,6 +205,7 @@
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "87:7:4",
+                    "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -215,7 +217,6 @@
               ],
               "src": "86:16:4"
             },
-            "payable": false,
             "returnParameters": {
               "id": 877,
               "nodeType": "ParameterList",
@@ -371,8 +372,8 @@
                       "referencedDeclaration": null,
                       "src": "281:10:4",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_address",
-                        "typeString": "address"
+                        "typeIdentifier": "t_address_payable",
+                        "typeString": "address payable"
                       }
                     },
                     "nodeType": "BinaryOperation",
@@ -406,8 +407,7 @@
             "documentation": null,
             "id": 903,
             "implemented": true,
-            "isConstructor": false,
-            "isDeclaredConst": true,
+            "kind": "function",
             "modifiers": [],
             "name": "isOwner",
             "nodeType": "FunctionDefinition",
@@ -417,7 +417,6 @@
               "parameters": [],
               "src": "234:2:4"
             },
-            "payable": false,
             "returnParameters": {
               "id": 896,
               "nodeType": "ParameterList",
@@ -545,8 +544,8 @@
                           "nodeType": "FunctionCall",
                           "src": "407:10:4",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_address_payable",
+                            "typeString": "address payable"
                           }
                         },
                         "src": "394:23:4",
@@ -646,8 +645,7 @@
             "documentation": null,
             "id": 923,
             "implemented": true,
-            "isConstructor": false,
-            "isDeclaredConst": false,
+            "kind": "function",
             "modifiers": [
               {
                 "arguments": null,
@@ -693,6 +691,7 @@
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "340:7:4",
+                    "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -704,7 +703,6 @@
               ],
               "src": "339:19:4"
             },
-            "payable": false,
             "returnParameters": {
               "id": 909,
               "nodeType": "ParameterList",
@@ -738,8 +736,9 @@
         "id": 871,
         "literals": [
           "solidity",
-          "0.4",
-          ".26"
+          "^",
+          "0.5",
+          ".0"
         ],
         "nodeType": "PragmaDirective",
         "src": "0:23:4"
@@ -775,6 +774,7 @@
               "name": "address",
               "nodeType": "ElementaryTypeName",
               "src": "48:7:4",
+              "stateMutability": "nonpayable",
               "typeDescriptions": {
                 "typeIdentifier": "t_address",
                 "typeString": "address"
@@ -840,8 +840,7 @@
             "documentation": null,
             "id": 883,
             "implemented": true,
-            "isConstructor": true,
-            "isDeclaredConst": false,
+            "kind": "constructor",
             "modifiers": [],
             "name": "",
             "nodeType": "FunctionDefinition",
@@ -867,6 +866,7 @@
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "87:7:4",
+                    "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -878,7 +878,6 @@
               ],
               "src": "86:16:4"
             },
-            "payable": false,
             "returnParameters": {
               "id": 877,
               "nodeType": "ParameterList",
@@ -1034,8 +1033,8 @@
                       "referencedDeclaration": null,
                       "src": "281:10:4",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_address",
-                        "typeString": "address"
+                        "typeIdentifier": "t_address_payable",
+                        "typeString": "address payable"
                       }
                     },
                     "nodeType": "BinaryOperation",
@@ -1069,8 +1068,7 @@
             "documentation": null,
             "id": 903,
             "implemented": true,
-            "isConstructor": false,
-            "isDeclaredConst": true,
+            "kind": "function",
             "modifiers": [],
             "name": "isOwner",
             "nodeType": "FunctionDefinition",
@@ -1080,7 +1078,6 @@
               "parameters": [],
               "src": "234:2:4"
             },
-            "payable": false,
             "returnParameters": {
               "id": 896,
               "nodeType": "ParameterList",
@@ -1208,8 +1205,8 @@
                           "nodeType": "FunctionCall",
                           "src": "407:10:4",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_address",
-                            "typeString": "address"
+                            "typeIdentifier": "t_address_payable",
+                            "typeString": "address payable"
                           }
                         },
                         "src": "394:23:4",
@@ -1309,8 +1306,7 @@
             "documentation": null,
             "id": 923,
             "implemented": true,
-            "isConstructor": false,
-            "isDeclaredConst": false,
+            "kind": "function",
             "modifiers": [
               {
                 "arguments": null,
@@ -1356,6 +1352,7 @@
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "340:7:4",
+                    "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
@@ -1367,7 +1364,6 @@
               ],
               "src": "339:19:4"
             },
-            "payable": false,
             "returnParameters": {
               "id": 909,
               "nodeType": "ParameterList",
@@ -1389,11 +1385,11 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.4.26+commit.4563c3fc.Emscripten.clang"
+    "version": "0.5.0+commit.1d4f565a.Emscripten.clang"
   },
   "networks": {},
   "schemaVersion": "3.0.2",
-  "updatedAt": "2019-08-27T10:04:04.450Z",
+  "updatedAt": "2019-09-03T10:48:26.416Z",
   "devdoc": {
     "methods": {}
   },

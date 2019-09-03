@@ -1,4 +1,4 @@
-pragma solidity 0.4.26;
+pragma solidity ^0.5.0;
 
 import "./utils/MultiOwnable.sol";
 import "./Acl.sol";
@@ -60,7 +60,7 @@ contract Profile is MultiOwnable {
         return exists;
     }
 
-    function getFiles() view public returns (bytes32[]) {
+    function getFiles() view public returns (bytes32[] memory) {
         return files;
     }
 
