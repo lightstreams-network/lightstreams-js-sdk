@@ -7,14 +7,17 @@
 const Web3 = require('../web3');
 const contract = require('../../build/contracts/Profile.json');
 
-module.exports = (web3) => ({
-  deploy: ({ owner, recoveryAccount }) => {
-    return Web3.deployContract(web3, {
-      abi: contract.abi,
-      bytecode: contract.bytecode,
-      params: [owner, recoveryAccount || '0x0000000000000000000000000000000000000000'],
-    }).then((txHash) => {
-      return Web3.getTxReceipt(web3, { txHash });
-    })
+module.exports.deploy = (web3, { owner, from, recoveryAccount }) => {
+  if(!owner && !from) {
+    throw new Error(`Missing contract owner`);
   }
-});
+
+  return Web3.deployContract(web3, {
+    from: from || owner,
+    abi: contract.abi,
+    bytecode: contract.bytecode,
+    params: [owner || from, recoveryAccount || '0x0000000000000000000000000000000000000000'],
+  }).then((txHash) => {
+    return Web3.getTxReceipt(web3, { txHash });
+  })
+};

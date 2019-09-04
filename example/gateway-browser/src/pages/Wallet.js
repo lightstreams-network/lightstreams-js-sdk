@@ -52,7 +52,7 @@ export default class WalletPage extends Component {
     const { web3, address } = this.state;
     try {
       const { ensAddress, resolverAddress } = await ENS.SDK.deployNewRegistry(web3, { from: address });
-      await ENS.SDK.registerNode(web3, { ensAddress, from: address, node: tld });
+      await ENS.SDK.registerNode(web3, { ensAddress, from: address, subnode: tld });
       this.setState({ ensAddress, resolverAddress });
     } catch ( err ) {
       console.error(err);

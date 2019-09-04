@@ -14,9 +14,9 @@ class ProviderEngine extends Web3ProviderEngine {
     this.wallets = {};
   }
 
-  importAccount(encodedJson) {
+  importAccount(encryptedJson) {
     const self = this;
-    const account = Account.newAccount(encodedJson);
+    const account = Account.newAccount(encryptedJson);
     self.wallets[account.address] = account;
     return account.address;
   };

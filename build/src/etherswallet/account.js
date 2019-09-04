@@ -9,7 +9,7 @@ var Util = require('ethereumjs-util');
 
 var keystore = require('./keystore');
 
-module.exports.newAccount = function (encodedJson) {
+module.exports.newAccount = function (encryptedJson) {
   var wallet = null;
   return {
     isLocked: function isLocked() {
@@ -21,7 +21,7 @@ module.exports.newAccount = function (encodedJson) {
       setTimeout(function () {
         wallet = null;
       }, timeout);
-      return keystore.decryptWallet(encodedJson, password).then(function (unlockWallet) {
+      return keystore.decryptWallet(encryptedJson, password).then(function (unlockWallet) {
         wallet = unlockWallet;
       });
     },
@@ -29,21 +29,21 @@ module.exports.newAccount = function (encodedJson) {
       wallet = null;
     },
     "export": function _export() {
-      return encodedJson;
+      return encryptedJson;
     },
     seedPhrase: function seedPhrase() {
-      if (!wallet) throw new Error("Account ".concat(encodedJson.address, " is locked"));
+      if (!wallet) throw new Error("Account ".concat(encryptedJson.address, " is locked"));
       return wallet.mnemonic;
     },
     signTx: function signTx(txParams, cb) {
-      if (!wallet) throw new Error("Account ".concat(encodedJson.address, " is locked"));
+      if (!wallet) throw new Error("Account ".concat(encryptedJson.address, " is locked"));
       wallet.sign(txParams).then(function (signedRawTx) {
         cb(null, signedRawTx);
       })["catch"](function (err) {
         cb(err, null);
       });
     },
-    address: Util.addHexPrefix(encodedJson.address).toLowerCase()
+    address: Util.addHexPrefix(encryptedJson.address).toLowerCase()
   };
 };
 

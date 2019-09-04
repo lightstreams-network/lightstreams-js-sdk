@@ -94,6 +94,9 @@ module.exports.contractCall = (web3, contractAddress, { abi, from, method, param
   return new Promise(async (resolve, reject) => {
     try {
       const contract = new web3.eth.Contract(abi, contractAddress);
+      if (typeof contract.methods[method] !== 'function') {
+        throw new Error(`Method ${method} is not available`);
+      }
       const result = await contract.methods[method](...params).call({ from });
       resolve(result);
     } catch ( err ) {
@@ -106,20 +109,28 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, from, method, par
   return new Promise(async (resolve, reject) => {
     try {
       const contract = new web3.eth.Contract(abi, contractAddress);
+      if(typeof contract.methods[method] !== 'function') {
+        throw new Error(`Method ${method} is not available`);
+      }
+
       const sendTx = contract.methods[method](...params);
       const estimatedGas = await (new Promise((resolve, reject) => {
         sendTx.estimateGas({ from }, (err, gas) => {
-          // if (err) reject(err);
-          if (err) resolve(9000000);
+          if (err) reject(err);
+          // if (err) {
+          //   debugger;
+          //   resolve(9000000);
+          // }
           else resolve(gas);
         });
       }));
-      contract.methods[method](...params).send({
+
+      sendTx.send({
         from,
-        gas: estimatedGas,
-        value: value || 0
+        gas: estimatedGas
       }).on('transactionHash', resolve)
         .on('error', reject);
+
     } catch ( err ) {
       reject(err);
     }
@@ -128,17 +139,26 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, from, method, par
 
 module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
   return new Promise(async (resolve, reject) => {
-    const contract = new web3.eth.Contract(abi);
-    const contractDeploy = contract.deploy({ data: bytecode, arguments: params || [] });
-    const estimatedGas = await( new Promise((resolve, reject) => {
-      contractDeploy.estimateGas((err, gas) => {
+    try {
+      const contract = new web3.eth.Contract(abi);
+      const contractDeploy = contract.deploy({ data: bytecode, arguments: params || [] });
+      const estimatedGas = await (new Promise((resolve, reject) => {
+        contractDeploy.estimateGas({ from }, (err, gas) => {
           if (err) reject(err);
+          // if (err) {
+          //   debugger;
+          //   resolve(9000000);
+          // }
           else resolve(gas);
         });
-    }));
+      }));
 
-    contractDeploy.send({ from, gas: estimatedGas })
-      .on('error', reject)
-      .on('transactionHash', resolve)
+      contractDeploy.send({ from, gas: estimatedGas })
+        .on('error', reject)
+        .on('transactionHash', resolve)
+
+    } catch(err) {
+      reject(err);
+    }
   });
 };

@@ -52,7 +52,7 @@ export default class ENSPage extends Component {
       }
 
       const { ensAddress, resolverAddress } = await ENS.SDK.deployNewRegistry(web3, { from: account });
-      await ENS.SDK.registerNode(web3, { ensAddress, from: account, node: tld});
+      await ENS.SDK.registerNode(web3, { ensAddress, from: account, subnode: tld});
       const ens = ENS.SDK.initializeManager(web3.currentProvider, ensAddress);
       this.setState({ ensAddress, resolverAddress, ens });
     } catch(err) {

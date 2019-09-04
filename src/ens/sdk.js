@@ -22,14 +22,14 @@ module.exports.deployNewRegistry = async (web3, { from }) => {
     from,
     ensAddress,
     parentNode: '0x0000000000000000000000000000000000000000',
-    node: defaultResolverNodeId // Default
+    subnode: defaultResolverNodeId // Default
   });
 
   await setNodeResolver(web3, { from, ensAddress, resolverAddress, node: defaultResolverNodeId });
   return { ensAddress, resolverAddress };
 };
 
-module.exports.registerNode = async (web3, {ensAddress, parentNode, from, node, resolverAddress, toAddress }) => {
+module.exports.registerNode = async (web3, {ensAddress, parentNode, from, subnode, resolverAddress, toAddress }) => {
   // In case of not resolver defined we use parent resolver
   if(!resolverAddress) {
     resolverAddress = await ENSRegistry(web3).resolver(ensAddress,
@@ -41,26 +41,26 @@ module.exports.registerNode = async (web3, {ensAddress, parentNode, from, node, 
     from,
     ensAddress,
     parentNode: parentNode || '0x0000000000000000000000000000000000000000',
-    node
+    subnode
   });
 
   await setNodeResolver(web3, {
     from,
     ensAddress,
     resolverAddress,
-    node: parentNode ? `${node}.${parentNode}` : `${node}`
+    node: parentNode ? `${subnode}.${parentNode}` : `${subnode}`
   });
 
   if (toAddress) {
     console.log(`Set node address to ${toAddress}....`);
     const txReceipt = await PublicResolver(web3).setAddr(resolverAddress,
-      { from: from, node, address: toAddress }
+      { from: from, node: subnode, address: toAddress }
     );
     if (txReceipt.status !== true) {
       console.error(txReceipt);
       throw new Error(`Failed to set resolver address.`)
     } else {
-      console.log(`Successfully set "${node}" to address "${resolverAddress}"`);
+      console.log(`Successfully set "${subnode}" to address "${resolverAddress}"`);
     }
   }
 };
@@ -73,27 +73,27 @@ module.exports.registerNode = async (web3, {ensAddress, parentNode, from, node, 
 //   return ensAddress;
 // };
 
-const registerNode = async(web3, { from, ensAddress, parentNode, node }) => {
-  console.log(`Registering node "${node}.${parentNode}"...`);
+const registerNode = async(web3, { from, ensAddress, parentNode, subnode }) => {
+  console.log(`Registering node "${subnode}.${parentNode}"...`);
   const txReceipt = await ENSRegistry(web3).registerNode(ensAddress, {
     from,
     owner: from,
     parentNode,
-    node
+    subnode
   });
 
   if (txReceipt.status !== true) {
     console.error(txReceipt);
-    throw new Error(`Failed to register node ${node}.${parentNode}}`)
+    throw new Error(`Failed to register node ${subnode}.${parentNode}}`)
   } else {
-    console.log(`Node "${node}.${parentNode}" registered successfully`);
+    console.log(`Node "${subnode}.${parentNode}" registered successfully`);
   }
 };
 
 const setNodeResolver = async (web3, { from, node, ensAddress, resolverAddress }) => {
   console.log(`Set resolver ${resolverAddress} for "${node}"...`);
-  let txReceipt = await ENSRegistry(web3).setResolver(ensAddress,
-    { from, resolverAddress, node });
+  let txReceipt = await ENSRegistry(web3).setResolver(ensAddress, { from, resolverAddress, node });
+
   if (txReceipt.status !== true) {
     console.error(txReceipt);
     throw new Error(`Failed to set resolver`)

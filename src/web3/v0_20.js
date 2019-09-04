@@ -120,6 +120,10 @@ module.exports.contractCall = (web3, contractAddress, { abi, method, params }) =
     //   resolve(result);
     // });
 
+    if (typeof contractInstance[method] === 'undefined') {
+      throw new Error(`Method ${method} is not available`);
+    }
+
     contractInstance[method].call(...params, function(err, result) {
       if (err) reject(err);
       resolve(result);
@@ -135,6 +139,10 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, method, params })
 
     const contract = web3.eth.contract(abi);
     const contractInstance = contract.at(contractAddress);
+    if (typeof contractInstance[method] === 'undefined') {
+      throw new Error(`Method ${method} is not available`);
+    }
+
     const estimatedGas = await (new Promise((resolve, reject) => {
       contractInstance[method].estimateGas(...params, (err, data) => {
         if (err) reject(err);

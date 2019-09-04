@@ -51,13 +51,35 @@ module.exports.unlockAccount = function (web3, _ref2) {
 };
 
 module.exports.importAccount = function (web3, _ref3) {
-  var encodedJson = _ref3.encodedJson;
+  var encryptedJson = _ref3.encryptedJson;
 
   if (typeof web3.currentProvider.importAccount !== 'function') {
     throw new Error("Not supported method");
   }
 
-  web3.currentProvider.importAccount(encodedJson);
+  web3.currentProvider.importAccount(encryptedJson);
+};
+
+module.exports.exportMnemonic = function (web3, _ref4) {
+  var address = _ref4.address;
+
+  if (typeof web3.currentProvider._getAccount !== 'function') {
+    throw new Error("Not supported method");
+  }
+
+  var account = web3.currentProvider._getAccount(address);
+
+  return account.seedPhrase();
+};
+
+module.exports.isAccountLocked = function (web3, _ref5) {
+  var address = _ref5.address;
+
+  if (typeof web3.currentProvider.isAccountLocked !== 'function') {
+    throw new Error("Not supported method");
+  }
+
+  return web3.currentProvider.isAccountLocked(address);
 };
 
 module.exports.getTxReceipt = function (web3, payload) {
@@ -118,4 +140,13 @@ module.exports.contractSendTx = function (web3, contractAddress, payload) {
   } else {
     throw new Error('Not supported method');
   }
+};
+
+module.exports.isAddress = function (web3, _ref6) {
+  var address = _ref6.address;
+  return web3.utils.isAddress(address);
+};
+
+module.exports.getAccounts = function (web3) {
+  return web3.eth.getAccounts();
 };

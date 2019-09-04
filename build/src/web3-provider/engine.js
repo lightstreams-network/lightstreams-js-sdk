@@ -46,9 +46,9 @@ function (_Web3ProviderEngine) {
 
   _createClass(ProviderEngine, [{
     key: "importAccount",
-    value: function importAccount(encodedJson) {
+    value: function importAccount(encryptedJson) {
       var self = this;
-      var account = Account.newAccount(encodedJson);
+      var account = Account.newAccount(encryptedJson);
       self.wallets[account.address] = account;
       return account.address;
     }

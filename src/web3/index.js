@@ -47,12 +47,29 @@ module.exports.unlockAccount = (web3, { address, password, duration }) => {
   });
 };
 
-module.exports.importAccount = (web3, { encodedJson }) => {
+module.exports.importAccount = (web3, { encryptedJson }) => {
   if(typeof web3.currentProvider.importAccount !== 'function') {
     throw new Error(`Not supported method`)
   }
 
-  web3.currentProvider.importAccount(encodedJson);
+  web3.currentProvider.importAccount(encryptedJson);
+};
+
+module.exports.exportMnemonic = (web3, { address }) => {
+  if (typeof web3.currentProvider._getAccount !== 'function') {
+    throw new Error(`Not supported method`)
+  }
+
+  const account = web3.currentProvider._getAccount(address);
+  return account.seedPhrase();
+};
+
+module.exports.isAccountLocked = (web3, { address }) => {
+  if (typeof web3.currentProvider.isAccountLocked !== 'function') {
+    throw new Error(`Not supported method`)
+  }
+
+  return web3.currentProvider.isAccountLocked(address);
 };
 
 module.exports.getTxReceipt = (web3, payload) => {
@@ -113,4 +130,12 @@ module.exports.contractSendTx = (web3, contractAddress, payload) => {
   } else {
     throw new Error('Not supported method');
   }
+};
+
+module.exports.isAddress = (web3, { address }) => {
+  return web3.utils.isAddress(address);
+};
+
+module.exports.getAccounts = (web3) => {
+  return web3.eth.getAccounts();
 };

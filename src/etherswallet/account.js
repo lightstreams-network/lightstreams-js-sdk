@@ -8,7 +8,7 @@ const Util = require('ethereumjs-util');
 
 const keystore = require('./keystore');
 
-module.exports.newAccount = (encodedJson) => {
+module.exports.newAccount = (encryptedJson) => {
   let wallet = null;
 
   return {
@@ -21,7 +21,7 @@ module.exports.newAccount = (encodedJson) => {
         wallet = null;
       }, timeout);
 
-      return keystore.decryptWallet(encodedJson, password)
+      return keystore.decryptWallet(encryptedJson, password)
         .then(unlockWallet => {
           wallet = unlockWallet;
         });
@@ -30,14 +30,14 @@ module.exports.newAccount = (encodedJson) => {
       wallet = null;
     },
     export: () => {
-      return encodedJson;
+      return encryptedJson;
     },
     seedPhrase: () => {
-      if (!wallet) throw new Error(`Account ${encodedJson.address} is locked`);
+      if (!wallet) throw new Error(`Account ${encryptedJson.address} is locked`);
       return wallet.mnemonic;
     },
     signTx: (txParams, cb) => {
-      if (!wallet) throw new Error(`Account ${encodedJson.address} is locked`);
+      if (!wallet) throw new Error(`Account ${encryptedJson.address} is locked`);
 
       wallet.sign(txParams)
         .then(signedRawTx => {
@@ -47,7 +47,7 @@ module.exports.newAccount = (encodedJson) => {
           cb(err, null)
         })
     },
-    address: Util.addHexPrefix(encodedJson.address).toLowerCase()
+    address: Util.addHexPrefix(encryptedJson.address).toLowerCase()
   }
 };
 
