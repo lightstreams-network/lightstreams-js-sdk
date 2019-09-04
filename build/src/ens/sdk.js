@@ -54,7 +54,7 @@ function () {
               from: from,
               ensAddress: ensAddress,
               parentNode: '0x0000000000000000000000000000000000000000',
-              node: defaultResolverNodeId // Default
+              subnode: defaultResolverNodeId // Default
 
             });
 
@@ -92,12 +92,12 @@ function () {
   var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(web3, _ref3) {
-    var ensAddress, parentNode, from, node, resolverAddress, toAddress, txReceipt;
+    var ensAddress, parentNode, from, subnode, resolverAddress, toAddress, txReceipt;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            ensAddress = _ref3.ensAddress, parentNode = _ref3.parentNode, from = _ref3.from, node = _ref3.node, resolverAddress = _ref3.resolverAddress, toAddress = _ref3.toAddress;
+            ensAddress = _ref3.ensAddress, parentNode = _ref3.parentNode, from = _ref3.from, subnode = _ref3.subnode, resolverAddress = _ref3.resolverAddress, toAddress = _ref3.toAddress;
 
             if (resolverAddress) {
               _context2.next = 5;
@@ -118,7 +118,7 @@ function () {
               from: from,
               ensAddress: ensAddress,
               parentNode: parentNode || '0x0000000000000000000000000000000000000000',
-              node: node
+              subnode: subnode
             });
 
           case 7:
@@ -127,7 +127,7 @@ function () {
               from: from,
               ensAddress: ensAddress,
               resolverAddress: resolverAddress,
-              node: parentNode ? "".concat(node, ".").concat(parentNode) : "".concat(node)
+              node: parentNode ? "".concat(subnode, ".").concat(parentNode) : "".concat(subnode)
             });
 
           case 9:
@@ -140,7 +140,7 @@ function () {
             _context2.next = 13;
             return PublicResolver(web3).setAddr(resolverAddress, {
               from: from,
-              node: node,
+              node: subnode,
               address: toAddress
             });
 
@@ -156,7 +156,7 @@ function () {
             throw new Error("Failed to set resolver address.");
 
           case 19:
-            console.log("Successfully set \"".concat(node, "\" to address \"").concat(resolverAddress, "\""));
+            console.log("Successfully set \"".concat(subnode, "\" to address \"").concat(resolverAddress, "\""));
 
           case 20:
           case "end":
@@ -184,19 +184,19 @@ function () {
   var _ref6 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee3(web3, _ref5) {
-    var from, ensAddress, parentNode, node, txReceipt;
+    var from, ensAddress, parentNode, subnode, txReceipt;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            from = _ref5.from, ensAddress = _ref5.ensAddress, parentNode = _ref5.parentNode, node = _ref5.node;
-            console.log("Registering node \"".concat(node, ".").concat(parentNode, "\"..."));
+            from = _ref5.from, ensAddress = _ref5.ensAddress, parentNode = _ref5.parentNode, subnode = _ref5.subnode;
+            console.log("Registering node \"".concat(subnode, ".").concat(parentNode, "\"..."));
             _context3.next = 4;
             return ENSRegistry(web3).registerNode(ensAddress, {
               from: from,
               owner: from,
               parentNode: parentNode,
-              node: node
+              subnode: subnode
             });
 
           case 4:
@@ -208,10 +208,10 @@ function () {
             }
 
             console.error(txReceipt);
-            throw new Error("Failed to register node ".concat(node, ".").concat(parentNode, "}"));
+            throw new Error("Failed to register node ".concat(subnode, ".").concat(parentNode, "}"));
 
           case 10:
-            console.log("Node \"".concat(node, ".").concat(parentNode, "\" registered successfully"));
+            console.log("Node \"".concat(subnode, ".").concat(parentNode, "\" registered successfully"));
 
           case 11:
           case "end":

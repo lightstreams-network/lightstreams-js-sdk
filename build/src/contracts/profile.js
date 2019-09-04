@@ -9,20 +9,23 @@ var Web3 = require('../web3');
 
 var contract = require('../../build/contracts/Profile.json');
 
-module.exports = function (web3) {
-  return {
-    deploy: function deploy(_ref) {
-      var owner = _ref.owner,
-          recoveryAccount = _ref.recoveryAccount;
-      return Web3.deployContract(web3, {
-        abi: contract.abi,
-        bytecode: contract.bytecode,
-        params: [owner, recoveryAccount || '0x0000000000000000000000000000000000000000']
-      }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, {
-          txHash: txHash
-        });
-      });
-    }
-  };
+module.exports.deploy = function (web3, _ref) {
+  var owner = _ref.owner,
+      from = _ref.from,
+      recoveryAccount = _ref.recoveryAccount;
+
+  if (!owner && !from) {
+    throw new Error("Missing contract owner");
+  }
+
+  return Web3.deployContract(web3, {
+    from: from || owner,
+    abi: contract.abi,
+    bytecode: contract.bytecode,
+    params: [owner || from, recoveryAccount || '0x0000000000000000000000000000000000000000']
+  }).then(function (txHash) {
+    return Web3.getTxReceipt(web3, {
+      txHash: txHash
+    });
+  });
 };

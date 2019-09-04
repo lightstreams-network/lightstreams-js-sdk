@@ -30,10 +30,10 @@ module.exports = function (web3) {
     registerNode: function registerNode(contractAddress, _ref2) {
       var from = _ref2.from,
           parentNode = _ref2.parentNode,
-          node = _ref2.node,
+          subnode = _ref2.subnode,
           owner = _ref2.owner;
 
-      if (!parentNode || !node) {
+      if (!parentNode || !subnode) {
         throw new Error("Missing required value");
       }
 
@@ -42,7 +42,7 @@ module.exports = function (web3) {
         abi: ENS.abi,
         method: 'setSubnodeOwner',
         params: [parentNode.indexOf('0x') === 0 ? parentNode : namehash.hash(parentNode), // domain
-        node.indexOf('0x') === 0 ? node : utils.sha3(node), // subdomain
+        subnode.indexOf('0x') === 0 ? subnode : utils.sha3(subnode), // subdomain
         owner || from]
       }).then(function (txHash) {
         return Web3.getTxReceipt(web3, {

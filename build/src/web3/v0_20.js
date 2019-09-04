@@ -219,12 +219,20 @@ module.exports.contractCall = function (web3, contractAddress, _ref7) {
               //   resolve(result);
               // });
 
+              if (!(typeof contractInstance[method] === 'undefined')) {
+                _context3.next = 5;
+                break;
+              }
+
+              throw new Error("Method ".concat(method, " is not available"));
+
+            case 5:
               (_contractInstance$met = contractInstance[method]).call.apply(_contractInstance$met, _toConsumableArray(params).concat([function (err, result) {
                 if (err) reject(err);
                 resolve(result);
               }]));
 
-            case 4:
+            case 6:
             case "end":
               return _context3.stop();
           }
@@ -259,7 +267,16 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref9) {
 
               contract = web3.eth.contract(abi);
               contractInstance = contract.at(contractAddress);
-              _context4.next = 5;
+
+              if (!(typeof contractInstance[method] === 'undefined')) {
+                _context4.next = 5;
+                break;
+              }
+
+              throw new Error("Method ".concat(method, " is not available"));
+
+            case 5:
+              _context4.next = 7;
               return new Promise(function (resolve, reject) {
                 var _contractInstance$met2;
 
@@ -268,12 +285,12 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref9) {
                 }]));
               });
 
-            case 5:
+            case 7:
               estimatedGas = _context4.sent;
-              _context4.next = 8;
+              _context4.next = 10;
               return fetchGasPrice(web3);
 
-            case 8:
+            case 10:
               gasPrice = _context4.sent;
               contractInstance[method].apply(contractInstance, _toConsumableArray(params).concat([{
                 from: window.ethereum.selectedAddress,
@@ -284,7 +301,7 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref9) {
                 resolve(txHash);
               }]));
 
-            case 10:
+            case 12:
             case "end":
               return _context4.stop();
           }
