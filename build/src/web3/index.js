@@ -148,5 +148,23 @@ module.exports.isAddress = function (web3, _ref6) {
 };
 
 module.exports.getAccounts = function (web3) {
-  return web3.eth.getAccounts();
+  return new Promise(function (resolve) {
+    web3.eth.getAccounts().then(function (addrs) {
+      resolve(addrs.map(function (addr) {
+        return addr.toLowerCase();
+      }));
+    });
+  });
+};
+
+module.exports.toWei = function (web3, _ref7) {
+  var pht = _ref7.pht;
+
+  if (isLatest(web3)) {
+    return web3.utils.toWei(pht);
+  } else if (isV0_20(web3)) {
+    return web3.toWei(pht);
+  } else {
+    throw new Error('Not supported method');
+  }
 };

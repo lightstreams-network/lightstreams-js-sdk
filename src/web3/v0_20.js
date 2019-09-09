@@ -9,7 +9,7 @@ const fetchGasPrice = (web3) => {
   return new Promise((resolve, reject) => {
     web3.eth.getGasPrice((err, result) => {
       if (err) reject(err);
-      resolve(result)
+      resolve(result.toNumber())
     });
   })
 };
@@ -20,6 +20,41 @@ const calculateEstimateGas = (web3, { data, to }) => {
       if (err) reject(err);
       resolve(result)
     });
+  });
+};
+
+const waitFor = (waitInSeconds) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, waitInSeconds * 1000);
+  });
+};
+
+const fetchTxReceipt = (web3, txHash, expiredAt) => {
+  return new Promise((resolve, reject) => {
+    web3.eth.getTransactionReceipt(txHash, async (err, receipt) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      if (receipt) {
+        resolve(receipt);
+        return;
+      }
+
+      if ((new Date()).getTime() < expiredAt) {
+        await waitFor(0.5);
+        try {
+          const _receipt = await fetchTxReceipt(web3, txHash, expiredAt);
+          if(_receipt) resolve(_receipt);
+          else reject(err);
+        } catch(err) {
+          reject(err);
+        }
+      } else {
+        reject(new Error(`Transaction ${txHash} was not found`));
+      }
+    })
   });
 };
 
@@ -46,35 +81,47 @@ module.exports.getBalance = (web3, { address }) => {
   });
 };
 
-module.exports.deployContract = (web3, { abi, bytecode, params }) => {
+module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
   return new Promise(async (resolve, reject) => {
     if (!web3.isConnected()) {
       reject(new Error('Web3 is not connected'));
     }
-    const contract = web3.eth.contract(abi);
-    const gasPrice = await fetchGasPrice(web3);
-    const estimatedGas = await calculateEstimateGas(web3, { data: bytecode });
 
-    contract.new(...params, {
-      from: window.ethereum.selectedAddress,
-      data: bytecode,
-      gas: estimatedGas,
-      gasPrice
-    }, (err, myContract) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      // NOTE: The callback will fire twice!
-      // Once the contract has the transactionHash property set and once its deployed on an address.
-      // e.g. check tx hash on the first call (transaction send)
-      if (!myContract.address) {
-        resolve(myContract.transactionHash) // The hash of the transaction, which deploys the contract
-      }
-      // else {
-      //   resolve(myContract);
-      // }
-    });
+    if(from && from.toLowerCase() !== window.ethereum.selectedAddress.toLowerCase()) {
+      reject(new Error('From account does not match with selected address.'));
+    }
+
+    try {
+      const contract = web3.eth.contract(abi);
+      const gasPrice = await fetchGasPrice(web3);
+      const contractData = contract.new.getData(...params, {data: bytecode, from});
+      // const encodeParams = encodeConstructorParams(web3, abi, params || []);
+      const estimatedGas = await calculateEstimateGas(web3, { data: contractData });
+
+      contract.new(...params, {
+        from: window.ethereum.selectedAddress,
+        data: bytecode,
+        gas: estimatedGas,
+        gasPrice
+      }, (err, myContract) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        // NOTE: The callback will fire twice!
+        // Once the contract has the transactionHash property set and once its deployed on an address.
+        // e.g. check tx hash on the first call (transaction send)
+        if (!myContract.address) {
+          resolve(myContract.transactionHash) // The hash of the transaction, which deploys the contract
+        }
+        // else {
+        //   resolve(myContract);
+        // }
+      });
+    } catch(err) {
+      reject(err);
+    }
+
   });
 };
 
@@ -163,5 +210,12 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, method, params })
 };
 
 module.exports.getTxReceipt = (web3, { txHash, timeoutInSec }) => {
-  throw new Error('Missing implementation');
+  return new Promise((resolve, reject) => {
+    fetchTxReceipt(web3, txHash, (new Date()).getTime() + (timeoutInSec || 30) * 1000).then(receipt => {
+      if (!receipt) {
+        reject()
+      }
+      resolve(receipt);
+    })
+  });
 };
