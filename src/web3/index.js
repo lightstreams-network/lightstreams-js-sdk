@@ -137,5 +137,9 @@ module.exports.isAddress = (web3, { address }) => {
 };
 
 module.exports.getAccounts = (web3) => {
-  return web3.eth.getAccounts();
+  return new Promise((resolve) => {
+    web3.eth.getAccounts().then(addrs => {
+      resolve(addrs.map(addr => addr.toLowerCase()));
+    })
+  });
 };

@@ -55,7 +55,7 @@ class ProviderEngine extends Web3ProviderEngine {
     return Object.keys(self.wallets).map(Account.formatAddress)
   }
 
-  // Copyrights to @Portis team
+  // Copyrights by @Portis team
   // https://github.com/portis-project/web-sdk/blob/master/packages/portis-web3/src/index.ts
   // send(payload, callback) {
   //   debugger;
