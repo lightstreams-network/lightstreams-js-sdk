@@ -5,16 +5,17 @@
  */
 
 const Web3 = require('../web3');
-const ENS = require('@ensdomains/ens/build/contracts/ENSRegistry.json');
+const ENS = require('../../build/contracts/ENSRegistry.json');
 const namehash = require('eth-ens-namehash');
 const utils = require('web3-utils');
 
 module.exports = (web3) => ({
-  deploy: ({ from }) => {
+  // bytecode MUST be an optional argument because it will depends on compiler version
+  deploy: ({ from, bytecode }) => {
     return Web3.deployContract(web3, {
       from,
       abi: ENS.abi,
-      bytecode: ENS.bytecode,
+      bytecode: bytecode || ENS.bytecode,
     }).then((txHash) => {
       return Web3.getTxReceipt(web3, { txHash });
     })
@@ -49,6 +50,24 @@ module.exports = (web3) => ({
     }).then((txHash) => {
       return Web3.getTxReceipt(web3, { txHash });
     });
+  },
+  owner: (contractAddress, { node }) => {
+    return Web3.contractCall(web3, contractAddress, {
+      abi: ENS.abi,
+      method: 'owner',
+      params: [
+        node.indexOf('0x') === 0 ? node : namehash.hash(node) // node
+      ]
+    })
+  },
+  ttl: (contractAddress, { node }) => {
+    return Web3.contractCall(web3, contractAddress, {
+      abi: ENS.abi,
+      method: 'ttl',
+      params: [
+        node.indexOf('0x') === 0 ? node : namehash.hash(node) // node
+      ]
+    })
   },
   resolver: (contractAddress, { node }) => {
     return Web3.contractCall(web3, contractAddress, {

@@ -25,6 +25,10 @@ module.exports.deployNewRegistry = async (web3, { from }) => {
     subnode: defaultResolverNodeId // Default
   });
 
+  // We need for few seconds till node registration is completed
+  // @TODO Improve understanding of this wait
+  await waitFor(3);
+
   await setNodeResolver(web3, { from, ensAddress, resolverAddress, node: defaultResolverNodeId });
   return { ensAddress, resolverAddress };
 };
@@ -92,6 +96,12 @@ const registerNode = async(web3, { from, ensAddress, parentNode, subnode }) => {
 
 const setNodeResolver = async (web3, { from, node, ensAddress, resolverAddress }) => {
   console.log(`Set resolver ${resolverAddress} for "${node}"...`);
+
+  const fetchedOwner = await ENSRegistry(web3).owner(ensAddress, { node });
+  if (fetchedOwner.toLowerCase() !== from.toLowerCase()) {
+    throw new Error(`Invalid node owner ${fetchedOwner}`);
+  }
+
   let txReceipt = await ENSRegistry(web3).setResolver(ensAddress, { from, resolverAddress, node });
 
   if (txReceipt.status !== true) {
@@ -128,6 +138,12 @@ const deployResolver = async (web3, { from, ensAddress }) => {
   }
 
   return address;
+};
+
+const waitFor = (waitInSeconds) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, waitInSeconds * 1000);
+  });
 };
 
 //

@@ -7,7 +7,7 @@
     "start": "cross-env NODE_ENV=development webpack-dev-server -d",
     "start:dev": "npm run postinstall-dev && cross-env NODE_ENV=development webpack-dev-server -d",
     "build": "cross-env NODE_ENV=production webpack -p",
-    "postinstall-dev": "rm -rf ./node_modules/lightstreams-js-sdk ; ln -s ../../../ node_modules/lightstreams-js-sdk"
+    "postinstall": "./scripts/postinstall.sh"
   },
   "keywords": [],
   "author": "Gabriel Garrido",
