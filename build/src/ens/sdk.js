@@ -60,6 +60,10 @@ function () {
 
           case 9:
             _context.next = 11;
+            return waitFor(3);
+
+          case 11:
+            _context.next = 13;
             return setNodeResolver(web3, {
               from: from,
               ensAddress: ensAddress,
@@ -67,13 +71,13 @@ function () {
               node: defaultResolverNodeId
             });
 
-          case 11:
+          case 13:
             return _context.abrupt("return", {
               ensAddress: ensAddress,
               resolverAddress: resolverAddress
             });
 
-          case 12:
+          case 14:
           case "end":
             return _context.stop();
         }
@@ -232,7 +236,7 @@ function () {
   var _ref8 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee4(web3, _ref7) {
-    var from, node, ensAddress, resolverAddress, txReceipt;
+    var from, node, ensAddress, resolverAddress, fetchedOwner, txReceipt;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
@@ -240,27 +244,43 @@ function () {
             from = _ref7.from, node = _ref7.node, ensAddress = _ref7.ensAddress, resolverAddress = _ref7.resolverAddress;
             console.log("Set resolver ".concat(resolverAddress, " for \"").concat(node, "\"..."));
             _context4.next = 4;
+            return ENSRegistry(web3).owner(ensAddress, {
+              node: node
+            });
+
+          case 4:
+            fetchedOwner = _context4.sent;
+
+            if (!(fetchedOwner.toLowerCase() !== from.toLowerCase())) {
+              _context4.next = 7;
+              break;
+            }
+
+            throw new Error("Invalid node owner ".concat(fetchedOwner));
+
+          case 7:
+            _context4.next = 9;
             return ENSRegistry(web3).setResolver(ensAddress, {
               from: from,
               resolverAddress: resolverAddress,
               node: node
             });
 
-          case 4:
+          case 9:
             txReceipt = _context4.sent;
 
             if (!(txReceipt.status !== true)) {
-              _context4.next = 10;
+              _context4.next = 15;
               break;
             }
 
             console.error(txReceipt);
             throw new Error("Failed to set resolver");
 
-          case 10:
+          case 15:
             console.log("Resolver was set correctly.");
 
-          case 11:
+          case 16:
           case "end":
             return _context4.stop();
         }
@@ -370,7 +390,13 @@ function () {
   return function deployResolver(_x11, _x12) {
     return _ref12.apply(this, arguments);
   };
-}(); //
+}();
+
+var waitFor = function waitFor(waitInSeconds) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, waitInSeconds * 1000);
+  });
+}; //
 // const deployRegistrar = async (web3, from, ensAddress, tld) => {
 //   console.log(`Deploying registrar`);
 //   const txReceipt = await FIFSRegistrar.web3(web3).deploy({ from: from, ensAddress, rootNode: tld });

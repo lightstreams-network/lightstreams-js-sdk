@@ -7,19 +7,21 @@
  */
 var Web3 = require('../web3');
 
-var PublicResolver = require('@ensdomains/resolver/build/contracts/PublicResolver.json');
+var PublicResolver = require('../../build/contracts/PublicResolver.json');
 
 var namehash = require('eth-ens-namehash');
 
 module.exports = function (web3) {
   return {
+    // bytecode MUST be an optional argument because it will depends on compiler version
     deploy: function deploy(_ref) {
       var from = _ref.from,
-          ensAddress = _ref.ensAddress;
+          ensAddress = _ref.ensAddress,
+          bytecode = _ref.bytecode;
       return Web3.deployContract(web3, {
         from: from,
         abi: PublicResolver.abi,
-        bytecode: PublicResolver.bytecode,
+        bytecode: bytecode || PublicResolver.bytecode,
         params: [ensAddress]
       }).then(function (txHash) {
         return Web3.getTxReceipt(web3, {
