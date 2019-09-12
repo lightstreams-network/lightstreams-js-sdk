@@ -1,12 +1,14 @@
 pragma solidity ^0.5.0;
 
 import "./utils/Ownable.sol";
+import "./utils/Initializable.sol";
+import "./utils/GSNRecipient.sol";
 
 /**
  * @title Permissioned manages access rights
  * @author Lukas Lukac, Lightstreams, 11.7.2018
  */
-contract Permissioned is Ownable {
+contract Permissioned is Ownable, GSNRecipient {
     /**
      * The higher permission automatically contains all lower permissions.
      *
@@ -41,7 +43,7 @@ contract Permissioned is Ownable {
     }
 
     modifier onlyAdmin {
-        require(permissions[msg.sender].level >= Level.ADMIN, "Only user with Admin permission lvl can call this function.");
+        require(permissions[_msgSender()].level >= Level.ADMIN, "Only user with Admin permission lvl can call this function.");
         _;
     }
 
@@ -102,11 +104,34 @@ contract Permissioned is Ownable {
  * @title ACL enables access control and management for every Smart Vault file
  * @author Lukas Lukac, Lightstreams, 11.7.2018
  */
-contract ACL is Permissioned {
+contract ACL is Initializable, Permissioned {
     constructor(address _owner, bool _isPublic) public Permissioned(_owner, _isPublic) {
     }
 
+    function initialize(address relayHub) public initializer {
+        GSNRecipient.initialize();
+        _upgradeRelayHub(relayHub);
+    }
+
+    function acceptRelayedCall(
+        address,
+        address,
+        bytes calldata,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        bytes calldata,
+        uint256
+    ) external view returns (uint256, bytes memory) {
+        return _approveRelayedCall();
+    }
+
+    function getRecipientBalance() public view returns (uint) {
+        return IRelayHub(getHubAddr()).balanceOf(address(this));
+    }
+
     function version() public pure returns (uint256) {
-        return 2;
+        return 3;
     }
 }
