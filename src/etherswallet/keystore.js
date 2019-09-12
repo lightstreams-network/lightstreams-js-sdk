@@ -25,7 +25,14 @@ module.exports.createWallet = (mnemonic) => {
 };
 
 module.exports.encryptWallet = async (wallet, password) => {
-  return JSON.parse(await wallet.encrypt(password, (progress) => showProgressCb('Encrypt wallet', progress * 100)));
+  let options = {
+    scrypt: {
+      N: (1 << 8), //N: (1 << 16),
+      r: 8,
+      p: 1
+    }
+  };
+  return JSON.parse(await wallet.encrypt(password, options, (progress) => showProgressCb('Encrypt wallet', progress * 100)));
 };
 
 module.exports.decryptWallet = async (encryptedWalletJson, password) => {
