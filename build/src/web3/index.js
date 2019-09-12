@@ -51,13 +51,14 @@ module.exports.unlockAccount = function (web3, _ref2) {
 };
 
 module.exports.importAccount = function (web3, _ref3) {
-  var encryptedJson = _ref3.encryptedJson;
+  var encryptedJson = _ref3.encryptedJson,
+      decryptedWallet = _ref3.decryptedWallet;
 
   if (typeof web3.currentProvider.importAccount !== 'function') {
     throw new Error("Not supported method");
   }
 
-  web3.currentProvider.importAccount(encryptedJson);
+  web3.currentProvider.importAccount(encryptedJson, decryptedWallet);
 };
 
 module.exports.exportMnemonic = function (web3, _ref4) {

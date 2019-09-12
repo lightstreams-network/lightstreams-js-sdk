@@ -47,12 +47,12 @@ module.exports.unlockAccount = (web3, { address, password, duration }) => {
   });
 };
 
-module.exports.importAccount = (web3, { encryptedJson }) => {
+module.exports.importAccount = (web3, { encryptedJson, decryptedWallet }) => {
   if(typeof web3.currentProvider.importAccount !== 'function') {
     throw new Error(`Not supported method`)
   }
 
-  web3.currentProvider.importAccount(encryptedJson);
+  web3.currentProvider.importAccount(encryptedJson, decryptedWallet);
 };
 
 module.exports.exportMnemonic = (web3, { address }) => {

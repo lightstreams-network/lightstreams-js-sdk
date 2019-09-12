@@ -17,29 +17,40 @@ var showProgressCb = function showProgressCb(actionText, progress) {
   }
 };
 
-module.exports.createRandomWallet =
+module.exports.createRandomWallet = function () {
+  return ethers.Wallet.createRandom();
+};
+
+module.exports.generateRandomSeedPhrase = function () {
+  var bytes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 16;
+  return ethers.utils.HDNode.entropyToMnemonic(ethers.utils.randomBytes(bytes), ethers.wordlists.en);
+};
+
+module.exports.createWallet = function (mnemonic) {
+  return ethers.Wallet.fromMnemonic(mnemonic);
+};
+
+module.exports.encryptWallet =
 /*#__PURE__*/
 function () {
   var _ref = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(password) {
-    var wallet;
+  regeneratorRuntime.mark(function _callee(wallet, password) {
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            wallet = ethers.Wallet.createRandom();
             _context.t0 = JSON;
-            _context.next = 4;
+            _context.next = 3;
             return wallet.encrypt(password, function (progress) {
-              return showProgressCb('Create random wallet', progress * 100);
+              return showProgressCb('Encrypt wallet', progress * 100);
             });
 
-          case 4:
+          case 3:
             _context.t1 = _context.sent;
             return _context.abrupt("return", _context.t0.parse.call(_context.t0, _context.t1));
 
-          case 6:
+          case 5:
           case "end":
             return _context.stop();
         }
@@ -47,39 +58,30 @@ function () {
     }, _callee);
   }));
 
-  return function (_x) {
+  return function (_x, _x2) {
     return _ref.apply(this, arguments);
   };
 }();
 
-module.exports.generateRandomSeedPhrase = function () {
-  var bytes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 16;
-  return ethers.utils.HDNode.entropyToMnemonic(ethers.utils.randomBytes(bytes), ethers.wordlists.en);
-};
-
-module.exports.createWallet =
+module.exports.decryptWallet =
 /*#__PURE__*/
 function () {
   var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(mnemonic, password) {
-    var wallet;
+  regeneratorRuntime.mark(function _callee2(encryptedWalletJson, password) {
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            wallet = ethers.Wallet.fromMnemonic(mnemonic);
-            _context2.t0 = JSON;
-            _context2.next = 4;
-            return wallet.encrypt(password, function (progress) {
-              return showProgressCb('Encrypt wallet', progress * 100);
+            _context2.next = 2;
+            return ethers.Wallet.fromEncryptedJson(JSON.stringify(encryptedWalletJson), password, function (progress) {
+              return showProgressCb('Decrypt wallet', progress * 100);
             });
 
-          case 4:
-            _context2.t1 = _context2.sent;
-            return _context2.abrupt("return", _context2.t0.parse.call(_context2.t0, _context2.t1));
+          case 2:
+            return _context2.abrupt("return", _context2.sent);
 
-          case 6:
+          case 3:
           case "end":
             return _context2.stop();
         }
@@ -87,38 +89,7 @@ function () {
     }, _callee2);
   }));
 
-  return function (_x2, _x3) {
+  return function (_x3, _x4) {
     return _ref2.apply(this, arguments);
-  };
-}();
-
-module.exports.decryptWallet =
-/*#__PURE__*/
-function () {
-  var _ref3 = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3(encryptedWalletJson, password) {
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            _context3.next = 2;
-            return ethers.Wallet.fromEncryptedJson(JSON.stringify(encryptedWalletJson), password, function (progress) {
-              return showProgressCb('Decrypt wallet', progress * 100);
-            });
-
-          case 2:
-            return _context3.abrupt("return", _context3.sent);
-
-          case 3:
-          case "end":
-            return _context3.stop();
-        }
-      }
-    }, _callee3);
-  }));
-
-  return function (_x4, _x5) {
-    return _ref3.apply(this, arguments);
   };
 }();

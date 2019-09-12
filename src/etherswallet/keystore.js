@@ -12,17 +12,19 @@ const showProgressCb = (actionText, progress) => {
   }
 };
 
-module.exports.createRandomWallet = async (password) => {
-  const wallet = ethers.Wallet.createRandom();
-  return JSON.parse(await wallet.encrypt(password, (progress) => showProgressCb('Create random wallet', progress*100)));
+module.exports.createRandomWallet = () => {
+  return ethers.Wallet.createRandom();
 };
 
 module.exports.generateRandomSeedPhrase = (bytes = 16) => {
   return ethers.utils.HDNode.entropyToMnemonic(ethers.utils.randomBytes(bytes), ethers.wordlists.en);
 };
 
-module.exports.createWallet = async (mnemonic, password) => {
-  const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+module.exports.createWallet = (mnemonic) => {
+  return ethers.Wallet.fromMnemonic(mnemonic);
+};
+
+module.exports.encryptWallet = async (wallet, password) => {
   return JSON.parse(await wallet.encrypt(password, (progress) => showProgressCb('Encrypt wallet', progress * 100)));
 };
 

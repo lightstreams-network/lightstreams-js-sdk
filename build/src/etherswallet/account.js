@@ -9,13 +9,19 @@ var Util = require('ethereumjs-util');
 
 var keystore = require('./keystore');
 
+function isPromise(obj) {
+  return obj && Object.prototype.toString.call(obj) === "[object Promise]"; // if(!obj) return false;
+  // if(typeof obj !== 'object') return false;
+  // return typeof obj.then === 'function';
+}
+
 module.exports.newAccount = function (encryptedJson) {
-  var wallet = null;
+  var decryptedWallet = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var wallet = decryptedWallet;
   return {
     isLocked: function isLocked() {
       return wallet === null;
     },
-    // @TODO Implemented auto-lock based on timeout
     unlock: function unlock(password) {
       var timeout = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       setTimeout(function () {

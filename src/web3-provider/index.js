@@ -86,9 +86,10 @@ module.exports = (opts = {}) => {
       cb(null, addresses);
     },
     newAccount: ({ password }, cb) => {
-      Keystore.createRandomWallet(password)
+      const decryptedWallet = Keystore.createRandomWallet();
+      Keystore.encryptWallet(decryptedWallet, password)
         .then((encryptedJson) => {
-          const address = engine.importAccount(encryptedJson);
+          const address = engine.importAccount(encryptedJson, decryptedWallet);
           cb(null, address);
         })
         .catch(err => {

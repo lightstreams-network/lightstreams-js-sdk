@@ -8,14 +8,20 @@ const Util = require('ethereumjs-util');
 
 const keystore = require('./keystore');
 
-module.exports.newAccount = (encryptedJson) => {
-  let wallet = null;
+function isPromise(obj) {
+  return obj && Object.prototype.toString.call(obj) === "[object Promise]";
+  // if(!obj) return false;
+  // if(typeof obj !== 'object') return false;
+  // return typeof obj.then === 'function';
+}
+
+module.exports.newAccount = (encryptedJson, decryptedWallet = null) => {
+  let wallet = decryptedWallet;
 
   return {
     isLocked: () => {
       return wallet === null;
     },
-    // @TODO Implemented auto-lock based on timeout
     unlock: (password, timeout = 0) => {
       setTimeout(function() {
         wallet = null;

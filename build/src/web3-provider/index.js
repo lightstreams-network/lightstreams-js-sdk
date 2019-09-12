@@ -126,8 +126,9 @@ module.exports = function () {
     },
     newAccount: function newAccount(_ref, cb) {
       var password = _ref.password;
-      Keystore.createRandomWallet(password).then(function (encryptedJson) {
-        var address = engine.importAccount(encryptedJson);
+      var decryptedWallet = Keystore.createRandomWallet();
+      Keystore.encryptWallet(decryptedWallet, password).then(function (encryptedJson) {
+        var address = engine.importAccount(encryptedJson, decryptedWallet);
         cb(null, address);
       })["catch"](function (err) {
         cb(err, null);
