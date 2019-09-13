@@ -178,7 +178,7 @@ module.exports.contractCall = (web3, contractAddress, { abi, method, params }) =
   });
 };
 
-module.exports.contractSendTx = (web3, contractAddress, { abi, method, params }) => {
+module.exports.contractSendTx = (web3, contractAddress, { from, abi, method, params, value }) => {
   return new Promise(async (resolve, reject) => {
     if (!web3.isConnected()) {
       reject(new Error('Web3 is not connected'));
@@ -190,6 +190,7 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, method, params })
       throw new Error(`Method ${method} is not available`);
     }
 
+    let gasPrice = await fetchGasPrice(web3);
     const estimatedGas = await (new Promise((resolve, reject) => {
       contractInstance[method].estimateGas(...params, (err, data) => {
         if (err) reject(err);
@@ -197,10 +198,10 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, method, params })
       })
     }));
 
-    let gasPrice = await fetchGasPrice(web3);
-    contractInstance[method](...params, {
-      from: window.ethereum.selectedAddress,
+    contractInstance[method].sendTransaction(...params, {
+      from,
       gas: estimatedGas,
+      value: value,
       gasPrice
     }, (err, txHash) => {
       if (err) reject(err);
@@ -211,11 +212,11 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, method, params })
 
 module.exports.getTxReceipt = (web3, { txHash, timeoutInSec }) => {
   return new Promise((resolve, reject) => {
-    fetchTxReceipt(web3, txHash, (new Date()).getTime() + (timeoutInSec || 30) * 1000).then(receipt => {
+    fetchTxReceipt(web3, txHash, (new Date()).getTime() + (timeoutInSec || 15) * 1000).then(receipt => {
       if (!receipt) {
         reject()
       }
       resolve(receipt);
-    })
+    }).catch(reject)
   });
 };

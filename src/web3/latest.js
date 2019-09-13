@@ -54,12 +54,12 @@ module.exports.networkVersion = (web3) => {
 
 module.exports.getTxReceipt = (web3, { txHash, timeoutInSec }) => {
   return new Promise((resolve, reject) => {
-    fetchTxReceipt(web3, txHash, (new Date()).getTime() + (timeoutInSec||30) * 1000).then(receipt => {
+    fetchTxReceipt(web3, txHash, (new Date()).getTime() + (timeoutInSec || 15) * 1000).then(receipt => {
       if (!receipt) {
         reject()
       }
       resolve(receipt);
-    })
+    }).catch(reject);
   });
 };
 
