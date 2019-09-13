@@ -36,21 +36,30 @@ function () {
   var _ref = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee(wallet, password) {
+    var options;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
+            options = {
+              scrypt: {
+                N: 1 << 8,
+                //N: (1 << 16),
+                r: 8,
+                p: 1
+              }
+            };
             _context.t0 = JSON;
-            _context.next = 3;
-            return wallet.encrypt(password, function (progress) {
+            _context.next = 4;
+            return wallet.encrypt(password, options, function (progress) {
               return showProgressCb('Encrypt wallet', progress * 100);
             });
 
-          case 3:
+          case 4:
             _context.t1 = _context.sent;
             return _context.abrupt("return", _context.t0.parse.call(_context.t0, _context.t1));
 
-          case 5:
+          case 6:
           case "end":
             return _context.stop();
         }
@@ -63,33 +72,10 @@ function () {
   };
 }();
 
-module.exports.decryptWallet =
-/*#__PURE__*/
-function () {
-  var _ref2 = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(encryptedWalletJson, password) {
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            _context2.next = 2;
-            return ethers.Wallet.fromEncryptedJson(JSON.stringify(encryptedWalletJson), password, function (progress) {
-              return showProgressCb('Decrypt wallet', progress * 100);
-            });
-
-          case 2:
-            return _context2.abrupt("return", _context2.sent);
-
-          case 3:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-
-  return function (_x3, _x4) {
-    return _ref2.apply(this, arguments);
-  };
-}();
+module.exports.decryptWallet = function (encryptedWalletJson, password) {
+  return new Promise(function (resolve, reject) {
+    ethers.Wallet.fromEncryptedJson(JSON.stringify(encryptedWalletJson), password, function (progress) {
+      return showProgressCb('Decrypt wallet', progress * 100);
+    }).then(resolve)["catch"](reject);
+  });
+};

@@ -35,7 +35,10 @@ module.exports.encryptWallet = async (wallet, password) => {
   return JSON.parse(await wallet.encrypt(password, options, (progress) => showProgressCb('Encrypt wallet', progress * 100)));
 };
 
-module.exports.decryptWallet = async (encryptedWalletJson, password) => {
-  return await ethers.Wallet.fromEncryptedJson(JSON.stringify(encryptedWalletJson), password,
-    (progress) => showProgressCb('Decrypt wallet', progress * 100));
+module.exports.decryptWallet = (encryptedWalletJson, password) => {
+  return new Promise((resolve, reject) => {
+    ethers.Wallet.fromEncryptedJson(JSON.stringify(encryptedWalletJson), password,
+      (progress) => showProgressCb('Decrypt wallet', progress * 100)
+    ).then(resolve).catch(reject);
+  });
 };

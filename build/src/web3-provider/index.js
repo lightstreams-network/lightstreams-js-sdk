@@ -156,6 +156,8 @@ module.exports = function () {
 
         account.unlock(password, duration || 0).then(function () {
           cb(null, "Account \"".concat(address, "\" was unlock"));
+        })["catch"](function (err) {
+          return cb(err, null);
         });
       } catch (err) {
         cb(err, null);

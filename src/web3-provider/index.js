@@ -16,10 +16,9 @@ const ProviderEngine = require('./engine');
 const { PersonalSubprovider } = require('./subproviders');
 const Keystore = require('../etherswallet/keystore');
 
-
 // @TODO Decouple from etherswallet module
 module.exports = (opts = {}) => {
-  const { rpcUrl, ...engineOpts} = opts;
+  const { rpcUrl, ...engineOpts } = opts;
   const engine = new ProviderEngine(engineOpts);
   const version = '0.0.1';
 
@@ -72,7 +71,7 @@ module.exports = (opts = {}) => {
         };
 
         const account = engine._getAccount(from);
-        account.signTx({ ...txParams, chainId: network.chainId}, cb);
+        account.signTx({ ...txParams, chainId: network.chainId }, cb);
       } catch ( err ) {
         if (typeof cb === 'function') cb(err, '0x0');
         else throw err
@@ -108,9 +107,11 @@ module.exports = (opts = {}) => {
     unlockAccount: ({ address, password, duration }, cb) => {
       try {
         const account = engine._getAccount(address);
-        account.unlock(password, duration || 0).then(() => {
-          cb(null, `Account "${address}" was unlock`);
-        });
+        account.unlock(password, duration || 0)
+          .then(() => {
+            cb(null, `Account "${address}" was unlock`);
+          })
+          .catch(err => cb(err, null));
       } catch ( err ) {
         cb(err, null);
       }

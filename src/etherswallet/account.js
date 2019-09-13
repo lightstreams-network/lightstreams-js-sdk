@@ -30,7 +30,7 @@ module.exports.newAccount = (encryptedJson, decryptedWallet = null) => {
       return keystore.decryptWallet(encryptedJson, password)
         .then(unlockWallet => {
           wallet = unlockWallet;
-        });
+        })
     },
     lock: () => {
       wallet = null;
