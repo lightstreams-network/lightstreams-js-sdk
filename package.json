@@ -13,7 +13,7 @@
   },
   "main": "src/index.js",
   "scripts": {
-    "build": "babel src -d build/src; npm run compile",
+    "build": "babel src -d build/src",
     "build-single": "babel src --out-file ./build/src/index.js",
     "compile": "rm -rf ./build/contracts/*; truffle compile --all --reset",
     "test-standalone": "cp .env.standalone .env && truffle test --network standalone"

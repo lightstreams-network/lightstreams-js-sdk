@@ -12,7 +12,7 @@ module.exports.isInstalled = function () {
 };
 
 module.exports.isConnected = function () {
-  return _this.isInstalled && typeof window.web3 !== 'undefined' && window.web3.isConnected();
+  return _this.isInstalled() && typeof window.web3 !== 'undefined' && window.web3.isConnected();
 };
 
 module.exports.isEnabled = function () {

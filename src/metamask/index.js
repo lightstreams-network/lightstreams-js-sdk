@@ -10,7 +10,7 @@ module.exports.isInstalled = () => {
 };
 
 module.exports.isConnected = () => {
-  return (this.isInstalled
+  return (this.isInstalled()
     && typeof window.web3 !== 'undefined'
     && window.web3.isConnected());
 };
