@@ -148,13 +148,13 @@ module.exports.getTxReceipt = function (web3, _ref4) {
   var txHash = _ref4.txHash,
       timeoutInSec = _ref4.timeoutInSec;
   return new Promise(function (resolve, reject) {
-    fetchTxReceipt(web3, txHash, new Date().getTime() + (timeoutInSec || 30) * 1000).then(function (receipt) {
+    fetchTxReceipt(web3, txHash, new Date().getTime() + (timeoutInSec || 15) * 1000).then(function (receipt) {
       if (!receipt) {
         reject();
       }
 
       resolve(receipt);
-    });
+    })["catch"](reject);
   });
 };
 

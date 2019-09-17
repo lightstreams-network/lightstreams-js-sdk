@@ -29,3 +29,23 @@ module.exports.deploy = function (web3, _ref) {
     });
   });
 };
+
+module.exports.recover = function (web3, cont1ractAddr, _ref2) {
+  var from = _ref2.from,
+      newOwner = _ref2.newOwner;
+
+  if (!newOwner && !from) {
+    throw new Error("Missing mandatory call params");
+  }
+
+  return Web3.contractSendTx(web3, contractAddr, {
+    from: from,
+    method: 'recover',
+    abi: contract.abi,
+    params: [newOwner]
+  }).then(function (txHash) {
+    return Web3.getTxReceipt(web3, {
+      txHash: txHash
+    });
+  });
+};

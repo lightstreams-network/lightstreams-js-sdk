@@ -113,6 +113,7 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, from, method, par
         throw new Error(`Method ${method} is not available`);
       }
 
+
       const sendTx = contract.methods[method](...params);
       const estimatedGas = await (new Promise((resolve, reject) => {
         sendTx.estimateGas({ from }, (err, gas) => {

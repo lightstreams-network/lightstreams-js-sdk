@@ -350,16 +350,20 @@ module.exports.contractCall = function (web3, contractAddress, _ref8) {
 };
 
 module.exports.contractSendTx = function (web3, contractAddress, _ref10) {
-  var abi = _ref10.abi,
+  var from = _ref10.from,
+      abi = _ref10.abi,
       method = _ref10.method,
-      params = _ref10.params;
+      params = _ref10.params,
+      value = _ref10.value;
   return new Promise(
   /*#__PURE__*/
   function () {
     var _ref11 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee5(resolve, reject) {
-      var contract, contractInstance, estimatedGas, gasPrice;
+      var _contractInstance$met3;
+
+      var contract, contractInstance, gasPrice, estimatedGas;
       return regeneratorRuntime.wrap(function _callee5$(_context5) {
         while (1) {
           switch (_context5.prev = _context5.next) {
@@ -380,24 +384,31 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref10) {
 
             case 5:
               _context5.next = 7;
+              return fetchGasPrice(web3);
+
+            case 7:
+              gasPrice = _context5.sent;
+              _context5.next = 10;
               return new Promise(function (resolve, reject) {
                 var _contractInstance$met2;
 
-                (_contractInstance$met2 = contractInstance[method]).estimateGas.apply(_contractInstance$met2, _toConsumableArray(params).concat([function (err, data) {
-                  if (err) reject(err);else resolve(data);
+                (_contractInstance$met2 = contractInstance[method]).estimateGas.apply(_contractInstance$met2, _toConsumableArray(params).concat([{
+                  from: from,
+                  value: value
+                }, function (err, data) {
+                  debugger;
+                  if (err) reject(err); // if (err) resolve(9000000);
+                  else resolve(data);
                 }]));
               });
 
-            case 7:
-              estimatedGas = _context5.sent;
-              _context5.next = 10;
-              return fetchGasPrice(web3);
-
             case 10:
-              gasPrice = _context5.sent;
-              contractInstance[method].apply(contractInstance, _toConsumableArray(params).concat([{
-                from: window.ethereum.selectedAddress,
+              estimatedGas = _context5.sent;
+
+              (_contractInstance$met3 = contractInstance[method]).sendTransaction.apply(_contractInstance$met3, _toConsumableArray(params).concat([{
+                from: from,
                 gas: estimatedGas,
+                value: value,
                 gasPrice: gasPrice
               }, function (err, txHash) {
                 if (err) reject(err);
@@ -422,12 +433,12 @@ module.exports.getTxReceipt = function (web3, _ref12) {
   var txHash = _ref12.txHash,
       timeoutInSec = _ref12.timeoutInSec;
   return new Promise(function (resolve, reject) {
-    fetchTxReceipt(web3, txHash, new Date().getTime() + (timeoutInSec || 30) * 1000).then(function (receipt) {
+    fetchTxReceipt(web3, txHash, new Date().getTime() + (timeoutInSec || 15) * 1000).then(function (receipt) {
       if (!receipt) {
         reject();
       }
 
       resolve(receipt);
-    });
+    })["catch"](reject);
   });
 };

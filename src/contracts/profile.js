@@ -21,3 +21,18 @@ module.exports.deploy = (web3, { owner, from, recoveryAccount }) => {
     return Web3.getTxReceipt(web3, { txHash });
   })
 };
+
+module.exports.recover = (web3, cont1ractAddr, { from, newOwner }) => {
+  if (!newOwner && !from) {
+    throw new Error(`Missing mandatory call params`);
+  }
+
+  return Web3.contractSendTx(web3, contractAddr, {
+    from: from,
+    method: 'recover',
+    abi: contract.abi,
+    params: [newOwner],
+  }).then((txHash) => {
+    return Web3.getTxReceipt(web3, { txHash });
+  })
+};

@@ -24,9 +24,10 @@ module.exports.newAccount = function (encryptedJson) {
     },
     unlock: function unlock(password) {
       var timeout = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      setTimeout(function () {
-        wallet = null;
-      }, timeout);
+      // @TODO Session timeout for unlocked accounts
+      // setTimeout(function() {
+      //   wallet = null;
+      // }, timeout);
       return keystore.decryptWallet(encryptedJson, password).then(function (unlockWallet) {
         wallet = unlockWallet;
       });
