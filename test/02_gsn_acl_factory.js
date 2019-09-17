@@ -16,6 +16,7 @@ contract('AclFactory', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
   const RELAY_HUB = process.env.RELAYHUB;
   // Factory will be able to create 5 new individual ACLs
+  const GAS_PRICE = '500000000000';
   const FACTORY_ACL_FAUCET_FUNDING_ETH = '50';
   const FACTORY_FUNDING_ETH = '8';
 
@@ -60,7 +61,7 @@ contract('AclFactory', (accounts) => {
     assert.equal(balance, web3.utils.toWei(FACTORY_FUNDING_ETH, "ether"));
   });
 
-  it('should deploy an ACL from user without any funds for FREE using ACLFactory', async () => {
+  it('should deploy an ACL from a user without any funds for FREE using ACLFactory', async () => {
     const isFactoryDeployed = await isRelayHubDeployedForRecipient(web3, factory.address);
     assert.equal(isFactoryDeployed, true);
 
@@ -80,7 +81,7 @@ contract('AclFactory', (accounts) => {
 
     const createNewACLRes = await factoryGSN.methods.newACL(emptyAcc.address).send({
       from: emptyAcc.address,
-      gasPrice: "500000000000",
+      gasPrice: GAS_PRICE,
       gasLimit: "7000000",
     });
     assert.equal(createNewACLRes.status, true);
@@ -105,7 +106,7 @@ contract('AclFactory', (accounts) => {
 
     const grantReadRes = await newACLGSN.methods.grantRead(readerAcc.address).send({
       from: emptyAcc.address,
-      gasPrice: "500000000000",
+      gasPrice: GAS_PRICE,
       gasLimit: "7000000",
     });
     assert.equal(grantReadRes.status, true);
