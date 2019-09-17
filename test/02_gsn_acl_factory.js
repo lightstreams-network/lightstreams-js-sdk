@@ -9,14 +9,14 @@ const { fromConnection, useEphemeralKey } = require('@openzeppelin/network');
 const { utils } = require('@openzeppelin/gsn-provider');
 const { isRelayHubDeployedForRecipient, getRecipientFunds } = utils;
 
-const ACLFactory = artifacts.require("AclFactory");
-const ACL = artifacts.require("Acl");
+const ACLFactory = artifacts.require("GSNAclFactory");
+const ACL = artifacts.require("GSNAcl");
 
 contract('AclFactory', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
   const RELAY_HUB = process.env.RELAYHUB;
   // Factory will be able to create 5 new individual ACLs
-  const GAS_PRICE = '500000000000';
+
   const FACTORY_ACL_FAUCET_FUNDING_ETH = '50';
   const FACTORY_FUNDING_ETH = '8';
 
@@ -25,10 +25,12 @@ contract('AclFactory', (accounts) => {
   let readerAcc;
   let factory;
   let newACLGSN;
+  let gasPrice;
 
   it('should deploy a factory', async () => {
     factory = await ACLFactory.new();
 
+    gasPrice = await web3.eth.getGasPrice();
     emptyAcc = await web3.eth.accounts.create("secret");
     readerAcc = await web3.eth.accounts.create("secret");
   });
@@ -81,7 +83,7 @@ contract('AclFactory', (accounts) => {
 
     const createNewACLRes = await factoryGSN.methods.newACL(emptyAcc.address).send({
       from: emptyAcc.address,
-      gasPrice: GAS_PRICE,
+      gasPrice: gasPrice,
       gasLimit: "7000000",
     });
     assert.equal(createNewACLRes.status, true);
@@ -106,7 +108,7 @@ contract('AclFactory', (accounts) => {
 
     const grantReadRes = await newACLGSN.methods.grantRead(readerAcc.address).send({
       from: emptyAcc.address,
-      gasPrice: GAS_PRICE,
+      gasPrice: gasPrice,
       gasLimit: "7000000",
     });
     assert.equal(grantReadRes.status, true);

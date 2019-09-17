@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "./GSNRecipient.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
 
 contract GSNOwnableRecipient is GSNRecipient {
     address public owner;

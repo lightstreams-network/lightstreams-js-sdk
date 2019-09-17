@@ -1,12 +1,13 @@
 pragma solidity ^0.5.0;
 
-import "./utils/Ownable.sol";
+import "./utils/GSNOwnableRecipient.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
 /**
  * @title Permissioned manages access rights
  * @author Lukas Lukac, Lightstreams, 11.7.2018
  */
-contract Permissioned is Ownable {
+contract GSNPermissioned is GSNOwnableRecipient {
     /**
      * The higher permission automatically contains all lower permissions.
      *
@@ -32,16 +33,16 @@ contract Permissioned is Ownable {
 
     event PermissionGranted(address account, Level level);
 
-    constructor(address _owner, bool _isPublic) Ownable(_owner) public {
+    constructor(address _owner, bool _isPublic) GSNOwnableRecipient(_owner) public {
         isPublic = _isPublic;
 
         permissions[_owner] = Permission({
             level: Level.ADMIN
-            });
+        });
     }
 
     modifier onlyAdmin {
-        require(permissions[msg.sender].level >= Level.ADMIN, "Only user with Admin permission lvl can call this function.");
+        require(permissions[_msgSender()].level >= Level.ADMIN, "Only user with Admin permission lvl can call this function.");
         _;
     }
 
@@ -56,7 +57,7 @@ contract Permissioned is Ownable {
     function grantRead(address account) onlyAdmin public {
         permissions[account] = Permission({
             level: Level.READ
-            });
+        });
 
         emit PermissionGranted(account, Level.READ);
     }
@@ -64,7 +65,7 @@ contract Permissioned is Ownable {
     function grantWrite(address account) onlyAdmin public {
         permissions[account] = Permission({
             level: Level.WRITE
-            });
+        });
 
         emit PermissionGranted(account, Level.WRITE);
     }
@@ -72,7 +73,7 @@ contract Permissioned is Ownable {
     function grantAdmin(address account) onlyAdmin public {
         permissions[account] = Permission({
             level: Level.ADMIN
-            });
+        });
 
         emit PermissionGranted(account, Level.ADMIN);
     }
@@ -102,11 +103,34 @@ contract Permissioned is Ownable {
  * @title ACL enables access control and management for every Smart Vault file
  * @author Lukas Lukac, Lightstreams, 11.7.2018
  */
-contract ACL is Permissioned {
-    constructor(address _owner, bool _isPublic) public Permissioned(_owner, _isPublic) {
+contract GSNAcl is Initializable, GSNPermissioned {
+    constructor(address _owner, bool _isPublic) public GSNPermissioned(_owner, _isPublic) {
+    }
+
+    function initialize(address relayHub) public initializer {
+        GSNRecipient.initialize();
+        _upgradeRelayHub(relayHub);
+    }
+
+    function acceptRelayedCall(
+        address,
+        address,
+        bytes calldata,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        bytes calldata,
+        uint256
+    ) external view returns (uint256, bytes memory) {
+        return _approveRelayedCall();
+    }
+
+    function getRecipientBalance() public view returns (uint) {
+        return IRelayHub(getHubAddr()).balanceOf(address(this));
     }
 
     function version() public pure returns (uint256) {
-        return 2;
+        return 3;
     }
 }

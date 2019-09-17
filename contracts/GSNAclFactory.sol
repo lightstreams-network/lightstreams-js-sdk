@@ -1,16 +1,14 @@
 pragma solidity ^0.5.0;
 
-import "./utils/Ownable.sol";
-import "./utils/Initializable.sol";
-import "./utils/GSNRecipient.sol";
-import "./utils/IRelayHub.sol";
-import "./Acl.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "./GSNAcl.sol";
 
 /**
  * @title ACLFactory enables gas-free interactions with ACL from deployment to rights management.
  * @author Lukas Lukac, Lightstreams, 22.8.2018
  */
-contract ACLFactory is Initializable, GSNRecipient {
+contract GSNAclFactory is Initializable, GSNRecipient {
     uint256 constant public aclFunding = 10 ether;
 
     address[] acls;
@@ -25,7 +23,7 @@ contract ACLFactory is Initializable, GSNRecipient {
     }
 
     function newACL(address _owner) public returns (address) {
-        ACL acl = new ACL(_owner, false);
+        GSNAcl acl = new GSNAcl(_owner, false);
         address addr = address(acl);
 
         acl.initialize(_getRelayHub());
