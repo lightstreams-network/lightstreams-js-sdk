@@ -4,22 +4,13 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const assert = chai.assert;
 
-const { fundRecipient } = require('@openzeppelin/gsn-helpers');
-const { fromConnection, useEphemeralKey } = require('@openzeppelin/network');
-const { utils } = require('@openzeppelin/gsn-provider');
-const { isRelayHubDeployedForRecipient, getRecipientFunds } = utils;
+// A helper test for quick debugging of receipts during development.
+contract('TxReceipt', (accounts) => {
+  it('should fetch and print specified receipt', async () => {
+    let balance = await web3.eth.getBalance("0xd119b8b038d3a67d34ca1d46e1898881626a082b");
+    console.log(balance.toString());
 
-const ACLFactory = artifacts.require("AclFactory");
-const ACL = artifacts.require("Acl");
-
-contract('AclFactory', (accounts) => {
-  const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
-  const RELAY_HUB = process.env.RELAYHUB;
-  const FACTORY_FUNDING_ETH = '3';
-  const ACL_FUNDING_ETH = '1';
-
-  it('check receipt', async () => {
-    let receipt = await web3.eth.getTransactionReceipt("0x07c2076a3a1d7294335cb68a0c3abc89edf39c202fac6107c445c5b410eb61a6");
+    let receipt = await web3.eth.getTransactionReceipt("0x3746251167b4761d7e57c3418c2010ae377f2427e1eee9ca8608fe264aa3a214");
     console.log(receipt);
   });
 });

@@ -1,0 +1,61 @@
+diff --git a/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/RelayClient.js b/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/RelayClient.js
+index bb040b3..38cbcd1 100644
+--- a/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/RelayClient.js
++++ b/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/RelayClient.js
+@@ -17,7 +17,9 @@ const { appendAddress, toInt, preconditionCodeToDescription, getApprovalData, cr
+ const relayHubAbi = require('./IRelayHub');
+ const relayRecipientAbi = require('./IRelayRecipient');
+ 
+-const relay_lookup_limit_blocks = 6000;
++// TODO: #7 Horrible hack but I don't have time to fix Lightchain performance issues when reading logs from more than 1000 blocks in the past. This will do for the next 2 months.
++// const relay_lookup_limit_blocks = 6000;
++const relay_lookup_limit_blocks = 100;
+ abi_decoder.addABI(relayHubAbi);
+ 
+ // default timeout (in ms) for http requests
+@@ -350,6 +352,7 @@ class RelayClient {
+                 throw error
+             }
+             let relayAddress = activeRelay.RelayServerAddress;
++
+             let relayUrl = activeRelay.relayUrl;
+             let txfee = parseInt(options.txfee || activeRelay.transactionFee);
+ 
+@@ -406,6 +409,7 @@ class RelayClient {
+             let relayMaxNonce = (await this.web3.eth.getTransactionCount(relayAddress)) + allowed_relay_nonce_gap;
+ 
+             try {
++                // TODO: #7 Horrible hack but I don't have time to fix this and re-deploy kubernetes. This will do for next 2 months.
+                 let validTransaction = await self.sendViaRelay(
+                     relayAddress,
+                     options.from,
+@@ -417,7 +421,7 @@ class RelayClient {
+                     nonce,
+                     signature,
+                     approvalData,
+-                    relayUrl,
++                    'https://gsn.sirius.lightstreams.io',
+                     relayHub._address,
+                     relayMaxNonce
+                 );
+diff --git a/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/ServerHelper.js b/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/ServerHelper.js
+index 89a3e1d..7991019 100644
+--- a/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/ServerHelper.js
++++ b/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/ServerHelper.js
+@@ -36,7 +36,7 @@ class ActiveRelayPinger {
+                     console.log("nextRelay: find fastest relay from: " + JSON.stringify(slice))
+                 }
+                 firstRelayToRespond = await this.raceToSuccess(
+-                    slice.map(relay => this.getRelayAddressPing(relay.relayUrl, relay.transactionFee, this.gasPrice))
++                    slice.map(relay => this.getRelayAddressPing('https://gsn.sirius.lightstreams.io', relay.transactionFee, this.gasPrice))
+                 );
+                 if (this.verbose){
+                     console.log("race finished with a champion: " + firstRelayToRespond.relayUrl)
+@@ -164,6 +164,7 @@ class ServerHelper {
+         let score = 1000-relay.transactionFee
+ 
+         let failedRelay = this.failedRelays[relay.relayUrl]
++      console.log(failedRelay);
+         if ( failedRelay ) {
+             const elapsed = (new Date().getTime() - failedRelay.lastError)/1000
+             if ( elapsed < this.relayTimeoutGrace )
