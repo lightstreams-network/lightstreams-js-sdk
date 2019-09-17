@@ -39,7 +39,7 @@ index bb040b3..38cbcd1 100644
                      relayMaxNonce
                  );
 diff --git a/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/ServerHelper.js b/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/ServerHelper.js
-index 89a3e1d..7991019 100644
+index 89a3e1d..e3b3eb0 100644
 --- a/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/ServerHelper.js
 +++ b/node_modules/@openzeppelin/gsn-provider/src/tabookey-gasless/ServerHelper.js
 @@ -36,7 +36,7 @@ class ActiveRelayPinger {
@@ -51,11 +51,3 @@ index 89a3e1d..7991019 100644
                  );
                  if (this.verbose){
                      console.log("race finished with a champion: " + firstRelayToRespond.relayUrl)
-@@ -164,6 +164,7 @@ class ServerHelper {
-         let score = 1000-relay.transactionFee
- 
-         let failedRelay = this.failedRelays[relay.relayUrl]
-+      console.log(failedRelay);
-         if ( failedRelay ) {
-             const elapsed = (new Date().getTime() - failedRelay.lastError)/1000
-             if ( elapsed < this.relayTimeoutGrace )

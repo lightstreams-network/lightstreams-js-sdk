@@ -1,14 +1,13 @@
 pragma solidity ^0.5.0;
 
-import "./utils/Ownable.sol";
+import "./utils/GSNOwnableRecipient.sol";
 import "./utils/Initializable.sol";
-import "./utils/GSNRecipient.sol";
 
 /**
  * @title Permissioned manages access rights
  * @author Lukas Lukac, Lightstreams, 11.7.2018
  */
-contract Permissioned is Ownable, GSNRecipient {
+contract Permissioned is GSNOwnableRecipient {
     /**
      * The higher permission automatically contains all lower permissions.
      *
@@ -34,7 +33,7 @@ contract Permissioned is Ownable, GSNRecipient {
 
     event PermissionGranted(address account, Level level);
 
-    constructor(address _owner, bool _isPublic) Ownable(_owner) public {
+    constructor(address _owner, bool _isPublic) GSNOwnableRecipient(_owner) public {
         isPublic = _isPublic;
 
         permissions[_owner] = Permission({

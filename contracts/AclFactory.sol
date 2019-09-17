@@ -14,19 +14,12 @@ contract ACLFactory is Initializable, GSNRecipient {
     uint256 constant public aclFunding = 10 ether;
 
     address[] acls;
-    address private owner;
 
     event NewACL(address addr);
-
-    constructor() public {
-        owner = _msgSender();
-    }
 
     function() payable external {}
 
     function initialize(address relayHub) public initializer {
-        owner = _msgSender();
-
         GSNRecipient.initialize();
         _upgradeRelayHub(relayHub);
     }
