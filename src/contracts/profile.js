@@ -22,7 +22,7 @@ module.exports.deploy = (web3, { owner, from, recoveryAccount }) => {
   })
 };
 
-module.exports.recover = (web3, cont1ractAddr, { from, newOwner }) => {
+module.exports.recover = (web3, contractAddr, { from, newOwner }) => {
   if (!newOwner && !from) {
     throw new Error(`Missing mandatory call params`);
   }
