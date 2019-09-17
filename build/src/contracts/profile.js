@@ -30,7 +30,7 @@ module.exports.deploy = function (web3, _ref) {
   });
 };
 
-module.exports.recover = function (web3, cont1ractAddr, _ref2) {
+module.exports.recover = function (web3, contractAddr, _ref2) {
   var from = _ref2.from,
       newOwner = _ref2.newOwner;
 

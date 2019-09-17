@@ -193,7 +193,6 @@ module.exports.contractSendTx = (web3, contractAddress, { from, abi, method, par
     let gasPrice = await fetchGasPrice(web3);
     const estimatedGas = await (new Promise((resolve, reject) => {
       contractInstance[method].estimateGas(...params, { from, value }, (err, data) => {
-        debugger;
         if (err) reject(err);
         // if (err) resolve(9000000);
         else resolve(data);

@@ -396,7 +396,6 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref10) {
                   from: from,
                   value: value
                 }, function (err, data) {
-                  debugger;
                   if (err) reject(err); // if (err) resolve(9000000);
                   else resolve(data);
                 }]));
