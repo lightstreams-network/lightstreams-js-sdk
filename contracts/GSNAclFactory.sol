@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "./GSNAcl.sol";
-import "./GSN.sol";
+import "./utils/GSN.sol";
 
 /**
  * @title ACLFactory enables gas-free interactions with ACL from deployment to rights management.
