@@ -1,6 +1,8 @@
 pragma solidity ^0.5.0;
 
-contract Ownable {
+import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
+
+contract GSNOwnableRecipient is GSNRecipient {
     address public owner;
 
     constructor(address _owner) public {
@@ -8,12 +10,8 @@ contract Ownable {
     }
 
     modifier onlyOwner {
-        require(isOwner());
+        require(_msgSender() == owner);
         _;
-    }
-
-    function isOwner() public view returns (bool) {
-        return msg.sender == owner;
     }
 
     function transferOwnership(address _newOwner) public onlyOwner {
