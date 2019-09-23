@@ -27,7 +27,7 @@ module.exports.deployNewRegistry = async (web3, { from }) => {
 
   // We need for few seconds till node registration is completed
   // @TODO Improve understanding of this wait
-  await waitFor(3);
+  await waitFor(5);
 
   await setNodeResolver(web3, { from, ensAddress, resolverAddress, node: defaultResolverNodeId });
   return { ensAddress, resolverAddress };
@@ -101,6 +101,8 @@ const setNodeResolver = async (web3, { from, node, ensAddress, resolverAddress }
   if (fetchedOwner.toLowerCase() !== from.toLowerCase()) {
     throw new Error(`Invalid node owner ${fetchedOwner}`);
   }
+
+  await waitFor(5);
 
   let txReceipt = await ENSRegistry(web3).setResolver(ensAddress, { from, resolverAddress, node });
 
