@@ -5,12 +5,10 @@ import "./utils/GSN.sol";
 
 /**
  * @title ACLFactory enables gas-free interactions with ACL from deployment to rights management.
- * @author Lukas Lukac, Lightstreams, 22.8.2018
+ * @author Lukas Lukac, Lightstreams, 22.8.2019
  */
 contract GSNAclFactory is GSN {
     uint256 constant public aclFunding = 10 ether;
-
-    address[] acls;
 
     event NewACL(address addr);
 

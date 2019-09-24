@@ -9,33 +9,34 @@ const { fromConnection, useEphemeralKey } = require('@openzeppelin/network');
 const { utils } = require('@openzeppelin/gsn-provider');
 const { isRelayHubDeployedForRecipient, getRecipientFunds } = utils;
 
-const ACLFactory = artifacts.require("GSNAclFactory");
-const ACL = artifacts.require("GSNAcl");
+const ProfileFactory = artifacts.require("GSNProfileFactory");
+const Profile = artifacts.require("GSNProfile");
+const ACL = artifacts.require("Acl");
 
-contract('AclFactory', (accounts) => {
+contract('GSNProfileFactory', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
   const RELAY_HUB = process.env.RELAYHUB;
 
-  // Factory will be able to create 5 new individual ACLs
-  const FACTORY_ACL_FAUCET_FUNDING_ETH = '50';
+  // Factory will be able to create 5 new individual Profiles
+  const FACTORY_PROFILE_FAUCET_FUNDING_PHT = '50';
   const FACTORY_FUNDING_ETH = '8';
 
   let gsnCtx;
   let emptyAcc;
-  let readerAcc;
+  let recoveryAcc;
   let factory;
-  let newACLGSN;
+  let newGSNProfile;
   let gasPrice;
 
-  it('should deploy a factory', async () => {
-    factory = await ACLFactory.new();
-
+  it('should deploy a profile factory', async () => {
     gasPrice = await web3.eth.getGasPrice();
     emptyAcc = await web3.eth.accounts.create("secret");
-    readerAcc = await web3.eth.accounts.create("secret");
+    recoveryAcc = await web3.eth.accounts.create("secret");
+
+    factory = await ProfileFactory.new();
   });
 
-  it('should initialize the GSN for ACLFactory by configuring its RelayHub and funding it', async () => {
+  it('should initialize the GSN for ProfileFactory by configuring its RelayHub and funding it', async () => {
     let txHub = await factory.initialize(RELAY_HUB);
     assert.equal(txHub.receipt.status, true);
 
@@ -44,11 +45,11 @@ contract('AclFactory', (accounts) => {
 
     const factoryAddr = await factory.address;
 
-    // Required so we can fund individual ACLs from ACLFactory automatically
+    // Required so we can fund individual Profiles from ProfileFactory automatically
     const faucetTx = await web3.eth.sendTransaction({
       from: ROOT_ACCOUNT,
       to: factory.address,
-      value: web3.utils.toWei(FACTORY_ACL_FAUCET_FUNDING_ETH, "ether")
+      value: web3.utils.toWei(FACTORY_PROFILE_FAUCET_FUNDING_PHT, "ether")
     });
     assert.equal(faucetTx.status, true);
 
@@ -63,7 +64,7 @@ contract('AclFactory', (accounts) => {
     assert.equal(balance, web3.utils.toWei(FACTORY_FUNDING_ETH, "ether"));
   });
 
-  it('should deploy an ACL from a user without any funds for FREE using ACLFactory', async () => {
+  it('should deploy a Profile from a user without any funds for FREE using ProfileFactory', async () => {
     const isFactoryDeployed = await isRelayHubDeployedForRecipient(web3, factory.address);
     assert.equal(isFactoryDeployed, true);
 
@@ -81,39 +82,29 @@ contract('AclFactory', (accounts) => {
     web3 = gsnCtx.lib;
     const factoryGSN = await new gsnCtx.lib.eth.Contract(factory.abi, factory.address);
 
-    const createNewACLRes = await factoryGSN.methods.newACL(emptyAcc.address).send({
+    const createNewProfileRes = await factoryGSN.methods.newProfile(emptyAcc.address, recoveryAcc.address).send({
       from: emptyAcc.address,
       gasPrice: gasPrice,
       gasLimit: "7000000",
     });
-    assert.equal(createNewACLRes.status, true);
+    assert.equal(createNewProfileRes.status, true);
 
-    const newACLAddr = createNewACLRes.events['NewACL'].returnValues['addr'];
+    const newProfileAddr = createNewProfileRes.events['NewProfile'].returnValues['addr'];
 
-    const isACLGSNReady = await isRelayHubDeployedForRecipient(web3, newACLAddr);
-    assert.equal(isACLGSNReady, true);
+    const isProfileGSNReady = await isRelayHubDeployedForRecipient(web3, newProfileAddr);
+    assert.equal(isProfileGSNReady, true);
 
-    newACLGSN = await new gsnCtx.lib.eth.Contract(ACL.abi, newACLAddr);
-    const aclOwner = await newACLGSN.methods.getOwner().call();
+    newGSNProfile = await new gsnCtx.lib.eth.Contract(Profile.abi, newProfileAddr);
+    const isEmptyAccOwner = await newGSNProfile.methods.hasOwner(emptyAcc.address).call();
 
-    const isACLOwnerAdmin = await newACLGSN.methods.hasAdmin(emptyAcc.address).call();
-
-    assert.equal(aclOwner, emptyAcc.address);
-    assert.equal(isACLOwnerAdmin, true);
-  });
-
-  it('should be possible for ACL owner, to control permissions (grandRead, etc) without any funds, for FREE', async () => {
-    let hasReadAccess = await newACLGSN.methods.hasRead(readerAcc.address).call();
-    assert.equal(hasReadAccess, false);
-
-    const grantReadRes = await newACLGSN.methods.grantRead(readerAcc.address).send({
+    await newGSNProfile.methods.addOwner(recoveryAcc.address).send({
       from: emptyAcc.address,
       gasPrice: gasPrice,
       gasLimit: "7000000",
     });
-    assert.equal(grantReadRes.status, true);
+    const isRecoveryAccOwner = await newGSNProfile.methods.hasOwner(recoveryAcc.address).call();
 
-    hasReadAccess = await newACLGSN.methods.hasRead(readerAcc.address).call();
-    assert.equal(hasReadAccess, true);
+    assert.equal(isEmptyAccOwner, true);
+    assert.equal(isRecoveryAccOwner, true);
   });
 });

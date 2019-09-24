@@ -1,13 +1,14 @@
 pragma solidity ^0.5.0;
 
-import "./utils/MultiOwnable.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "./utils/GSNMultiOwnableRecipient.sol";
 import "./Acl.sol";
 
 /**
  * @title Profile groups together all user's SmartVault activities and enables data control recovery
- * @author Lukas Lukac, Lightstreams, 7.8.2019
+ * @author Lukas Lukac, Lightstreams, 24.9.2019
  */
-contract Profile is MultiOwnable {
+contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
     // @dev Base58 decoded CID is stored WITHOUT the leading "Qm" to optimise storage space for 32 bytes as SmartVault only uses CID v0.
     bytes32[] files;
     address[] acls;
@@ -27,20 +28,19 @@ contract Profile is MultiOwnable {
         _;
     }
 
-    constructor(address _owner, address _recoveryAccount) public MultiOwnable(_owner) {
-        addOwner(_recoveryAccount);
+    constructor(address _owner) public GSNMultiOwnableRecipient(_owner) {
     }
 
-    function addFile(bytes32 _cid, address _acl) public isOwner(msg.sender) fileNotExists(_cid) {
+    function addFile(bytes32 _cid, address _acl) public isOwner(_msgSender()) fileNotExists(_cid) {
         require(ACL(_acl).hasAdmin(address(this)));
 
         files.push(_cid);
         acls.push(_acl);
 
-        emit FileAdded(msg.sender, _cid, _acl);
+        emit FileAdded(_msgSender(), _cid, _acl);
     }
 
-    function removeFile(bytes32 _cid) public isOwner(msg.sender) fileExists(_cid) {
+    function removeFile(bytes32 _cid) public isOwner(_msgSender()) fileExists(_cid) {
         (uint256 fileIndex, bool exists) = getFileIndex(_cid);
         require(exists == true);
 
@@ -51,7 +51,7 @@ contract Profile is MultiOwnable {
         files.length--;
         acls.length--;
 
-        emit FileRemoved(msg.sender, _cid, acl);
+        emit FileRemoved(_msgSender(), _cid, acl);
     }
 
     function hasFile(bytes32 _cid) view public returns (bool) {
@@ -71,17 +71,17 @@ contract Profile is MultiOwnable {
         return acls[fileIndex];
     }
 
-    function recover(address _newOwner) public isOwner(msg.sender) {
+    function recover(address _newOwner) public isOwner(_msgSender()) {
         addOwner(_newOwner);
 
         if (acls.length > 0) {
             for (uint i = 0; i <= acls.length - 1; i++) {
                 ACL(acls[i]).grantAdmin(_newOwner);
-                emit FileRecovered(files[i], acls[i], _newOwner, msg.sender);
+                emit FileRecovered(files[i], acls[i], _newOwner, _msgSender());
             }
         }
 
-        emit OwnerRecovered(_newOwner, msg.sender);
+        emit OwnerRecovered(_newOwner, _msgSender());
     }
 
     function getFileIndex(bytes32 _cid) internal view returns (uint256 index, bool exists) {
@@ -96,5 +96,33 @@ contract Profile is MultiOwnable {
         }
 
         return (0, false);
+    }
+
+    // GSN ACTIVATION
+    function initialize(address relayHub) public initializer {
+        GSNRecipient.initialize();
+        _upgradeRelayHub(relayHub);
+    }
+
+    function acceptRelayedCall(
+        address,
+        address,
+        bytes calldata,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        bytes calldata,
+        uint256
+    ) external view returns (uint256, bytes memory) {
+        return _approveRelayedCall();
+    }
+
+    function getRecipientBalance() public view returns (uint) {
+        return IRelayHub(getHubAddr()).balanceOf(address(this));
+    }
+
+    function version() public pure returns (uint256) {
+        return 3;
     }
 }
