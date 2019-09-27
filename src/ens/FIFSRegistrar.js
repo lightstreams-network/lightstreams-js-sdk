@@ -5,7 +5,7 @@
  */
 
 const Web3 = require('../web3');
-const FIFSRegistrar = require('../../build/contracts/FIFSRegistrar.json');
+const FIFSRegistrar = require('@ensdomains/ens/build/contracts/FIFSRegistrar.json');
 const namehash = require('eth-ens-namehash');
 
 module.exports = (web3) => ({

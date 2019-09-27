@@ -5,9 +5,8 @@
  */
 
 const Web3 = require('../web3');
-const PublicResolver = require('../../build/contracts/PublicResolver.json');
+const PublicResolver = require('@ensdomains/resolver/build/contracts/PublicResolver.json');
 const namehash = require('eth-ens-namehash');
-
 
 module.exports = (web3) => ({
   // bytecode MUST be an optional argument because it will depends on compiler version

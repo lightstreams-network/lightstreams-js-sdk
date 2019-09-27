@@ -3,6 +3,11 @@ const { fundRecipient } = require('@openzeppelin/gsn-helpers');
 
 module.exports = function(deployer) {
   const RELAY_HUB = `${process.env.RELAY_HUB}`;
+  const ROOT_ACCOUNT = `${process.env.ACCOUNT}`;
+
+  // Factory will be able to create 5 new individual Profiles
+  const FACTORY_PROFILE_FAUCET_FUNDING_PHT = '90';
+  const FACTORY_FUNDING_ETH = '20';
 
   let profileFactory;
 
@@ -18,13 +23,21 @@ module.exports = function(deployer) {
       return profileFactory.initialize(RELAY_HUB);
     })
     .then(() => {
-      const funds = "50";
-      console.log(`Funding GSN ProfileFactory ${profileFactory.address} with ${funds}PHTs...`);
+      console.log(`Topping up ProfileFactory with ${FACTORY_PROFILE_FAUCET_FUNDING_PHT}PHTs...`);
+
+      return web3.eth.sendTransaction({
+        from: ROOT_ACCOUNT,
+        to: profileFactory.address,
+        value: web3.utils.toWei(FACTORY_PROFILE_FAUCET_FUNDING_PHT, "ether")
+      });
+    })
+    .then(() => {
+      console.log(`Funding GSN ProfileFactory ${profileFactory.address} with ${FACTORY_FUNDING_ETH}PHTs...`);
 
       return fundRecipient(web3, {
         recipient: profileFactory.address,
         relayHubAddress: RELAY_HUB,
-        amount: web3.utils.toWei(funds, "ether")
+        amount: web3.utils.toWei(FACTORY_FUNDING_ETH, "ether")
       });
     })
 }

@@ -5,7 +5,7 @@
  */
 
 const Web3 = require('../web3');
-const ENS = require('../../build/contracts/ENSRegistry.json');
+const ENS = require('@ensdomains/ens/build/contracts/ENSRegistry.json');
 const namehash = require('eth-ens-namehash');
 const utils = require('web3-utils');
 
