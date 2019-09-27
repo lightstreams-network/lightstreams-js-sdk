@@ -5,21 +5,62 @@
  */
 
 const Web3 = require('../web3');
-const contract = require('../../build/contracts/Profile.json');
+const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
+const profileScJSON = require('../../build/contracts/GSNProfile.json');
+const { fromConnection } = require('@openzeppelin/network');
 
-module.exports.deploy = (web3, { owner, from, recoveryAccount }) => {
-  if(!owner && !from) {
-    throw new Error(`Missing contract owner`);
+module.exports.deployWithGSN = async (web3, { unlockedFromObj, profileFactoryAddr }) => {
+  if (!unlockedFromObj.address || !unlockedFromObj.privateKey) {
+    throw new Error(`Requires unlocked account's decrypted web3 obj with its address and private key attrs`);
   }
 
-  return Web3.deployContract(web3, {
-    from: from || owner,
-    abi: contract.abi,
-    bytecode: contract.bytecode,
-    params: [owner || from, recoveryAccount || '0x0000000000000000000000000000000000000000'],
-  }).then((txHash) => {
-    return Web3.getTxReceipt(web3, { txHash });
-  })
+  const gsnCtx = await fromConnection(
+    web3.currentProvider.host, {
+      gsn: {
+        dev: false,
+        signKey: unlockedFromObj.privateKey
+      }
+    });
+
+  const factoryGSN = await new gsnCtx.lib.eth.Contract(factoryScJSON.abi, profileFactoryAddr);
+
+  const txReceipt = await factoryGSN.methods.newProfile(unlockedFromObj.address).send({
+    from: unlockedFromObj.address,
+    gasPrice: "500000000000",
+    gasLimit: "7000000",
+  });
+
+  if (!txReceipt.status) {
+    throw new Error(`Failed to create a new profile. TX: ${txReceipt.transactionHash}`);
+  }
+
+  return txReceipt.events['NewProfile'].returnValues['addr'];
+};
+
+module.exports.addOwnerWithGSN = async (web3, { unlockedFromObj, ownerAddr, profileAddr }) => {
+  if (!unlockedFromObj.address || !unlockedFromObj.privateKey) {
+    throw new Error(`Requires unlocked account's decrypted web3 obj with its address and private key attrs`);
+  }
+
+  const gsnCtx = await fromConnection(
+    web3.currentProvider.host, {
+      gsn: {
+        dev: false,
+        signKey: unlockedFromObj.privateKey
+      }
+    });
+
+  const profileSc = await new gsnCtx.lib.eth.Contract(profileScJSON.abi, profileAddr);
+
+  const txReceipt = await profileSc.methods.addOwner(ownerAddr).send({
+    from: unlockedFromObj.address,
+    gasPrice: "500000000000",
+    gasLimit: "7000000",
+  });
+
+  if (!txReceipt.status) {
+    throw new Error(`Failed to add a new profile owner. TX: ${txReceipt.transactionHash}`);
+  }
 };
 
 module.exports.recover = (web3, contractAddr, { from, newOwner }) => {
@@ -30,7 +71,7 @@ module.exports.recover = (web3, contractAddr, { from, newOwner }) => {
   return Web3.contractSendTx(web3, contractAddr, {
     from: from,
     method: 'recover',
-    abi: contract.abi,
+    abi: profileScJSON.abi,
     params: [newOwner],
   }).then((txHash) => {
     return Web3.getTxReceipt(web3, { txHash });

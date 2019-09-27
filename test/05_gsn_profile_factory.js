@@ -11,15 +11,14 @@ const { isRelayHubDeployedForRecipient, getRecipientFunds } = utils;
 
 const ProfileFactory = artifacts.require("GSNProfileFactory");
 const Profile = artifacts.require("GSNProfile");
-const ACL = artifacts.require("Acl");
 
 contract('GSNProfileFactory', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
-  const RELAY_HUB = process.env.RELAYHUB;
+  const RELAY_HUB = process.env.RELAY_HUB;
 
   // Factory will be able to create 5 new individual Profiles
-  const FACTORY_PROFILE_FAUCET_FUNDING_PHT = '50';
-  const FACTORY_FUNDING_ETH = '8';
+  const FACTORY_PROFILE_FAUCET_FUNDING_PHT = '90';
+  const FACTORY_FUNDING_ETH = '20';
 
   let gsnCtx;
   let emptyAcc;
@@ -34,6 +33,8 @@ contract('GSNProfileFactory', (accounts) => {
     recoveryAcc = await web3.eth.accounts.create("secret");
 
     factory = await ProfileFactory.new();
+
+    console.log(`ProfileFactory addr: ${factory.address}`);
   });
 
   it('should initialize the GSN for ProfileFactory by configuring its RelayHub and funding it', async () => {
@@ -82,7 +83,7 @@ contract('GSNProfileFactory', (accounts) => {
     web3 = gsnCtx.lib;
     const factoryGSN = await new gsnCtx.lib.eth.Contract(factory.abi, factory.address);
 
-    const createNewProfileRes = await factoryGSN.methods.newProfile(emptyAcc.address, recoveryAcc.address).send({
+    const createNewProfileRes = await factoryGSN.methods.newProfile(emptyAcc.address).send({
       from: emptyAcc.address,
       gasPrice: gasPrice,
       gasLimit: "7000000",

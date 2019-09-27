@@ -45,6 +45,8 @@ module.exports = (opts = {}) => {
     }
   });
 
+  engine.host = rpcUrl;
+
   engine.addProvider(new FixtureSubprovider({
     web3_clientVersion: `Lightstreams/v${version}/javascript`,
     net_listening: true,
