@@ -9,8 +9,8 @@ const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
 const { fromConnection } = require('@openzeppelin/network');
 
-module.exports.deployWithGSN = async (web3, { unlockedFromObj, profileFactoryAddr }) => {
-  if (!unlockedFromObj.address || !unlockedFromObj.privateKey) {
+module.exports.deployWithGSN = async (web3, { account, profileFactoryAddr }) => {
+  if (!account.address || !account.privateKey) {
     throw new Error(`Requires unlocked account's decrypted web3 obj with its address and private key attrs`);
   }
 
@@ -18,14 +18,14 @@ module.exports.deployWithGSN = async (web3, { unlockedFromObj, profileFactoryAdd
     web3.currentProvider.host, {
       gsn: {
         dev: false,
-        signKey: unlockedFromObj.privateKey
+        signKey: account.privateKey
       }
     });
 
   const factoryGSN = await new gsnCtx.lib.eth.Contract(factoryScJSON.abi, profileFactoryAddr);
 
-  const txReceipt = await factoryGSN.methods.newProfile(unlockedFromObj.address).send({
-    from: unlockedFromObj.address,
+  const txReceipt = await factoryGSN.methods.newProfile(account.address).send({
+    from: account.address,
     gasPrice: "500000000000",
     gasLimit: "7000000",
   });
@@ -37,8 +37,8 @@ module.exports.deployWithGSN = async (web3, { unlockedFromObj, profileFactoryAdd
   return txReceipt.events['NewProfile'].returnValues['addr'];
 };
 
-module.exports.addOwnerWithGSN = async (web3, { unlockedFromObj, ownerAddr, profileAddr }) => {
-  if (!unlockedFromObj.address || !unlockedFromObj.privateKey) {
+module.exports.addOwnerWithGSN = async (web3, { account, ownerAddr, profileAddr }) => {
+  if (!account.address || !account.privateKey) {
     throw new Error(`Requires unlocked account's decrypted web3 obj with its address and private key attrs`);
   }
 
@@ -46,14 +46,14 @@ module.exports.addOwnerWithGSN = async (web3, { unlockedFromObj, ownerAddr, prof
     web3.currentProvider.host, {
       gsn: {
         dev: false,
-        signKey: unlockedFromObj.privateKey
+        signKey: account.privateKey
       }
     });
 
   const profileSc = await new gsnCtx.lib.eth.Contract(profileScJSON.abi, profileAddr);
 
   const txReceipt = await profileSc.methods.addOwner(ownerAddr).send({
-    from: unlockedFromObj.address,
+    from: account.address,
     gasPrice: "500000000000",
     gasLimit: "7000000",
   });
