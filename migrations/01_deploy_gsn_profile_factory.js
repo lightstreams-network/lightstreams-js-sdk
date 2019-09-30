@@ -5,8 +5,8 @@ module.exports = function(deployer) {
   const RELAY_HUB = `${process.env.RELAY_HUB}`;
   const ROOT_ACCOUNT = `${process.env.ACCOUNT}`;
 
-  // Factory will be able to create 5 new individual Profiles
-  const FACTORY_PROFILE_FAUCET_FUNDING_PHT = '90';
+  // Factory will be able to create 15 new individual Profiles
+  const FACTORY_PROFILE_FAUCET_FUNDING_PHT = '300';
   const FACTORY_FUNDING_ETH = '20';
 
   let profileFactory;
