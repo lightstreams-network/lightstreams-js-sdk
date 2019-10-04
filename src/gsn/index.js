@@ -6,7 +6,7 @@
 
 
 const { fromConnection } = require('@openzeppelin/network');
-const { fundRecipient: fRecipient } = require('@openzeppelin/gsn-helpers');
+const { fundRecipient: fRecipient, getRelayHub } = require('@openzeppelin/gsn-helpers');
 const web3Utils = require('web3-utils');
 
 module.exports.Web = ({ host, dev, privateKey }) => {
@@ -22,7 +22,7 @@ module.exports.Web = ({ host, dev, privateKey }) => {
 
 // From account is sending $amountInPht tokens to the relayHub to sponsor the usage
 // of the smart contract address specified at the recipient
-module.exports.fundRecipient = (web3, { from, recipient, relayHub, amountInPht }) => {
+module.exports.fundRecipient = async (web3, { from, recipient, relayHub, amountInPht }) => {
   // @TODO: Validate relayHub has funds enough
   if(!web3Utils.isAddress(from)) {
     throw new Error(`Invalid "from" address ${from}. Expected a valid eth addr`);
@@ -36,11 +36,15 @@ module.exports.fundRecipient = (web3, { from, recipient, relayHub, amountInPht }
     throw new Error(`Invalid "relayHub" address ${relayHub}. Expected a valid eth addr`);
   }
 
+  // Validate RelayHub exists at the passed address
+  await getRelayHub(web3, relayHub);
+
+
   if(isNaN(parseFloat(amountInPht))) {
     throw new Error(`Invalid "amountInPht" value ${amountInPht}. Expected a float number`);
   }
 
-  return fRecipient(web3, {
+  await fRecipient(web3, {
     from,
     recipient,
     relayHubAddress: relayHub,
