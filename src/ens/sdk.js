@@ -27,7 +27,8 @@ module.exports.deployNewRegistry = async (web3, { from }) => {
 
   // We need for few seconds till node registration is completed
   // @TODO Improve understanding of this wait
-  await waitFor(5);
+  console.log("Waiting few seconds for node to registration to completed");
+  await waitFor(3);
 
   await setNodeResolver(web3, { from, ensAddress, resolverAddress, node: defaultResolverNodeId });
   return { ensAddress, resolverAddress };

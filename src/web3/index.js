@@ -92,6 +92,14 @@ module.exports.getBalance = (web3, payload) => {
   }
 };
 
+module.exports.sendTransaction = (web3, payload) => {
+  if (isLatest(web3)) {
+    return latest.sendTransaction(web3, payload)
+  } else {
+    throw new Error('Not supported method');
+  }
+};
+
 module.exports.sendRawTransaction = (web3, rawSignedTx) => {
   if (isLatest(web3)) {
     return latest.sendRawTransaction(web3, rawSignedTx);

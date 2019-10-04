@@ -18,9 +18,8 @@
     "build": "babel src -d build/src",
     "build-single": "babel src --out-file ./build/src/index.js",
     "compile": "rm -rf ./build/contracts/*; truffle compile --all --reset",
-    "test-standalone": "truffle test --network=standalone",
-    "test-sirius": "truffle test --network=sirius",
-    "test-sirius-gsn": "truffle test ./test/02_gsn_acl_factory.js --network=sirius"
+    "test": "truffle test --reset --network",
+    "deploy": "truffle deploy --reset --network"
   },
   "repository": {
     "type": "git",

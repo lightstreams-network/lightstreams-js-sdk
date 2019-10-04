@@ -86,8 +86,15 @@ module.exports.sendRawTransaction = (web3, rawSignedTx) => {
   });
 };
 
-module.exports.sendTransaction = (web3, { to, value }) => {
-  throw new Error('Missing implementation');
+module.exports.sendTransaction = (web3, { from, to, valueInPht }) => {
+  return new Promise((resolve, reject) => {
+    web3.eth.sendTransaction({
+      from: from,
+      to: to,
+      value: web3.utils.toWei(valueInPht, "ether"),
+    }).on('transactionHash', resolve)
+      .on('error', reject);
+  });
 };
 
 module.exports.contractCall = (web3, contractAddress, { abi, from, method, params }) => {

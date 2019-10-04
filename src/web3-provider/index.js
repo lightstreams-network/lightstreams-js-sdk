@@ -12,12 +12,14 @@ const NonceSubprovider = require('web3-provider-engine/subproviders/nonce-tracke
 const FilterSubprovider = require('web3-provider-engine/subproviders/filters');
 const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 
+const { fromConnection } = require('@openzeppelin/network');
+
 const ProviderEngine = require('./engine');
 const { PersonalSubprovider } = require('./subproviders');
 const Keystore = require('../etherswallet/keystore');
 
 // @TODO Decouple from etherswallet module
-module.exports = (opts = {}) => {
+module.exports.default = (opts = {}) => {
   const { rpcUrl, ...engineOpts } = opts;
   const engine = new ProviderEngine(engineOpts);
   const version = '0.0.1';
@@ -134,4 +136,15 @@ module.exports = (opts = {}) => {
   engine.start();
 
   return engine;
+};
+
+module.exports.web3GSNProvider = ({ host, dev, privateKey }) => {
+  return fromConnection(host, {
+      gsn: {
+        dev: dev || false,
+        signKey: privateKey
+      }
+    }).then(ctx => {
+      return ctx.lib
+  });
 };
