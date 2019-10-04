@@ -6,7 +6,7 @@ module.exports = function(deployer) {
   return deployGSNFactory(web3, {
     relayHub: process.env.RELAY_HUB,
     from: process.env.ACCOUNT,
-    factoryFundingInPht: '300',
-    profileFundingInPht: '20'
+    factoryFundingInPht: process.env.GSN_PROFILE_FACTORY_FUNDING || '300',
+    profileFundingInPht: process.env.GSN_PROFILE_FUNDING || '20'
   });
 };
