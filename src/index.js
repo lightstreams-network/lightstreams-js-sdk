@@ -32,6 +32,8 @@ module.exports.ENS = {
   SDK: require('./ens/sdk'),
 };
 
+module.exports.GSN = require('./gsn');
+
 module.exports.EthersWallet = {
   Keystore: require('./etherswallet/keystore'),
   Account: require('./etherswallet/account'),

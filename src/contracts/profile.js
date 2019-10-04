@@ -5,11 +5,10 @@
  */
 
 const Web3 = require('../web3');
-const { web3GSNProvider } = require('../web3-provider');
+const { Web3: Web3GSN, fundRecipient } = require('../gsn');
 
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
-const { fundRecipient } = require('@openzeppelin/gsn-helpers');
 
 module.exports.deployGSNFactory = async (web3, { relayHub, from, factoryFundingInPht, profileFundingInPht } ) => {
   // Step 1: Deploy Profile factory smart contract
@@ -52,10 +51,12 @@ module.exports.deployGSNFactory = async (web3, { relayHub, from, factoryFundingI
   console.log(`Topped up ProfileFactory with ${factoryFundingInPht} PHTs...`);
 
   await fundRecipient(web3, {
+    from: from,
     recipient: profileFactoryAddr,
-    relayHubAddress: relayHub,
-    amount: web3.utils.toWei(profileFundingInPht, "ether")
+    relayHub: relayHub,
+    amountInPht: profileFundingInPht
   });
+  console.log(`Funded recipient ${profileFactoryAddr} with ${profileFundingInPht} PHTs...`);
 };
 
 module.exports.deployWithGSN = async (web3, { account, profileFactoryAddr }) => {
@@ -63,7 +64,7 @@ module.exports.deployWithGSN = async (web3, { account, profileFactoryAddr }) => 
     throw new Error(`Requires unlocked account's decrypted web3 obj with its address and private key attrs`);
   }
 
-  const gsnWeb3 = await web3GSNProvider({ host: web3.currentProvider.host, privateKey: account.privateKey });
+  const gsnWeb3 = await Web3GSN({ host: web3.currentProvider.host, privateKey: account.privateKey });
 
   const txHash = Web3.contractSendTx(gsnWeb3, profileFactoryAddr, {
     from: account.address,
@@ -85,7 +86,7 @@ module.exports.addOwnerWithGSN = async (web3, { account, ownerAddr, profileAddr 
     throw new Error(`Requires unlocked account's decrypted web3 obj with its address and private key attrs`);
   }
 
-  const gsnWeb3 = await web3GSNProvider({ host: web3.currentProvider.host, privateKey: account.privateKey });
+  const gsnWeb3 = await Web3GSN({ host: web3.currentProvider.host, privateKey: account.privateKey });
 
   const txHash = Web3.contractSendTx(gsnWeb3, profileAddr, {
     from: account.address,
