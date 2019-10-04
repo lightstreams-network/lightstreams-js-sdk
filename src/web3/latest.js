@@ -8,6 +8,9 @@
 const Web3 = require('web3');
 const net = require('net');
 
+// Increasing estimated gas to prevent wrong estimations
+const estimatedGasThreshold = 1000;
+
 const defaultCfg = {
   provider: process.env.WEB3_PROVIDER || 'http://locahost:8545',
   gasPrice: process.env.WEB3_GAS_PRICE || 500000000000,
@@ -135,7 +138,7 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, from, method, par
 
       sendTx.send({
         from,
-        gas: estimatedGas
+        gas: estimatedGas + estimatedGasThreshold
       }).on('transactionHash', resolve)
         .on('error', reject);
 
@@ -161,8 +164,10 @@ module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
         });
       }));
 
-      contractDeploy.send({ from, gas: estimatedGas })
-        .on('error', reject)
+      contractDeploy.send({
+        from,
+        gas: estimatedGas + estimatedGasThreshold
+      }).on('error', reject)
         .on('transactionHash', resolve)
 
     } catch(err) {

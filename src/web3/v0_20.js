@@ -4,6 +4,8 @@
  * Copyright 2019 (c) Lightstreams, Granada
  */
 
+// Increasing estimated gas to prevent wrong estimations
+const estimatedGasThreshold = 1000;
 
 const fetchGasPrice = (web3) => {
   return new Promise((resolve, reject) => {
@@ -101,7 +103,7 @@ module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
       contract.new(...params, {
         from: window.ethereum.selectedAddress,
         data: bytecode,
-        gas: estimatedGas,
+        gas: estimatedGas + estimatedGasThreshold,
         gasPrice
       }, (err, myContract) => {
         if (err) {
@@ -201,7 +203,7 @@ module.exports.contractSendTx = (web3, contractAddress, { from, abi, method, par
 
     contractInstance[method].sendTransaction(...params, {
       from,
-      gas: estimatedGas,
+      gas: estimatedGas + estimatedGasThreshold,
       value: value,
       gasPrice
     }, (err, txHash) => {

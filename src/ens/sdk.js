@@ -21,14 +21,13 @@ module.exports.deployNewRegistry = async (web3, { from }) => {
   await registerNode(web3, {
     from,
     ensAddress,
-    parentNode: '0x0000000000000000000000000000000000000000',
     subnode: defaultResolverNodeId // Default
   });
 
   // We need for few seconds till node registration is completed
   // @TODO Improve understanding of this wait
   console.log("Waiting few seconds for node to registration to completed");
-  await waitFor(3);
+  await waitFor(5);
 
   await setNodeResolver(web3, { from, ensAddress, resolverAddress, node: defaultResolverNodeId });
   return { ensAddress, resolverAddress };
@@ -45,7 +44,7 @@ module.exports.registerNode = async (web3, {ensAddress, parentNode, from, subnod
   await registerNode(web3, {
     from,
     ensAddress,
-    parentNode: parentNode || '0x0000000000000000000000000000000000000000',
+    parentNode,
     subnode
   });
 
@@ -79,6 +78,7 @@ module.exports.registerNode = async (web3, {ensAddress, parentNode, from, subnod
 // };
 
 const registerNode = async(web3, { from, ensAddress, parentNode, subnode }) => {
+  parentNode = parentNode || '0x0000000000000000000000000000000000000000';
   console.log(`Registering node "${subnode}.${parentNode}"...`);
   const txReceipt = await ENSRegistry(web3).registerNode(ensAddress, {
     from,
@@ -102,8 +102,6 @@ const setNodeResolver = async (web3, { from, node, ensAddress, resolverAddress }
   if (fetchedOwner.toLowerCase() !== from.toLowerCase()) {
     throw new Error(`Invalid node owner ${fetchedOwner}`);
   }
-
-  await waitFor(5);
 
   let txReceipt = await ENSRegistry(web3).setResolver(ensAddress, { from, resolverAddress, node });
 
