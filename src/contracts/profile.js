@@ -11,7 +11,7 @@ const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
 const { fundRecipient } = require('@openzeppelin/gsn-helpers');
 
-module.exports.deployGSNFactory = async (web3, { relayHub, from, faucetFundingInPht, fundingInPht } ) => {
+module.exports.deployGSNFactory = async (web3, { relayHub, from, factoryFundingInPht, profileFundingInPht } ) => {
   // Step 1: Deploy Profile factory smart contract
   let txHash = await Web3.deployContract(web3, {
     from,
@@ -43,18 +43,18 @@ module.exports.deployGSNFactory = async (web3, { relayHub, from, faucetFundingIn
   console.log(`Activated GSN for ProfileFactory instance for RelayHub ${relayHub}...`);
 
   // Step 3: Top up factory contract
-  txHash = await Web3.sendTransaction(web3, { from, to: profileFactoryAddr, valueInPht: faucetFundingInPht });
+  txHash = await Web3.sendTransaction(web3, { from, to: profileFactoryAddr, valueInPht: factoryFundingInPht });
   txReceipt = await Web3.getTxReceipt(web3, { txHash });
   if (!txReceipt.status) {
     console.error(txReceipt);
     throw new Error(`Tx failed ${txHash}`);
   }
-  console.log(`Topped up ProfileFactory with ${faucetFundingInPht} PHTs...`);
+  console.log(`Topped up ProfileFactory with ${factoryFundingInPht} PHTs...`);
 
   await fundRecipient(web3, {
     recipient: profileFactoryAddr,
     relayHubAddress: relayHub,
-    amount: web3.utils.toWei(fundingInPht, "ether")
+    amount: web3.utils.toWei(profileFundingInPht, "ether")
   });
 };
 
