@@ -5,12 +5,36 @@
  */
 
 const Web3 = require('../web3');
-const { Web3: Web3GSN, fundRecipient } = require('../gsn');
+const { Web3: Web3GSN, fundRecipient, isRelayHubDeployed } = require('../gsn');
+const web3Utils = require('web3-utils');
 
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
 
 module.exports.deployGSNFactory = async (web3, { relayHub, from, factoryFundingInPht, profileFundingInPht }) => {
+
+  // Step 0: Validate arguments
+  if (!web3Utils.isAddress(from)) {
+    throw new Error(`Invalid argument "from": ${from}. Expected eth address`);
+  }
+
+  if (!web3Utils.isAddress(relayHub)) {
+    throw new Error(`Invalid argument "relayHub": ${relayHub}. Expected eth address`);
+  }
+
+  if (isNaN(parseFloat(factoryFundingInPht))) {
+    throw new Error(`Invalid "factoryFundingInPht" value ${factoryFundingInPht}. Expected a float number`);
+  }
+
+  if (isNaN(parseFloat(profileFundingInPht))) {
+    throw new Error(`Invalid "profileFundingInPht" value ${profileFundingInPht}. Expected a float number`);
+  }
+
+  const isRelayHub = await isRelayHubDeployed(web3, {relayHub});
+  if(!isRelayHub) {
+    throw new Error(`RelayHub is not found at ${relayHub}`);
+  }
+
   // Step 1: Deploy Profile factory smart contract
   console.log(`Deploying profile factory...`);
   let txHash = await Web3.deployContract(web3, {

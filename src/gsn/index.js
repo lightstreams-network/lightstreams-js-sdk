@@ -51,3 +51,14 @@ module.exports.fundRecipient = async (web3, { from, recipient, relayHub, amountI
     amount: web3.utils.toWei(amountInPht, "ether")
   });
 };
+
+module.exports.isRelayHubDeployed = async (web3, { relayHub }) => {
+  try {
+    // Validate RelayHub exists at the passed address
+    await getRelayHub(web3, relayHub);
+    return true;
+  } catch(err) {
+    console.error(err);
+    return false;
+  }
+};
