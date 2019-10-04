@@ -152,7 +152,7 @@ module.exports.getAccounts = (web3) => {
   });
 };
 
-module.exports.toWei = (web3, {pht}) => {
+module.exports.toWei = (web3, { pht }) => {
   if (isLatest(web3)) {
     return web3.utils.toWei(pht)
   } else if (isV0_20(web3)) {

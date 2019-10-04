@@ -9,7 +9,7 @@ const Web3 = require('web3');
 const net = require('net');
 
 // Increasing estimated gas to prevent wrong estimations
-const estimatedGasThreshold = 100000;
+const estimatedGasThreshold = 50000;
 
 const defaultCfg = {
   provider: process.env.WEB3_PROVIDER || 'http://locahost:8545',
@@ -59,7 +59,7 @@ module.exports.getTxReceipt = (web3, { txHash, timeoutInSec }) => {
   return new Promise((resolve, reject) => {
     fetchTxReceipt(web3, txHash, (new Date()).getTime() + (timeoutInSec || 15) * 1000).then(receipt => {
       if (!receipt) {
-        reject()
+        reject(new Error(`Cannot fetch tx receipt ${txHash}`))
       }
       resolve(receipt);
     }).catch(reject);
@@ -118,8 +118,6 @@ module.exports.contractCall = (web3, contractAddress, { abi, from, method, param
 module.exports.contractSendTx = (web3, contractAddress, { abi, from, method, params, value }) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if(method === 'setOwner') debugger;
-
       const contract = new web3.eth.Contract(abi, contractAddress);
       if(typeof contract.methods[method] !== 'function') {
         throw new Error(`Method ${method} is not available`);

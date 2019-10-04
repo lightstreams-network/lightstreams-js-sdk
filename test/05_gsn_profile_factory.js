@@ -4,8 +4,8 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const assert = chai.assert;
 
-const { fundRecipient } = require('@openzeppelin/gsn-helpers');
-const { fromConnection, useEphemeralKey } = require('@openzeppelin/network');
+const { fundRecipient } = require('../src/gsn');
+const { fromConnection } = require('@openzeppelin/network');
 const { utils } = require('@openzeppelin/gsn-provider');
 const { isRelayHubDeployedForRecipient, getRecipientFunds } = utils;
 
@@ -32,7 +32,7 @@ contract('GSNProfileFactory', (accounts) => {
     emptyAcc = await web3.eth.accounts.create("secret");
     recoveryAcc = await web3.eth.accounts.create("secret");
 
-    factory = await ProfileFactory.new();
+    factory = await ProfileFactory.new(FACTORY_FUNDING_ETH);
 
     console.log(`ProfileFactory addr: ${factory.address}`);
   });
@@ -57,8 +57,8 @@ contract('GSNProfileFactory', (accounts) => {
     // Required to register the Recipient in RelayHub
     const balance = await fundRecipient(web3, {
       recipient: factoryAddr,
-      relayHubAddress: RELAY_HUB,
-      amount: web3.utils.toWei(FACTORY_FUNDING_ETH, "ether"),
+      relayHub: RELAY_HUB,
+      amountInPht: FACTORY_FUNDING_ETH,
       from: ROOT_ACCOUNT
     });
 

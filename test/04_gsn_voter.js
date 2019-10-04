@@ -4,7 +4,7 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const assert = chai.assert;
 
-const { fundRecipient } = require('@openzeppelin/gsn-helpers');
+const { fundRecipient } = require('../src/gsn');
 const { fromConnection } = require('@openzeppelin/network');
 const { utils } = require('@openzeppelin/gsn-provider');
 const { isRelayHubDeployedForRecipient, getRecipientFunds } = utils;
@@ -41,8 +41,8 @@ contract('Voter', (accounts) => {
     const voterFundingPHTs = "10";
     const balance = await fundRecipient(web3, {
       recipient: voterAddr,
-      relayHubAddress: RELAY_HUB,
-      amount: web3.utils.toWei(voterFundingPHTs, "ether"),
+      relayHub: RELAY_HUB,
+      amountInPht: voterFundingPHTs,
       from: ROOT_ACCOUNT
     });
 

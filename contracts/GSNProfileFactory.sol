@@ -8,9 +8,13 @@ import "./GSNProfile.sol";
  * @author Lukas Lukac, Lightstreams, 22.9.2019
  */
 contract GSNProfileFactory is GSN {
-    uint256 constant public profileFunding = 20 ether;
+    uint256 public profileFunding;
 
     event NewProfile(address addr, address owner);
+
+    constructor(uint256 _profileFunding) public {
+        profileFunding = _profileFunding;
+    }
 
     function() payable external {}
 

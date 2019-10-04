@@ -10,12 +10,14 @@ const { Web3: Web3GSN, fundRecipient } = require('../gsn');
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
 
-module.exports.deployGSNFactory = async (web3, { relayHub, from, factoryFundingInPht, profileFundingInPht } ) => {
+module.exports.deployGSNFactory = async (web3, { relayHub, from, factoryFundingInPht, profileFundingInPht }) => {
   // Step 1: Deploy Profile factory smart contract
+  console.log(`Deploying profile factory...`);
   let txHash = await Web3.deployContract(web3, {
     from,
     abi: factoryScJSON.abi,
     bytecode: factoryScJSON.bytecode,
+    params: [Web3.toWei(web3, { pht: profileFundingInPht })]
   });
 
   let txReceipt = await Web3.getTxReceipt(web3, { txHash });
@@ -51,12 +53,13 @@ module.exports.deployGSNFactory = async (web3, { relayHub, from, factoryFundingI
   console.log(`Topped up ProfileFactory with ${factoryFundingInPht} PHTs...`);
 
   await fundRecipient(web3, {
-    from: from,
+    from,
     recipient: profileFactoryAddr,
     relayHub: relayHub,
     amountInPht: profileFundingInPht
   });
-  console.log(`Funded recipient ${profileFactoryAddr} with ${profileFundingInPht} PHTs...`);
+
+  console.log(`Recipient ${profileFactoryAddr} is sponsored by relayHub with ${profileFundingInPht} PHTs...`);
 };
 
 module.exports.deployWithGSN = async (web3, { account, profileFactoryAddr }) => {
