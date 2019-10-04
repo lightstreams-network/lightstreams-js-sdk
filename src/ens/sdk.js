@@ -48,6 +48,11 @@ module.exports.registerNode = async (web3, {ensAddress, parentNode, from, subnod
     subnode
   });
 
+  // We need for few seconds till node registration is completed
+  // @TODO Improve understanding of this wait
+  console.log("Waiting few seconds for node to registration to completed");
+  await waitFor(5);
+
   await setNodeResolver(web3, {
     from,
     ensAddress,
@@ -91,7 +96,7 @@ const registerNode = async(web3, { from, ensAddress, parentNode, subnode }) => {
     console.error(txReceipt);
     throw new Error(`Failed to register node ${subnode}.${parentNode}}`)
   } else {
-    console.log(`Node "${subnode}.${parentNode}" registered successfully`);
+    console.log(`Node "${subnode}.${parentNode}" registered successfully (${txReceipt.cumulativeGasUsed} usedGas)`);
   }
 };
 

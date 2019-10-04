@@ -51,12 +51,12 @@ module.exports = (web3) => ({
       return Web3.getTxReceipt(web3, { txHash });
     });
   },
-  setOwner: (contractAddress, { from, node, newOwnerAddr }) => {
+  setOwner: (contractAddress, { from, node, newOwner }) => {
     return Web3.contractSendTx(web3, contractAddress, {
       from: from,
       abi: ENS.abi,
       method: 'setOwner',
-      params: [namehash.hash(FANBASE_NODE), newOwnerAddr],
+      params: [namehash.hash(node), newOwner],
     }).then((txHash) => {
       return Web3.getTxReceipt(web3, { txHash });
     });
