@@ -9,7 +9,7 @@ const { fromConnection } = require('@openzeppelin/network');
 const { fundRecipient: fRecipient, getRelayHub } = require('@openzeppelin/gsn-helpers');
 const web3Utils = require('web3-utils');
 
-module.exports.Web = ({ host, dev, privateKey }) => {
+module.exports.Web3 = ({ host, dev, privateKey }) => {
   return fromConnection(host, {
     gsn: {
       dev: dev || false,

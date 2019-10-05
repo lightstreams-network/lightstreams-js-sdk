@@ -16,8 +16,6 @@ module.exports = (web3) => ({
       from,
       abi: ENS.abi,
       bytecode: bytecode || ENS.bytecode,
-    }).then((txHash) => {
-      return Web3.getTxReceipt(web3, { txHash });
     })
   },
   registerNode: (contractAddress, { from, parentNode, subnode, owner }) => {
@@ -34,8 +32,6 @@ module.exports = (web3) => ({
         subnode.indexOf('0x') === 0 ? subnode : utils.sha3(subnode), // subdomain
         owner || from
       ],
-    }).then((txHash) => {
-      return Web3.getTxReceipt(web3, { txHash });
     });
   },
   setResolver: (contractAddress, { from, resolverAddress, node, owner }) => {
@@ -47,8 +43,6 @@ module.exports = (web3) => ({
         node.indexOf('0x') === 0 ? node : namehash.hash(node), //node
         resolverAddress
       ],
-    }).then((txHash) => {
-      return Web3.getTxReceipt(web3, { txHash });
     });
   },
   setOwner: (contractAddress, { from, node, newOwner }) => {
@@ -57,9 +51,7 @@ module.exports = (web3) => ({
       abi: ENS.abi,
       method: 'setOwner',
       params: [namehash.hash(node), newOwner],
-    }).then((txHash) => {
-      return Web3.getTxReceipt(web3, { txHash });
-    });
+    })
   },
   owner: (contractAddress, { node }) => {
     return Web3.contractCall(web3, contractAddress, {

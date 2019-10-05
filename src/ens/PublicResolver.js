@@ -16,8 +16,6 @@ module.exports = (web3) => ({
       abi: PublicResolver.abi,
       bytecode: bytecode || PublicResolver.bytecode,
       params: [ensAddress]
-    }).then((txHash) => {
-      return Web3.getTxReceipt(web3, { txHash });
     })
   },
   setAddr: (contractAddress, { from, node, address, owner }) => {
@@ -29,8 +27,6 @@ module.exports = (web3) => ({
         node.indexOf('0x') === 0 ? node : namehash.hash(node), //node
         address
       ],
-    }).then((txHash) => {
-      return Web3.getTxReceipt(web3, { txHash });
-    });
+    })
   }
 });

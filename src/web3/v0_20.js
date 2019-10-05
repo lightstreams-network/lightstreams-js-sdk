@@ -60,6 +60,27 @@ const fetchTxReceipt = (web3, txHash, expiredAt) => {
   });
 };
 
+const getTxReceipt = (web3, { txHash, timeoutInSec }) => {
+  return new Promise((resolve, reject) => {
+    fetchTxReceipt(web3, txHash, (new Date()).getTime() + (timeoutInSec || 15) * 1000).then(receipt => {
+      if (!receipt) {
+        reject()
+      }
+      resolve(receipt);
+    }).catch(reject)
+  });
+};
+
+const handleReceipt = (web3, {txHash, resolve, reject}) => {
+  getTxReceipt(web3, { txHash }).then(txReceipt => {
+    if (!txReceipt.status) {
+      reject(new Error(`Failed tx ${txHash}`))
+    }
+    resolve(txReceipt);
+  });
+};
+
+
 module.exports.networkVersion = (web3) => {
   return new Promise((resolve, reject) => {
     web3.version.getNetwork((err, netId) => {
@@ -114,7 +135,7 @@ module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
         // Once the contract has the transactionHash property set and once its deployed on an address.
         // e.g. check tx hash on the first call (transaction send)
         if (!myContract.address) {
-          resolve(myContract.transactionHash) // The hash of the transaction, which deploys the contract
+          handleReceipt(web3, { txHash: myContract.transactionHash, resolve, reject });  // The hash of the transaction, which deploys the contract
         }
         // else {
         //   resolve(myContract);
@@ -144,11 +165,11 @@ module.exports.sendTransaction = (web3, { to, value }) => {
       value: value,
       gas: 21000,
       gasPrice
-    }, (err, result) => {
+    }, (err, txHash) => {
       if (err) {
         reject(err)
       }
-      resolve(result);
+      handleReceipt(web3, { txHash, resolve, reject });
     })
   });
 };
@@ -208,18 +229,9 @@ module.exports.contractSendTx = (web3, contractAddress, { from, abi, method, par
       gasPrice
     }, (err, txHash) => {
       if (err) reject(err);
-      resolve(txHash);
+      handleReceipt(web3, { txHash, resolve, reject });
     });
   });
 };
 
-module.exports.getTxReceipt = (web3, { txHash, timeoutInSec }) => {
-  return new Promise((resolve, reject) => {
-    fetchTxReceipt(web3, txHash, (new Date()).getTime() + (timeoutInSec || 15) * 1000).then(receipt => {
-      if (!receipt) {
-        reject()
-      }
-      resolve(receipt);
-    }).catch(reject)
-  });
-};
+module.exports.getTxReceipt = getTxReceipt;

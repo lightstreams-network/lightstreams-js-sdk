@@ -61,10 +61,6 @@ class AccountPage extends Component {
       .then(rawSignedTx => {
         return lw.Web3.sendRawTransaction(web3, rawSignedTx);
       })
-      .then(txHash => {
-        console.log('Tx: ', txHash);
-        return lw.Web3.getTxReceipt(web3, txHash);
-      })
       .then(receipt => {
         console.log('Receipt: ', receipt);
       })
@@ -76,10 +72,6 @@ class AccountPage extends Component {
     lw.Signing.signDeployContractTx(web3, ksVault, pwDerivedKey, { from, bytecode })
       .then(rawSignedTx => {
         return lw.Web3.sendRawTransaction(web3, rawSignedTx);
-      })
-      .then(txHash => {
-        console.log('Tx: ', txHash);
-        return lw.Web3.getTxReceipt(web3, txHash);
       })
       .then(receipt => {
         console.log('Receipt: ', receipt);
@@ -130,10 +122,6 @@ class AccountPage extends Component {
       .then(rawSignedTx => {
         return lw.Web3.sendRawTransaction(web3, rawSignedTx);
       })
-      .then(txHash => {
-        console.log('Tx: ', txHash);
-        return lw.Web3.getTxReceipt(web3, txHash);
-      })
       .then(receipt => {
         console.log('Receipt: ', receipt);
       })
@@ -144,7 +132,7 @@ class AccountPage extends Component {
   }
 
   render() {
-    const { addresses, seedPhrase, balances } = this.state;
+    const { addresses, seedPhrase } = this.state;
 
     return (
       <div>

@@ -32,6 +32,26 @@ const fetchTxReceipt = async (web3, txHash, expiredAt) => {
   return receipt
 };
 
+const getTxReceipt = (web3, { txHash, timeoutInSec }) => {
+  return new Promise((resolve, reject) => {
+    fetchTxReceipt(web3, txHash, (new Date()).getTime() + (timeoutInSec || 15) * 1000).then(receipt => {
+      if (!receipt) {
+        reject(new Error(`Cannot fetch tx receipt ${txHash}`))
+      }
+      resolve(receipt);
+    }).catch(reject);
+  });
+};
+
+const handleReceipt = (web3, {txHash, resolve, reject}) => {
+  getTxReceipt(web3, { txHash }).then(txReceipt => {
+    if (!txReceipt.status) {
+      reject(new Error(`Failed tx ${txHash}`))
+    }
+    resolve(txReceipt);
+  });
+};
+
 module.exports.initialize = async (provider, options = {}) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -55,16 +75,7 @@ module.exports.networkVersion = (web3) => {
   })
 };
 
-module.exports.getTxReceipt = (web3, { txHash, timeoutInSec }) => {
-  return new Promise((resolve, reject) => {
-    fetchTxReceipt(web3, txHash, (new Date()).getTime() + (timeoutInSec || 15) * 1000).then(receipt => {
-      if (!receipt) {
-        reject(new Error(`Cannot fetch tx receipt ${txHash}`))
-      }
-      resolve(receipt);
-    }).catch(reject);
-  });
-};
+module.exports.getTxReceipt = getTxReceipt;
 
 module.exports.getBalance = (web3, { address }) => {
   return new Promise(async (resolve, reject) => {
@@ -79,12 +90,12 @@ module.exports.getBalance = (web3, { address }) => {
 
 module.exports.sendRawTransaction = (web3, rawSignedTx) => {
   return new Promise((resolve, reject) => {
-    web3.eth.sendSignedTransaction(rawSignedTx, (err, hash) => {
+    web3.eth.sendSignedTransaction(rawSignedTx, (err, txHash) => {
       if (err) {
         reject(err);
       }
 
-      resolve(hash);
+      handleReceipt(web3, {txHash, resolve, reject});
     });
   });
 };
@@ -95,8 +106,9 @@ module.exports.sendTransaction = (web3, { from, to, valueInPht }) => {
       from: from,
       to: to,
       value: web3.utils.toWei(valueInPht, "ether"),
-    }).on('transactionHash', resolve)
-      .on('error', reject);
+    }).on('transactionHash', (txHash) => {
+      handleReceipt(web3, {txHash, resolve, reject});
+    }).on('error', reject);
   });
 };
 
@@ -140,8 +152,9 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, from, method, par
         from,
         value,
         gas: estimatedGas + estimatedGasThreshold
-      }).on('transactionHash', resolve)
-        .on('error', reject);
+      }).on('transactionHash', (txHash) => {
+        handleReceipt(web3, {txHash, resolve, reject});
+      }).on('error', reject);
 
     } catch ( err ) {
       reject(err);
@@ -169,7 +182,9 @@ module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
         from,
         gas: estimatedGas + estimatedGasThreshold
       }).on('error', reject)
-        .on('transactionHash', resolve)
+        .on('transactionHash', (txHash) => {
+          handleReceipt(web3, {txHash, resolve, reject});
+        })
 
     } catch(err) {
       reject(err);
