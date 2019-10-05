@@ -3,7 +3,6 @@
  * Date: 14/08/19 15:44
  * Copyright 2019 (c) Lightstreams, Granada
  */
-
 const Web3 = require('../web3');
 const { fundRecipient, isRelayHubDeployed } = require('../gsn');
 const web3Utils = require('web3-utils');
@@ -30,7 +29,7 @@ module.exports.deployProfileFactory = async (web3, { relayHub, from, factoryFund
     throw new Error(`Invalid "profileFundingInPht" value ${profileFundingInPht}. Expected a float number`);
   }
 
-  const isRelayHub = await isRelayHubDeployed(web3, {relayHub});
+  const isRelayHub = await isRelayHubDeployed(web3, { relayHub });
   if(!isRelayHub) {
     throw new Error(`RelayHub is not found at ${relayHub}`);
   }

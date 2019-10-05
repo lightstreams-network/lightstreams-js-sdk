@@ -9,7 +9,7 @@ const Web3 = require('web3');
 const net = require('net');
 
 // Increasing estimated gas to prevent wrong estimations
-const estimatedGasThreshold = 50000;
+const gasThreshold = 200000;
 
 const defaultCfg = {
   provider: process.env.WEB3_PROVIDER || 'http://locahost:8545',
@@ -50,6 +50,23 @@ const handleReceipt = (web3, {txHash, resolve, reject}) => {
     }
     resolve(txReceipt);
   });
+};
+
+const calculateEstimatedGas = (method, params) => {
+  return new Promise((resolve, reject) => {
+    method.estimateGas(params, (err, estimatedGas) => {
+      if (err) reject(err);
+      // if (err) {
+      //   debugger;
+      //   resolve(9000000);
+      // }
+      else {
+        const gas = estimatedGas + gasThreshold;
+        console.log(gas);
+        resolve(gas);
+      }
+    });
+  })
 };
 
 module.exports.initialize = async (provider, options = {}) => {
@@ -137,21 +154,12 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, from, method, par
 
 
       const sendTx = contract.methods[method](...params);
-      const estimatedGas = await (new Promise((resolve, reject) => {
-        sendTx.estimateGas({ from, value }, (err, gas) => {
-          if (err) reject(err);
-          // if (err) {
-          //   debugger;
-          //   resolve(9000000);
-          // }
-          else resolve(gas);
-        });
-      }));
+      const estimatedGas = await calculateEstimatedGas(sendTx, { from, value });
 
       sendTx.send({
         from,
         value,
-        gas: estimatedGas + estimatedGasThreshold
+        gas: estimatedGas
       }).on('transactionHash', (txHash) => {
         handleReceipt(web3, {txHash, resolve, reject});
       }).on('error', reject);
@@ -167,20 +175,11 @@ module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
     try {
       const contract = new web3.eth.Contract(abi);
       const contractDeploy = contract.deploy({ data: bytecode, arguments: params || [] });
-      const estimatedGas = await (new Promise((resolve, reject) => {
-        contractDeploy.estimateGas({ from }, (err, gas) => {
-          if (err) reject(err);
-          // if (err) {
-          //   debugger;
-          //   resolve(9000000);
-          // }
-          else resolve(gas);
-        });
-      }));
+      const estimatedGas = await calculateEstimatedGas(contractDeploy, { from });
 
       contractDeploy.send({
         from,
-        gas: estimatedGas + estimatedGasThreshold
+        gas: estimatedGas
       }).on('error', reject)
         .on('transactionHash', (txHash) => {
           handleReceipt(web3, {txHash, resolve, reject});
