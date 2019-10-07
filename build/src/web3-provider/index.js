@@ -29,13 +29,10 @@ var FilterSubprovider = require('web3-provider-engine/subproviders/filters');
 
 var RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 
-var _require = require('@openzeppelin/network'),
-    fromConnection = _require.fromConnection;
-
 var ProviderEngine = require('./engine');
 
-var _require2 = require('./subproviders'),
-    PersonalSubprovider = _require2.PersonalSubprovider;
+var _require = require('./subproviders'),
+    PersonalSubprovider = _require.PersonalSubprovider;
 
 var Keystore = require('../etherswallet/keystore'); // @TODO Decouple from etherswallet module
 
@@ -180,18 +177,4 @@ module.exports["default"] = function () {
 
   engine.start();
   return engine;
-};
-
-module.exports.web3GSNProvider = function (_ref4) {
-  var host = _ref4.host,
-      dev = _ref4.dev,
-      privateKey = _ref4.privateKey;
-  return fromConnection(host, {
-    gsn: {
-      dev: dev || false,
-      signKey: privateKey
-    }
-  }).then(function (ctx) {
-    return ctx.lib;
-  });
 };

@@ -10,7 +10,7 @@ const web3Utils = require('web3-utils');
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
 
-module.exports.deployProfileFactory = async (web3, { relayHub, from, factoryFundingInPht, profileFundingInPht }) => {
+module.exports.initializeProfileFactory = async (web3, { profileFactoryAddr, relayHub, from, factoryFundingInPht, profileFundingInPht }) => {
 
   // Step 0: Validate arguments
   if (!web3Utils.isAddress(from)) {
@@ -19,6 +19,10 @@ module.exports.deployProfileFactory = async (web3, { relayHub, from, factoryFund
 
   if (!web3Utils.isAddress(relayHub)) {
     throw new Error(`Invalid argument "relayHub": ${relayHub}. Expected eth address`);
+  }
+
+  if (!web3Utils.isAddress(profileFactoryAddr)) {
+    throw new Error(`Invalid argument "profileFactoryAddr": ${profileFactoryAddr}. Expected eth address`);
   }
 
   if (isNaN(parseFloat(factoryFundingInPht))) {
@@ -35,16 +39,16 @@ module.exports.deployProfileFactory = async (web3, { relayHub, from, factoryFund
   }
 
   // Step 1: Deploy Profile factory smart contract
-  console.log(`Deploying profile factory...`);
-  const txReceipt = await Web3.deployContract(web3, {
-    from,
-    abi: factoryScJSON.abi,
-    bytecode: factoryScJSON.bytecode,
-    params: [Web3.toWei(web3, { pht: profileFundingInPht })]
-  });
-
-  const profileFactoryAddr = txReceipt.contractAddress;
-  console.log(`GSNProfileFactory.sol successfully deployed at ${profileFactoryAddr}!`);
+  // console.log(`Deploying profile factory...`);
+  // const txReceipt = await Web3.deployContract(web3, {
+  //   from,
+  //   abi: factoryScJSON.abi,
+  //   bytecode: factoryScJSON.bytecode,
+  //   params: [Web3.toWei(web3, profileFundingInPht)]
+  // });
+  //
+  // const profileFactoryAddr = txReceipt.contractAddress;
+  // console.log(`GSNProfileFactory.sol successfully deployed at ${profileFactoryAddr}!`);
 
   // Step 2: Initialize gsn feature within profile factory contract
   await Web3.contractSendTx(web3, profileFactoryAddr, {

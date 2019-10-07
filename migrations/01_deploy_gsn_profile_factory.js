@@ -1,13 +1,23 @@
-const { deployProfileFactory } = require('../src/contracts/profile');
+const { initializeProfileFactory } = require('../src/contracts/profile');
+const Web3 = require('../src/web3');
+
+const ProfileFactory = artifacts.require("GSNProfileFactory");
 
 module.exports = function(deployer) {
+  const profileFundingInPht = process.env.GSN_PROFILE_FUNDING || '20';
+  const factoryFundingInPht = process.env.GSN_PROFILE_FACTORY_FUNDING || '300';
+  const profileFundingInWei = Web3.toWei(web3, profileFundingInPht);
+  const relayHub = process.env.RELAY_HUB;
+
   // Factory is funded with 300 PHT and 20 PHT for every new profile created.
   // Therefore the total amount of pre-funded profiles will be of 300/20 = 15 profiles
-  return deployProfileFactory(web3, {
-    relayHub: process.env.RELAY_HUB,
-    from: process.env.ACCOUNT,
-    factoryFundingInPht: process.env.GSN_PROFILE_FACTORY_FUNDING || '300',
-    profileFundingInPht: process.env.GSN_PROFILE_FUNDING || '20'
+  deployer.deploy(ProfileFactory, profileFundingInWei).then(instance => {
+    return initializeProfileFactory(web3, {
+      profileFactoryAddr: instance.address,
+      relayHub: relayHub,
+      from: process.env.ACCOUNT,
+      factoryFundingInPht: factoryFundingInPht,
+      profileFundingInPht: profileFundingInPht
+    });
   });
-
 };

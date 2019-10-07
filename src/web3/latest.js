@@ -62,7 +62,6 @@ const calculateEstimatedGas = (method, params) => {
       // }
       else {
         const gas = estimatedGas + gasThreshold;
-        console.log(gas);
         resolve(gas);
       }
     });

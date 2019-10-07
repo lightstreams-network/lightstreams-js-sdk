@@ -11,58 +11,86 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
  */
 var Web3 = require('../web3');
 
-var _require = require('../web3-provider'),
-    web3GSNProvider = _require.web3GSNProvider;
+var _require = require('../gsn'),
+    fundRecipient = _require.fundRecipient,
+    isRelayHubDeployed = _require.isRelayHubDeployed;
+
+var web3Utils = require('web3-utils');
 
 var factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 
 var profileScJSON = require('../../build/contracts/GSNProfile.json');
 
-var _require2 = require('@openzeppelin/gsn-helpers'),
-    fundRecipient = _require2.fundRecipient;
-
-module.exports.deployGSNFactory =
+module.exports.initializeProfileFactory =
 /*#__PURE__*/
 function () {
   var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee(web3, _ref) {
-    var relayHub, from, factoryFundingInPht, profileFundingInPht, txHash, txReceipt, profileFactoryAddr;
+    var profileFactoryAddr, relayHub, from, factoryFundingInPht, profileFundingInPht, isRelayHub;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            relayHub = _ref.relayHub, from = _ref.from, factoryFundingInPht = _ref.factoryFundingInPht, profileFundingInPht = _ref.profileFundingInPht;
-            _context.next = 3;
-            return Web3.deployContract(web3, {
-              from: from,
-              abi: factoryScJSON.abi,
-              bytecode: factoryScJSON.bytecode
-            });
+            profileFactoryAddr = _ref.profileFactoryAddr, relayHub = _ref.relayHub, from = _ref.from, factoryFundingInPht = _ref.factoryFundingInPht, profileFundingInPht = _ref.profileFundingInPht;
 
-          case 3:
-            txHash = _context.sent;
-            _context.next = 6;
-            return Web3.getTxReceipt(web3, {
-              txHash: txHash
-            });
-
-          case 6:
-            txReceipt = _context.sent;
-
-            if (txReceipt.status) {
-              _context.next = 10;
+            if (web3Utils.isAddress(from)) {
+              _context.next = 3;
               break;
             }
 
-            console.error(txReceipt);
-            throw new Error("Tx failed ".concat(txHash));
+            throw new Error("Invalid argument \"from\": ".concat(from, ". Expected eth address"));
 
-          case 10:
-            profileFactoryAddr = txReceipt.contractAddress;
-            console.log("GSNProfileFactory.sol successfully deployed at ".concat(profileFactoryAddr, "!")); // Step 2: Initialize gsn feature within profile factory contract
+          case 3:
+            if (web3Utils.isAddress(relayHub)) {
+              _context.next = 5;
+              break;
+            }
 
-            _context.next = 14;
+            throw new Error("Invalid argument \"relayHub\": ".concat(relayHub, ". Expected eth address"));
+
+          case 5:
+            if (web3Utils.isAddress(profileFactoryAddr)) {
+              _context.next = 7;
+              break;
+            }
+
+            throw new Error("Invalid argument \"profileFactoryAddr\": ".concat(profileFactoryAddr, ". Expected eth address"));
+
+          case 7:
+            if (!isNaN(parseFloat(factoryFundingInPht))) {
+              _context.next = 9;
+              break;
+            }
+
+            throw new Error("Invalid \"factoryFundingInPht\" value ".concat(factoryFundingInPht, ". Expected a float number"));
+
+          case 9:
+            if (!isNaN(parseFloat(profileFundingInPht))) {
+              _context.next = 11;
+              break;
+            }
+
+            throw new Error("Invalid \"profileFundingInPht\" value ".concat(profileFundingInPht, ". Expected a float number"));
+
+          case 11:
+            _context.next = 13;
+            return isRelayHubDeployed(web3, {
+              relayHub: relayHub
+            });
+
+          case 13:
+            isRelayHub = _context.sent;
+
+            if (isRelayHub) {
+              _context.next = 16;
+              break;
+            }
+
+            throw new Error("RelayHub is not found at ".concat(relayHub));
+
+          case 16:
+            _context.next = 18;
             return Web3.contractSendTx(web3, profileFactoryAddr, {
               from: from,
               abi: factoryScJSON.abi,
@@ -70,62 +98,31 @@ function () {
               params: [relayHub]
             });
 
-          case 14:
-            txHash = _context.sent;
-            _context.next = 17;
-            return Web3.getTxReceipt(web3, {
-              txHash: txHash
-            });
-
-          case 17:
-            txReceipt = _context.sent;
-
-            if (txReceipt.status) {
-              _context.next = 21;
-              break;
-            }
-
-            console.error(txReceipt);
-            throw new Error("Tx failed ".concat(txHash));
-
-          case 21:
+          case 18:
             console.log("Activated GSN for ProfileFactory instance for RelayHub ".concat(relayHub, "...")); // Step 3: Top up factory contract
 
-            _context.next = 24;
+            _context.next = 21;
             return Web3.sendTransaction(web3, {
               from: from,
               to: profileFactoryAddr,
               valueInPht: factoryFundingInPht
             });
 
-          case 24:
-            txHash = _context.sent;
-            _context.next = 27;
-            return Web3.getTxReceipt(web3, {
-              txHash: txHash
-            });
-
-          case 27:
-            txReceipt = _context.sent;
-
-            if (txReceipt.status) {
-              _context.next = 31;
-              break;
-            }
-
-            console.error(txReceipt);
-            throw new Error("Tx failed ".concat(txHash));
-
-          case 31:
+          case 21:
             console.log("Topped up ProfileFactory with ".concat(factoryFundingInPht, " PHTs..."));
-            _context.next = 34;
+            _context.next = 24;
             return fundRecipient(web3, {
+              from: from,
               recipient: profileFactoryAddr,
-              relayHubAddress: relayHub,
-              amount: web3.utils.toWei(profileFundingInPht, "ether")
+              relayHub: relayHub,
+              amountInPht: profileFundingInPht
             });
 
-          case 34:
+          case 24:
+            console.log("Recipient ".concat(profileFactoryAddr, " is sponsored by relayHub with ").concat(profileFundingInPht, " PHTs..."));
+            return _context.abrupt("return", profileFactoryAddr);
+
+          case 26:
           case "end":
             return _context.stop();
         }
@@ -138,13 +135,13 @@ function () {
   };
 }();
 
-module.exports.deployWithGSN =
+module.exports.deployProfile =
 /*#__PURE__*/
 function () {
   var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(web3, _ref3) {
-    var account, profileFactoryAddr, gsnWeb3, txHash, txReceipt;
+    var account, profileFactoryAddr, txReceipt;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -160,38 +157,18 @@ function () {
 
           case 3:
             _context2.next = 5;
-            return web3GSNProvider({
-              host: web3.currentProvider.host,
-              privateKey: account.privateKey
-            });
-
-          case 5:
-            gsnWeb3 = _context2.sent;
-            txHash = Web3.contractSendTx(gsnWeb3, profileFactoryAddr, {
+            return Web3.contractSendTx(web3, profileFactoryAddr, {
               from: account.address,
               abi: factoryScJSON.abi,
               method: 'newProfile',
               params: [RELAY_HUB]
             });
-            _context2.next = 9;
-            return Web3.getTxReceipt(web3, {
-              txHash: txHash
-            });
 
-          case 9:
+          case 5:
             txReceipt = _context2.sent;
-
-            if (txReceipt.status) {
-              _context2.next = 12;
-              break;
-            }
-
-            throw new Error("Failed to create a new profile. TX: ".concat(txHash));
-
-          case 12:
             return _context2.abrupt("return", txReceipt.events['NewProfile'].returnValues['addr']);
 
-          case 13:
+          case 7:
           case "end":
             return _context2.stop();
         }
@@ -204,13 +181,13 @@ function () {
   };
 }();
 
-module.exports.addOwnerWithGSN =
+module.exports.addOwner =
 /*#__PURE__*/
 function () {
   var _ref6 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee3(web3, _ref5) {
-    var account, ownerAddr, profileAddr, gsnWeb3, txHash, txReceipt;
+    var account, ownerAddr, profileAddr;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -225,36 +202,14 @@ function () {
             throw new Error("Requires unlocked account's decrypted web3 obj with its address and private key attrs");
 
           case 3:
-            _context3.next = 5;
-            return web3GSNProvider({
-              host: web3.currentProvider.host,
-              privateKey: account.privateKey
-            });
-
-          case 5:
-            gsnWeb3 = _context3.sent;
-            txHash = Web3.contractSendTx(gsnWeb3, profileAddr, {
+            return _context3.abrupt("return", Web3.contractSendTx(web3, profileAddr, {
               from: account.address,
               abi: factoryScJSON.abi,
               method: 'addOwner',
               params: [ownerAddr]
-            });
-            _context3.next = 9;
-            return Web3.getTxReceipt(web3, {
-              txHash: txHash
-            });
+            }));
 
-          case 9:
-            txReceipt = _context3.sent;
-
-            if (txReceipt.status) {
-              _context3.next = 12;
-              break;
-            }
-
-            throw new Error("Failed to add a new profile owner. TX: ".concat(txReceipt.transactionHash));
-
-          case 12:
+          case 4:
           case "end":
             return _context3.stop();
         }
@@ -267,22 +222,43 @@ function () {
   };
 }();
 
-module.exports.recover = function (web3, contractAddr, _ref7) {
-  var from = _ref7.from,
-      newOwner = _ref7.newOwner;
+module.exports.recover =
+/*#__PURE__*/
+function () {
+  var _ref8 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee4(web3, contractAddr, _ref7) {
+    var from, newOwner;
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            from = _ref7.from, newOwner = _ref7.newOwner;
 
-  if (!newOwner && !from) {
-    throw new Error("Missing mandatory call params");
-  }
+            if (!(!newOwner && !from)) {
+              _context4.next = 3;
+              break;
+            }
 
-  return Web3.contractSendTx(web3, contractAddr, {
-    from: from,
-    method: 'recover',
-    abi: profileScJSON.abi,
-    params: [newOwner]
-  }).then(function (txHash) {
-    return Web3.getTxReceipt(web3, {
-      txHash: txHash
-    });
-  });
-};
+            throw new Error("Missing mandatory call params");
+
+          case 3:
+            return _context4.abrupt("return", Web3.contractSendTx(web3, contractAddr, {
+              from: from,
+              method: 'recover',
+              abi: profileScJSON.abi,
+              params: [newOwner]
+            }));
+
+          case 4:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+
+  return function (_x7, _x8, _x9) {
+    return _ref8.apply(this, arguments);
+  };
+}();

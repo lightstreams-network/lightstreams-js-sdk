@@ -166,9 +166,7 @@ module.exports.getAccounts = function (web3) {
   });
 };
 
-module.exports.toWei = function (web3, _ref7) {
-  var pht = _ref7.pht;
-
+module.exports.toWei = function (web3, pht) {
   if (isLatest(web3)) {
     return web3.utils.toWei(pht);
   } else if (isV0_20(web3)) {

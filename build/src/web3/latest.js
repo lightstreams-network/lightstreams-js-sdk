@@ -22,7 +22,7 @@ var Web3 = require('web3');
 var net = require('net'); // Increasing estimated gas to prevent wrong estimations
 
 
-var estimatedGasThreshold = 1000;
+var gasThreshold = 200000;
 var defaultCfg = {
   provider: process.env.WEB3_PROVIDER || 'http://locahost:8545',
   gasPrice: process.env.WEB3_GAS_PRICE || 500000000000
@@ -78,10 +78,54 @@ function () {
   };
 }();
 
+var getTxReceipt = function getTxReceipt(web3, _ref2) {
+  var txHash = _ref2.txHash,
+      timeoutInSec = _ref2.timeoutInSec;
+  return new Promise(function (resolve, reject) {
+    fetchTxReceipt(web3, txHash, new Date().getTime() + (timeoutInSec || 15) * 1000).then(function (receipt) {
+      if (!receipt) {
+        reject(new Error("Cannot fetch tx receipt ".concat(txHash)));
+      }
+
+      resolve(receipt);
+    })["catch"](reject);
+  });
+};
+
+var handleReceipt = function handleReceipt(web3, _ref3) {
+  var txHash = _ref3.txHash,
+      resolve = _ref3.resolve,
+      reject = _ref3.reject;
+  getTxReceipt(web3, {
+    txHash: txHash
+  }).then(function (txReceipt) {
+    if (!txReceipt.status) {
+      reject(new Error("Failed tx ".concat(txHash)));
+    }
+
+    resolve(txReceipt);
+  });
+};
+
+var calculateEstimatedGas = function calculateEstimatedGas(method, params) {
+  return new Promise(function (resolve, reject) {
+    method.estimateGas(params, function (err, estimatedGas) {
+      if (err) reject(err); // if (err) {
+      //   debugger;
+      //   resolve(9000000);
+      // }
+      else {
+          var gas = estimatedGas + gasThreshold;
+          resolve(gas);
+        }
+    });
+  });
+};
+
 module.exports.initialize =
 /*#__PURE__*/
 function () {
-  var _ref2 = _asyncToGenerator(
+  var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee3(provider) {
     var options,
@@ -94,7 +138,7 @@ function () {
             return _context3.abrupt("return", new Promise(
             /*#__PURE__*/
             function () {
-              var _ref3 = _asyncToGenerator(
+              var _ref5 = _asyncToGenerator(
               /*#__PURE__*/
               regeneratorRuntime.mark(function _callee2(resolve, reject) {
                 var web3;
@@ -120,7 +164,7 @@ function () {
               }));
 
               return function (_x5, _x6) {
-                return _ref3.apply(this, arguments);
+                return _ref5.apply(this, arguments);
               };
             }()));
 
@@ -133,7 +177,7 @@ function () {
   }));
 
   return function (_x4) {
-    return _ref2.apply(this, arguments);
+    return _ref4.apply(this, arguments);
   };
 }();
 
@@ -146,26 +190,14 @@ module.exports.networkVersion = function (web3) {
   });
 };
 
-module.exports.getTxReceipt = function (web3, _ref4) {
-  var txHash = _ref4.txHash,
-      timeoutInSec = _ref4.timeoutInSec;
-  return new Promise(function (resolve, reject) {
-    fetchTxReceipt(web3, txHash, new Date().getTime() + (timeoutInSec || 15) * 1000).then(function (receipt) {
-      if (!receipt) {
-        reject();
-      }
+module.exports.getTxReceipt = getTxReceipt;
 
-      resolve(receipt);
-    })["catch"](reject);
-  });
-};
-
-module.exports.getBalance = function (web3, _ref5) {
-  var address = _ref5.address;
+module.exports.getBalance = function (web3, _ref6) {
+  var address = _ref6.address;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref6 = _asyncToGenerator(
+    var _ref7 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee4(resolve, reject) {
       var balance;
@@ -197,45 +229,55 @@ module.exports.getBalance = function (web3, _ref5) {
     }));
 
     return function (_x7, _x8) {
-      return _ref6.apply(this, arguments);
+      return _ref7.apply(this, arguments);
     };
   }());
 };
 
 module.exports.sendRawTransaction = function (web3, rawSignedTx) {
   return new Promise(function (resolve, reject) {
-    web3.eth.sendSignedTransaction(rawSignedTx, function (err, hash) {
+    web3.eth.sendSignedTransaction(rawSignedTx, function (err, txHash) {
       if (err) {
         reject(err);
       }
 
-      resolve(hash);
+      handleReceipt(web3, {
+        txHash: txHash,
+        resolve: resolve,
+        reject: reject
+      });
     });
   });
 };
 
-module.exports.sendTransaction = function (web3, _ref7) {
-  var from = _ref7.from,
-      to = _ref7.to,
-      valueInPht = _ref7.valueInPht;
+module.exports.sendTransaction = function (web3, _ref8) {
+  var from = _ref8.from,
+      to = _ref8.to,
+      valueInPht = _ref8.valueInPht;
   return new Promise(function (resolve, reject) {
     web3.eth.sendTransaction({
       from: from,
       to: to,
       value: web3.utils.toWei(valueInPht, "ether")
-    }).on('transactionHash', resolve).on('error', reject);
+    }).on('transactionHash', function (txHash) {
+      handleReceipt(web3, {
+        txHash: txHash,
+        resolve: resolve,
+        reject: reject
+      });
+    }).on('error', reject);
   });
 };
 
-module.exports.contractCall = function (web3, contractAddress, _ref8) {
-  var abi = _ref8.abi,
-      from = _ref8.from,
-      method = _ref8.method,
-      params = _ref8.params;
+module.exports.contractCall = function (web3, contractAddress, _ref9) {
+  var abi = _ref9.abi,
+      from = _ref9.from,
+      method = _ref9.method,
+      params = _ref9.params;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref9 = _asyncToGenerator(
+    var _ref10 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee5(resolve, reject) {
       var _contract$methods, contract, result;
@@ -280,21 +322,21 @@ module.exports.contractCall = function (web3, contractAddress, _ref8) {
     }));
 
     return function (_x9, _x10) {
-      return _ref9.apply(this, arguments);
+      return _ref10.apply(this, arguments);
     };
   }());
 };
 
-module.exports.contractSendTx = function (web3, contractAddress, _ref10) {
-  var abi = _ref10.abi,
-      from = _ref10.from,
-      method = _ref10.method,
-      params = _ref10.params,
-      value = _ref10.value;
+module.exports.contractSendTx = function (web3, contractAddress, _ref11) {
+  var abi = _ref11.abi,
+      from = _ref11.from,
+      method = _ref11.method,
+      params = _ref11.params,
+      value = _ref11.value;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref11 = _asyncToGenerator(
+    var _ref12 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee6(resolve, reject) {
       var _contract$methods2, contract, sendTx, estimatedGas;
@@ -316,24 +358,24 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref10) {
             case 4:
               sendTx = (_contract$methods2 = contract.methods)[method].apply(_contract$methods2, _toConsumableArray(params));
               _context6.next = 7;
-              return new Promise(function (resolve, reject) {
-                sendTx.estimateGas({
-                  from: from
-                }, function (err, gas) {
-                  if (err) reject(err); // if (err) {
-                  //   debugger;
-                  //   resolve(9000000);
-                  // }
-                  else resolve(gas);
-                });
+              return calculateEstimatedGas(sendTx, {
+                from: from,
+                value: value
               });
 
             case 7:
               estimatedGas = _context6.sent;
               sendTx.send({
                 from: from,
-                gas: estimatedGas + estimatedGasThreshold
-              }).on('transactionHash', resolve).on('error', reject);
+                value: value,
+                gas: estimatedGas
+              }).on('transactionHash', function (txHash) {
+                handleReceipt(web3, {
+                  txHash: txHash,
+                  resolve: resolve,
+                  reject: reject
+                });
+              }).on('error', reject);
               _context6.next = 14;
               break;
 
@@ -351,20 +393,20 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref10) {
     }));
 
     return function (_x11, _x12) {
-      return _ref11.apply(this, arguments);
+      return _ref12.apply(this, arguments);
     };
   }());
 };
 
-module.exports.deployContract = function (web3, _ref12) {
-  var from = _ref12.from,
-      abi = _ref12.abi,
-      bytecode = _ref12.bytecode,
-      params = _ref12.params;
+module.exports.deployContract = function (web3, _ref13) {
+  var from = _ref13.from,
+      abi = _ref13.abi,
+      bytecode = _ref13.bytecode,
+      params = _ref13.params;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref13 = _asyncToGenerator(
+    var _ref14 = _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee7(resolve, reject) {
       var contract, contractDeploy, estimatedGas;
@@ -379,24 +421,22 @@ module.exports.deployContract = function (web3, _ref12) {
                 arguments: params || []
               });
               _context7.next = 5;
-              return new Promise(function (resolve, reject) {
-                contractDeploy.estimateGas({
-                  from: from
-                }, function (err, gas) {
-                  if (err) reject(err); // if (err) {
-                  //   debugger;
-                  //   resolve(9000000);
-                  // }
-                  else resolve(gas);
-                });
+              return calculateEstimatedGas(contractDeploy, {
+                from: from
               });
 
             case 5:
               estimatedGas = _context7.sent;
               contractDeploy.send({
                 from: from,
-                gas: estimatedGas + estimatedGasThreshold
-              }).on('error', reject).on('transactionHash', resolve);
+                gas: estimatedGas
+              }).on('error', reject).on('transactionHash', function (txHash) {
+                handleReceipt(web3, {
+                  txHash: txHash,
+                  resolve: resolve,
+                  reject: reject
+                });
+              });
               _context7.next = 12;
               break;
 
@@ -414,7 +454,7 @@ module.exports.deployContract = function (web3, _ref12) {
     }));
 
     return function (_x13, _x14) {
-      return _ref13.apply(this, arguments);
+      return _ref14.apply(this, arguments);
     };
   }());
 };

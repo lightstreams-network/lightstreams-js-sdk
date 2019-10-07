@@ -23,10 +23,6 @@ module.exports = function (web3) {
         from: from,
         abi: ENS.abi,
         bytecode: bytecode || ENS.bytecode
-      }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, {
-          txHash: txHash
-        });
       });
     },
     registerNode: function registerNode(contractAddress, _ref2) {
@@ -46,10 +42,6 @@ module.exports = function (web3) {
         params: [parentNode.indexOf('0x') === 0 ? parentNode : namehash.hash(parentNode), // domain
         subnode.indexOf('0x') === 0 ? subnode : utils.sha3(subnode), // subdomain
         owner || from]
-      }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, {
-          txHash: txHash
-        });
       });
     },
     setResolver: function setResolver(contractAddress, _ref3) {
@@ -63,25 +55,17 @@ module.exports = function (web3) {
         method: 'setResolver',
         params: [node.indexOf('0x') === 0 ? node : namehash.hash(node), //node
         resolverAddress]
-      }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, {
-          txHash: txHash
-        });
       });
     },
     setOwner: function setOwner(contractAddress, _ref4) {
       var from = _ref4.from,
           node = _ref4.node,
-          newOwnerAddr = _ref4.newOwnerAddr;
+          newOwner = _ref4.newOwner;
       return Web3.contractSendTx(web3, contractAddress, {
         from: from,
         abi: ENS.abi,
         method: 'setOwner',
-        params: [namehash.hash(FANBASE_NODE), newOwnerAddr]
-      }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, {
-          txHash: txHash
-        });
+        params: [namehash.hash(node), newOwner]
       });
     },
     owner: function owner(contractAddress, _ref5) {

@@ -42,44 +42,19 @@ function () {
           case 3:
             ensAddress = _context.sent;
             _context.next = 6;
-            return deployResolver(web3, {
+            return initializeNewRegistry(web3, {
               from: from,
               ensAddress: ensAddress
             });
 
           case 6:
             resolverAddress = _context.sent;
-            _context.next = 9;
-            return registerNode(web3, {
-              from: from,
-              ensAddress: ensAddress,
-              subnode: defaultResolverNodeId // Default
-
-            });
-
-          case 9:
-            // We need for few seconds till node registration is completed
-            // @TODO Improve understanding of this wait
-            console.log("Waiting few seconds for node to registration to completed");
-            _context.next = 12;
-            return waitFor(5);
-
-          case 12:
-            _context.next = 14;
-            return setNodeResolver(web3, {
-              from: from,
-              ensAddress: ensAddress,
-              resolverAddress: resolverAddress,
-              node: defaultResolverNodeId
-            });
-
-          case 14:
             return _context.abrupt("return", {
               ensAddress: ensAddress,
               resolverAddress: resolverAddress
             });
 
-          case 15:
+          case 8:
           case "end":
             return _context.stop();
         }
@@ -92,34 +67,89 @@ function () {
   };
 }();
 
-module.exports.registerNode =
+module.exports.initializeNewRegistry =
 /*#__PURE__*/
 function () {
   var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(web3, _ref3) {
-    var ensAddress, parentNode, from, subnode, resolverAddress, toAddress, txReceipt;
+    var from, ensAddress, resolverAddress;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            ensAddress = _ref3.ensAddress, parentNode = _ref3.parentNode, from = _ref3.from, subnode = _ref3.subnode, resolverAddress = _ref3.resolverAddress, toAddress = _ref3.toAddress;
+            from = _ref3.from, ensAddress = _ref3.ensAddress;
+            _context2.next = 3;
+            return deployResolver(web3, {
+              from: from,
+              ensAddress: ensAddress
+            });
+
+          case 3:
+            resolverAddress = _context2.sent;
+            _context2.next = 6;
+            return registerNode(web3, {
+              from: from,
+              ensAddress: ensAddress,
+              subnode: defaultResolverNodeId // Default
+
+            });
+
+          case 6:
+            _context2.next = 8;
+            return setNodeResolver(web3, {
+              from: from,
+              ensAddress: ensAddress,
+              resolverAddress: resolverAddress,
+              node: defaultResolverNodeId
+            });
+
+          case 8:
+            return _context2.abrupt("return", {
+              resolverAddress: resolverAddress
+            });
+
+          case 9:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+
+  return function (_x3, _x4) {
+    return _ref4.apply(this, arguments);
+  };
+}();
+
+module.exports.registerNode =
+/*#__PURE__*/
+function () {
+  var _ref6 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee3(web3, _ref5) {
+    var ensAddress, parentNode, from, subnode, resolverAddress, toAddress, txReceipt;
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            ensAddress = _ref5.ensAddress, parentNode = _ref5.parentNode, from = _ref5.from, subnode = _ref5.subnode, resolverAddress = _ref5.resolverAddress, toAddress = _ref5.toAddress;
 
             if (resolverAddress) {
-              _context2.next = 5;
+              _context3.next = 5;
               break;
             }
 
-            _context2.next = 4;
+            _context3.next = 4;
             return ENSRegistry(web3).resolver(ensAddress, {
               node: parentNode || defaultResolverNodeId
             });
 
           case 4:
-            resolverAddress = _context2.sent;
+            resolverAddress = _context3.sent;
 
           case 5:
-            _context2.next = 7;
+            _context3.next = 7;
             return registerNode(web3, {
               from: from,
               ensAddress: ensAddress,
@@ -128,7 +158,7 @@ function () {
             });
 
           case 7:
-            _context2.next = 9;
+            _context3.next = 9;
             return setNodeResolver(web3, {
               from: from,
               ensAddress: ensAddress,
@@ -138,12 +168,12 @@ function () {
 
           case 9:
             if (!toAddress) {
-              _context2.next = 20;
+              _context3.next = 20;
               break;
             }
 
             console.log("Set node address to ".concat(toAddress, "...."));
-            _context2.next = 13;
+            _context3.next = 13;
             return PublicResolver(web3).setAddr(resolverAddress, {
               from: from,
               node: subnode,
@@ -151,10 +181,10 @@ function () {
             });
 
           case 13:
-            txReceipt = _context2.sent;
+            txReceipt = _context3.sent;
 
             if (!(txReceipt.status !== true)) {
-              _context2.next = 19;
+              _context3.next = 19;
               break;
             }
 
@@ -166,14 +196,14 @@ function () {
 
           case 20:
           case "end":
-            return _context2.stop();
+            return _context3.stop();
         }
       }
-    }, _callee2);
+    }, _callee3);
   }));
 
-  return function (_x3, _x4) {
-    return _ref4.apply(this, arguments);
+  return function (_x5, _x6) {
+    return _ref6.apply(this, arguments);
   };
 }(); // module.exports.deployTLD = async (web3, from, tld) => {
 //   const ensAddress = await deployRegistry(web3, from);
@@ -187,18 +217,18 @@ function () {
 var registerNode =
 /*#__PURE__*/
 function () {
-  var _ref6 = _asyncToGenerator(
+  var _ref8 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3(web3, _ref5) {
+  regeneratorRuntime.mark(function _callee4(web3, _ref7) {
     var from, ensAddress, parentNode, subnode, txReceipt;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
-            from = _ref5.from, ensAddress = _ref5.ensAddress, parentNode = _ref5.parentNode, subnode = _ref5.subnode;
+            from = _ref7.from, ensAddress = _ref7.ensAddress, parentNode = _ref7.parentNode, subnode = _ref7.subnode;
             parentNode = parentNode || '0x0000000000000000000000000000000000000000';
             console.log("Registering node \"".concat(subnode, ".").concat(parentNode, "\"..."));
-            _context3.next = 5;
+            _context4.next = 5;
             return ENSRegistry(web3).registerNode(ensAddress, {
               from: from,
               owner: from,
@@ -207,10 +237,10 @@ function () {
             });
 
           case 5:
-            txReceipt = _context3.sent;
+            txReceipt = _context4.sent;
 
             if (!(txReceipt.status !== true)) {
-              _context3.next = 11;
+              _context4.next = 11;
               break;
             }
 
@@ -218,51 +248,51 @@ function () {
             throw new Error("Failed to register node ".concat(subnode, ".").concat(parentNode, "}"));
 
           case 11:
-            console.log("Node \"".concat(subnode, ".").concat(parentNode, "\" registered successfully"));
+            console.log("Node \"".concat(subnode, ".").concat(parentNode, "\" registered successfully (").concat(txReceipt.cumulativeGasUsed, " usedGas)"));
 
           case 12:
           case "end":
-            return _context3.stop();
+            return _context4.stop();
         }
       }
-    }, _callee3);
+    }, _callee4);
   }));
 
-  return function registerNode(_x5, _x6) {
-    return _ref6.apply(this, arguments);
+  return function registerNode(_x7, _x8) {
+    return _ref8.apply(this, arguments);
   };
 }();
 
 var setNodeResolver =
 /*#__PURE__*/
 function () {
-  var _ref8 = _asyncToGenerator(
+  var _ref10 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee4(web3, _ref7) {
+  regeneratorRuntime.mark(function _callee5(web3, _ref9) {
     var from, node, ensAddress, resolverAddress, fetchedOwner, txReceipt;
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
-        switch (_context4.prev = _context4.next) {
+        switch (_context5.prev = _context5.next) {
           case 0:
-            from = _ref7.from, node = _ref7.node, ensAddress = _ref7.ensAddress, resolverAddress = _ref7.resolverAddress;
+            from = _ref9.from, node = _ref9.node, ensAddress = _ref9.ensAddress, resolverAddress = _ref9.resolverAddress;
             console.log("Set resolver ".concat(resolverAddress, " for \"").concat(node, "\"..."));
-            _context4.next = 4;
+            _context5.next = 4;
             return ENSRegistry(web3).owner(ensAddress, {
               node: node
             });
 
           case 4:
-            fetchedOwner = _context4.sent;
+            fetchedOwner = _context5.sent;
 
             if (!(fetchedOwner.toLowerCase() !== from.toLowerCase())) {
-              _context4.next = 7;
+              _context5.next = 7;
               break;
             }
 
             throw new Error("Invalid node owner ".concat(fetchedOwner));
 
           case 7:
-            _context4.next = 9;
+            _context5.next = 9;
             return ENSRegistry(web3).setResolver(ensAddress, {
               from: from,
               resolverAddress: resolverAddress,
@@ -270,10 +300,10 @@ function () {
             });
 
           case 9:
-            txReceipt = _context4.sent;
+            txReceipt = _context5.sent;
 
             if (!(txReceipt.status !== true)) {
-              _context4.next = 15;
+              _context5.next = 15;
               break;
             }
 
@@ -285,83 +315,33 @@ function () {
 
           case 16:
           case "end":
-            return _context4.stop();
-        }
-      }
-    }, _callee4);
-  }));
-
-  return function setNodeResolver(_x7, _x8) {
-    return _ref8.apply(this, arguments);
-  };
-}();
-
-var deployRegistry =
-/*#__PURE__*/
-function () {
-  var _ref10 = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee5(web3, _ref9) {
-    var from, txReceipt, address;
-    return regeneratorRuntime.wrap(function _callee5$(_context5) {
-      while (1) {
-        switch (_context5.prev = _context5.next) {
-          case 0:
-            from = _ref9.from;
-            console.log("Deploying registry...");
-            _context5.next = 4;
-            return ENSRegistry(web3).deploy({
-              from: from
-            });
-
-          case 4:
-            txReceipt = _context5.sent;
-            address = txReceipt.contractAddress;
-
-            if (!(txReceipt.status !== true)) {
-              _context5.next = 11;
-              break;
-            }
-
-            console.error(txReceipt);
-            throw new Error("Failed to deploy ENSRegistry ".concat(txReceipt.transactionHash));
-
-          case 11:
-            console.log("ENSRegistry deployed correctly at ".concat(address));
-
-          case 12:
-            return _context5.abrupt("return", address);
-
-          case 13:
-          case "end":
             return _context5.stop();
         }
       }
     }, _callee5);
   }));
 
-  return function deployRegistry(_x9, _x10) {
+  return function setNodeResolver(_x9, _x10) {
     return _ref10.apply(this, arguments);
   };
 }();
 
-var deployResolver =
+var deployRegistry =
 /*#__PURE__*/
 function () {
   var _ref12 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee6(web3, _ref11) {
-    var from, ensAddress, txReceipt, address;
+    var from, txReceipt, address;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
-            from = _ref11.from, ensAddress = _ref11.ensAddress;
-            console.log("Deploying resolver...");
+            from = _ref11.from;
+            console.log("Deploying registry...");
             _context6.next = 4;
-            return PublicResolver(web3).deploy({
-              from: from,
-              ensAddress: ensAddress
+            return ENSRegistry(web3).deploy({
+              from: from
             });
 
           case 4:
@@ -374,10 +354,10 @@ function () {
             }
 
             console.error(txReceipt);
-            throw new Error("Failed to deploy PublicResolver ".concat(txReceipt.transactionHash));
+            throw new Error("Failed to deploy ENSRegistry ".concat(txReceipt.transactionHash));
 
           case 11:
-            console.log("PublicResolver deployed correctly at ".concat(address));
+            console.log("ENSRegistry deployed correctly at ".concat(address));
 
           case 12:
             return _context6.abrupt("return", address);
@@ -390,8 +370,58 @@ function () {
     }, _callee6);
   }));
 
-  return function deployResolver(_x11, _x12) {
+  return function deployRegistry(_x11, _x12) {
     return _ref12.apply(this, arguments);
+  };
+}();
+
+var deployResolver =
+/*#__PURE__*/
+function () {
+  var _ref14 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee7(web3, _ref13) {
+    var from, ensAddress, txReceipt, address;
+    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+      while (1) {
+        switch (_context7.prev = _context7.next) {
+          case 0:
+            from = _ref13.from, ensAddress = _ref13.ensAddress;
+            console.log("Deploying resolver...");
+            _context7.next = 4;
+            return PublicResolver(web3).deploy({
+              from: from,
+              ensAddress: ensAddress
+            });
+
+          case 4:
+            txReceipt = _context7.sent;
+            address = txReceipt.contractAddress;
+
+            if (!(txReceipt.status !== true)) {
+              _context7.next = 11;
+              break;
+            }
+
+            console.error(txReceipt);
+            throw new Error("Failed to deploy PublicResolver ".concat(txReceipt.transactionHash));
+
+          case 11:
+            console.log("PublicResolver deployed correctly at ".concat(address));
+
+          case 12:
+            return _context7.abrupt("return", address);
+
+          case 13:
+          case "end":
+            return _context7.stop();
+        }
+      }
+    }, _callee7);
+  }));
+
+  return function deployResolver(_x13, _x14) {
+    return _ref14.apply(this, arguments);
   };
 }();
 

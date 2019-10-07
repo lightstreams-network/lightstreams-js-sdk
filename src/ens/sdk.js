@@ -16,6 +16,12 @@ module.exports.initializeManager = (provider, ensRegistryAddress) => {
 
 module.exports.deployNewRegistry = async (web3, { from }) => {
   const ensAddress = await deployRegistry(web3, { from });
+  const resolverAddress = await initializeNewRegistry(web3, { from, ensAddress });
+
+  return { ensAddress, resolverAddress };
+};
+
+module.exports.initializeNewRegistry = async (web3, { from, ensAddress }) => {
   const resolverAddress = await deployResolver(web3, { from, ensAddress });
 
   await registerNode(web3, {
@@ -30,8 +36,9 @@ module.exports.deployNewRegistry = async (web3, { from }) => {
   // await waitFor(5);
 
   await setNodeResolver(web3, { from, ensAddress, resolverAddress, node: defaultResolverNodeId });
-  return { ensAddress, resolverAddress };
+  return { resolverAddress };
 };
+
 
 module.exports.registerNode = async (web3, {ensAddress, parentNode, from, subnode, resolverAddress, toAddress }) => {
   // In case of not resolver defined we use parent resolver

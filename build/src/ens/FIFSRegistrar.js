@@ -24,10 +24,6 @@ module.exports = function (web3) {
         abi: FIFSRegistrar.abi,
         bytecode: bytecode || FIFSRegistrar.bytecode,
         params: [ensAddress, namehash.hash(rootNode)]
-      }).then(function (txHash) {
-        return Web3.getTxReceipt(web3, {
-          txHash: txHash
-        });
       });
     }
   };
