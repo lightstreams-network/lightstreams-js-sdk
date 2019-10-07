@@ -26,7 +26,25 @@ var gasThreshold = 200000;
 var defaultCfg = {
   provider: process.env.WEB3_PROVIDER || 'http://locahost:8545',
   gasPrice: process.env.WEB3_GAS_PRICE || 500000000000
-};
+}; // const logParser = function(web3, { logs, abi }) {
+//   return logs.map(function(log) {
+//     // return decoders.find(function(decoder) {
+//     //   return (decoder.signature() == log.topics[0].replace("0x", ""));
+//     // }).decode(log);
+//     return web3.eth.abi.decodeLog([{
+//       type: 'string',
+//       name: 'myString'
+//     }, {
+//       type: 'uint256',
+//       name: 'myNumber',
+//       indexed: true
+//     }, {
+//       type: 'uint8',
+//       name: 'mySmallNumber',
+//       indexed: true
+//     }], log.data, log.topics[0].replace("0x", ""));
+//   })
+// };
 
 var waitFor = function waitFor(waitInSeconds) {
   return new Promise(function (resolve) {
@@ -370,11 +388,13 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref11) {
                 value: value,
                 gas: estimatedGas
               }).on('transactionHash', function (txHash) {
-                handleReceipt(web3, {
-                  txHash: txHash,
-                  resolve: resolve,
-                  reject: reject
-                });
+                console.log("Tx executed ".concat(txHash));
+              }).on('receipt', function (txReceipt) {
+                if (!txReceipt.status) {
+                  reject(new Error("Failed tx ".concat(txReceipt.hash)));
+                }
+
+                resolve(txReceipt);
               }).on('error', reject);
               _context6.next = 14;
               break;
@@ -430,13 +450,15 @@ module.exports.deployContract = function (web3, _ref13) {
               contractDeploy.send({
                 from: from,
                 gas: estimatedGas
-              }).on('error', reject).on('transactionHash', function (txHash) {
-                handleReceipt(web3, {
-                  txHash: txHash,
-                  resolve: resolve,
-                  reject: reject
-                });
-              });
+              }).on('transactionHash', function (txHash) {
+                console.log("Tx executed ".concat(txHash));
+              }).on('receipt', function (txReceipt) {
+                if (!txReceipt.status) {
+                  reject(new Error("Failed tx ".concat(txReceipt.hash)));
+                }
+
+                resolve(txReceipt);
+              }).on('error', reject);
               _context7.next = 12;
               break;
 

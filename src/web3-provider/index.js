@@ -17,7 +17,7 @@ const { PersonalSubprovider } = require('./subproviders');
 const Keystore = require('../etherswallet/keystore');
 
 // @TODO Decouple from etherswallet module
-module.exports.default = (opts = {}) => {
+module.exports = (opts = {}) => {
   const { rpcUrl, ...engineOpts } = opts;
   const engine = new ProviderEngine(engineOpts);
   const version = '0.0.1';

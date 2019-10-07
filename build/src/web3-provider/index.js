@@ -37,7 +37,7 @@ var _require = require('./subproviders'),
 var Keystore = require('../etherswallet/keystore'); // @TODO Decouple from etherswallet module
 
 
-module.exports["default"] = function () {
+module.exports = function () {
   var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
   var rpcUrl = opts.rpcUrl,

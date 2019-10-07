@@ -16,6 +16,26 @@ const defaultCfg = {
   gasPrice: process.env.WEB3_GAS_PRICE || 500000000000,
 };
 
+// const logParser = function(web3, { logs, abi }) {
+//   return logs.map(function(log) {
+//     // return decoders.find(function(decoder) {
+//     //   return (decoder.signature() == log.topics[0].replace("0x", ""));
+//     // }).decode(log);
+//     return web3.eth.abi.decodeLog([{
+//       type: 'string',
+//       name: 'myString'
+//     }, {
+//       type: 'uint256',
+//       name: 'myNumber',
+//       indexed: true
+//     }, {
+//       type: 'uint8',
+//       name: 'mySmallNumber',
+//       indexed: true
+//     }], log.data, log.topics[0].replace("0x", ""));
+//   })
+// };
+
 const waitFor = (waitInSeconds) => {
   return new Promise((resolve) => {
     setTimeout(resolve, waitInSeconds * 1000);
@@ -43,7 +63,7 @@ const getTxReceipt = (web3, { txHash, timeoutInSec }) => {
   });
 };
 
-const handleReceipt = (web3, {txHash, resolve, reject}) => {
+const handleReceipt = (web3, { txHash, resolve, reject }) => {
   getTxReceipt(web3, { txHash }).then(txReceipt => {
     if (!txReceipt.status) {
       reject(new Error(`Failed tx ${txHash}`))
@@ -110,7 +130,6 @@ module.exports.sendRawTransaction = (web3, rawSignedTx) => {
       if (err) {
         reject(err);
       }
-
       handleReceipt(web3, {txHash, resolve, reject});
     });
   });
@@ -160,7 +179,12 @@ module.exports.contractSendTx = (web3, contractAddress, { abi, from, method, par
         value,
         gas: estimatedGas
       }).on('transactionHash', (txHash) => {
-        handleReceipt(web3, {txHash, resolve, reject});
+        console.log(`Tx executed ${txHash}`)
+      }).on('receipt', (txReceipt) => {
+        if (!txReceipt.status) {
+          reject(new Error(`Failed tx ${txReceipt.hash}`))
+        }
+        resolve(txReceipt);
       }).on('error', reject);
 
     } catch ( err ) {
@@ -179,10 +203,14 @@ module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
       contractDeploy.send({
         from,
         gas: estimatedGas
-      }).on('error', reject)
-        .on('transactionHash', (txHash) => {
-          handleReceipt(web3, {txHash, resolve, reject});
-        })
+      }).on('transactionHash', (txHash) => {
+        console.log(`Tx executed ${txHash}`)
+      }).on('receipt', (txReceipt) => {
+        if (!txReceipt.status) {
+          reject(new Error(`Failed tx ${txReceipt.hash}`))
+        }
+        resolve(txReceipt);
+      }).on('error', reject);
 
     } catch(err) {
       reject(err);

@@ -161,14 +161,15 @@ function () {
               from: account.address,
               abi: factoryScJSON.abi,
               method: 'newProfile',
-              params: [RELAY_HUB]
+              params: [account.address]
             });
 
           case 5:
             txReceipt = _context2.sent;
+            debugger;
             return _context2.abrupt("return", txReceipt.events['NewProfile'].returnValues['addr']);
 
-          case 7:
+          case 8:
           case "end":
             return _context2.stop();
         }

@@ -83,9 +83,10 @@ module.exports.deployProfile = async (web3, { account, profileFactoryAddr }) => 
     from: account.address,
     abi: factoryScJSON.abi,
     method: 'newProfile',
-    params: [RELAY_HUB]
+    params: [account.address]
   });
 
+  // debugger;
   return txReceipt.events['NewProfile'].returnValues['addr'];
 };
 
