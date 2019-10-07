@@ -275,10 +275,6 @@ module.exports.deployContract = function (web3, _ref6) {
   }());
 };
 
-module.exports.sendRawTransaction = function (web3, rawSignedTx) {
-  throw new Error('Missing implementation');
-};
-
 module.exports.sendTransaction = function (web3, _ref8) {
   var to = _ref8.to,
       value = _ref8.value;
@@ -333,8 +329,9 @@ module.exports.sendTransaction = function (web3, _ref8) {
   }());
 };
 
-module.exports.contractCall = function (web3, contractAddress, _ref10) {
-  var abi = _ref10.abi,
+module.exports.contractCall = function (web3, _ref10) {
+  var contractAddr = _ref10.to,
+      abi = _ref10.abi,
       method = _ref10.method,
       params = _ref10.params;
   return new Promise(
@@ -355,7 +352,7 @@ module.exports.contractCall = function (web3, contractAddress, _ref10) {
               }
 
               contract = window.web3.eth.contract(abi);
-              contractInstance = contract.at(contractAddress); // const callData = contractInstance[method].getData(...params);
+              contractInstance = contract.at(contractAddr); // const callData = contractInstance[method].getData(...params);
               // window.web3.eth.call({ to: address, data: callData }, (err, result) => {
               //   debugger;
               //   if (err) reject(err);
@@ -389,8 +386,9 @@ module.exports.contractCall = function (web3, contractAddress, _ref10) {
   }());
 };
 
-module.exports.contractSendTx = function (web3, contractAddress, _ref12) {
-  var from = _ref12.from,
+module.exports.contractSendTx = function (web3, _ref12) {
+  var contractAddr = _ref12.to,
+      from = _ref12.from,
       abi = _ref12.abi,
       method = _ref12.method,
       params = _ref12.params,
@@ -413,7 +411,7 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref12) {
               }
 
               contract = web3.eth.contract(abi);
-              contractInstance = contract.at(contractAddress);
+              contractInstance = contract.at(contractAddr);
 
               if (!(typeof contractInstance[method] === 'undefined')) {
                 _context5.next = 5;

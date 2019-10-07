@@ -30,7 +30,8 @@ module.exports = function (web3) {
           node = _ref2.node,
           address = _ref2.address,
           owner = _ref2.owner;
-      return Web3.contractSendTx(web3, contractAddress, {
+      return Web3.contractSendTx(web3, {
+        to: contractAddress,
         from: from || owner,
         abi: PublicResolver.abi,
         method: 'setAddr',

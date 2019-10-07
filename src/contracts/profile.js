@@ -51,7 +51,8 @@ module.exports.initializeProfileFactory = async (web3, { profileFactoryAddr, rel
   // console.log(`GSNProfileFactory.sol successfully deployed at ${profileFactoryAddr}!`);
 
   // Step 2: Initialize gsn feature within profile factory contract
-  await Web3.contractSendTx(web3, profileFactoryAddr, {
+  await Web3.contractSendTx(web3, {
+    to: profileFactoryAddr,
     from,
     abi: factoryScJSON.abi,
     method: 'initialize',
@@ -79,14 +80,15 @@ module.exports.deployProfile = async (web3, { account, profileFactoryAddr }) => 
     throw new Error(`Requires unlocked account's decrypted web3 obj with its address and private key attrs`);
   }
 
-  const txReceipt = await Web3.contractSendTx(web3, profileFactoryAddr, {
+  const txReceipt = await Web3.contractSendTx(web3, {
+    to: profileFactoryAddr,
     from: account.address,
     abi: factoryScJSON.abi,
     method: 'newProfile',
     params: [account.address]
   });
 
-  // debugger;
+  debugger;
   return txReceipt.events['NewProfile'].returnValues['addr'];
 };
 
@@ -95,7 +97,8 @@ module.exports.addOwner = async (web3, { account, ownerAddr, profileAddr }) => {
     throw new Error(`Requires unlocked account's decrypted web3 obj with its address and private key attrs`);
   }
 
-  return Web3.contractSendTx(web3, profileAddr, {
+  return Web3.contractSendTx(web3, {
+    to: profileAddr,
     from: account.address,
     abi: factoryScJSON.abi,
     method: 'addOwner',
@@ -108,7 +111,8 @@ module.exports.recover = async (web3, contractAddr, { from, newOwner }) => {
     throw new Error(`Missing mandatory call params`);
   }
 
-  return Web3.contractSendTx(web3, contractAddr, {
+  return Web3.contractSendTx(web3, {
+    to: contractAddr,
     from: from,
     method: 'recover',
     abi: profileScJSON.abi,

@@ -5,16 +5,9 @@
  */
 
 
-const Web3 = require('web3');
-const net = require('net');
-
 // Increasing estimated gas to prevent wrong estimations
 const gasThreshold = 200000;
 
-const defaultCfg = {
-  provider: process.env.WEB3_PROVIDER || 'http://locahost:8545',
-  gasPrice: process.env.WEB3_GAS_PRICE || 500000000000,
-};
 
 // const logParser = function(web3, { logs, abi }) {
 //   return logs.map(function(log) {
@@ -88,20 +81,6 @@ const calculateEstimatedGas = (method, params) => {
   })
 };
 
-module.exports.initialize = async (provider, options = {}) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const web3 = new Web3(provider || defaultCfg.provider, net, {
-        defaultGasPrice: options.gasPrice || defaultCfg.gasPrice,
-      });
-
-      resolve(web3);
-    } catch ( err ) {
-      reject(err);
-    }
-  });
-};
-
 module.exports.networkVersion = (web3) => {
   return new Promise((resolve, reject) => {
     web3.eth.net.getId((err, netId) => {
@@ -147,10 +126,10 @@ module.exports.sendTransaction = (web3, { from, to, valueInPht }) => {
   });
 };
 
-module.exports.contractCall = (web3, contractAddress, { abi, from, method, params }) => {
+module.exports.contractCall = (web3, { to: contractAddr, abi, from, method, params }) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const contract = new web3.eth.Contract(abi, contractAddress);
+      const contract = new web3.eth.Contract(abi, contractAddr);
       if (typeof contract.methods[method] !== 'function') {
         throw new Error(`Method ${method} is not available`);
       }
@@ -162,10 +141,10 @@ module.exports.contractCall = (web3, contractAddress, { abi, from, method, param
   });
 };
 
-module.exports.contractSendTx = (web3, contractAddress, { abi, from, method, params, value }) => {
+module.exports.contractSendTx = (web3, { to: contractAddr, abi, from, method, params, value }) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const contract = new web3.eth.Contract(abi, contractAddress);
+      const contract = new web3.eth.Contract(abi, contractAddr);
       if(typeof contract.methods[method] !== 'function') {
         throw new Error(`Method ${method} is not available`);
       }

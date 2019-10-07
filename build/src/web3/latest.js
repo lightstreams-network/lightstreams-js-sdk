@@ -17,16 +17,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
  * Date: 5/08/19 15:45
  * Copyright 2019 (c) Lightstreams, Granada
  */
-var Web3 = require('web3');
-
-var net = require('net'); // Increasing estimated gas to prevent wrong estimations
-
-
-var gasThreshold = 200000;
-var defaultCfg = {
-  provider: process.env.WEB3_PROVIDER || 'http://locahost:8545',
-  gasPrice: process.env.WEB3_GAS_PRICE || 500000000000
-}; // const logParser = function(web3, { logs, abi }) {
+// Increasing estimated gas to prevent wrong estimations
+var gasThreshold = 200000; // const logParser = function(web3, { logs, abi }) {
 //   return logs.map(function(log) {
 //     // return decoders.find(function(decoder) {
 //     //   return (decoder.signature() == log.topics[0].replace("0x", ""));
@@ -140,65 +132,6 @@ var calculateEstimatedGas = function calculateEstimatedGas(method, params) {
   });
 };
 
-module.exports.initialize =
-/*#__PURE__*/
-function () {
-  var _ref4 = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3(provider) {
-    var options,
-        _args3 = arguments;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            options = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : {};
-            return _context3.abrupt("return", new Promise(
-            /*#__PURE__*/
-            function () {
-              var _ref5 = _asyncToGenerator(
-              /*#__PURE__*/
-              regeneratorRuntime.mark(function _callee2(resolve, reject) {
-                var web3;
-                return regeneratorRuntime.wrap(function _callee2$(_context2) {
-                  while (1) {
-                    switch (_context2.prev = _context2.next) {
-                      case 0:
-                        try {
-                          web3 = new Web3(provider || defaultCfg.provider, net, {
-                            defaultGasPrice: options.gasPrice || defaultCfg.gasPrice
-                          });
-                          resolve(web3);
-                        } catch (err) {
-                          reject(err);
-                        }
-
-                      case 1:
-                      case "end":
-                        return _context2.stop();
-                    }
-                  }
-                }, _callee2);
-              }));
-
-              return function (_x5, _x6) {
-                return _ref5.apply(this, arguments);
-              };
-            }()));
-
-          case 2:
-          case "end":
-            return _context3.stop();
-        }
-      }
-    }, _callee3);
-  }));
-
-  return function (_x4) {
-    return _ref4.apply(this, arguments);
-  };
-}();
-
 module.exports.networkVersion = function (web3) {
   return new Promise(function (resolve, reject) {
     web3.eth.net.getId(function (err, netId) {
@@ -210,44 +143,44 @@ module.exports.networkVersion = function (web3) {
 
 module.exports.getTxReceipt = getTxReceipt;
 
-module.exports.getBalance = function (web3, _ref6) {
-  var address = _ref6.address;
+module.exports.getBalance = function (web3, _ref4) {
+  var address = _ref4.address;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref7 = _asyncToGenerator(
+    var _ref5 = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee4(resolve, reject) {
+    regeneratorRuntime.mark(function _callee2(resolve, reject) {
       var balance;
-      return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      return regeneratorRuntime.wrap(function _callee2$(_context2) {
         while (1) {
-          switch (_context4.prev = _context4.next) {
+          switch (_context2.prev = _context2.next) {
             case 0:
-              _context4.prev = 0;
-              _context4.next = 3;
+              _context2.prev = 0;
+              _context2.next = 3;
               return web3.eth.getBalance(address);
 
             case 3:
-              balance = _context4.sent;
+              balance = _context2.sent;
               resolve(balance);
-              _context4.next = 10;
+              _context2.next = 10;
               break;
 
             case 7:
-              _context4.prev = 7;
-              _context4.t0 = _context4["catch"](0);
-              reject(_context4.t0);
+              _context2.prev = 7;
+              _context2.t0 = _context2["catch"](0);
+              reject(_context2.t0);
 
             case 10:
             case "end":
-              return _context4.stop();
+              return _context2.stop();
           }
         }
-      }, _callee4, null, [[0, 7]]);
+      }, _callee2, null, [[0, 7]]);
     }));
 
-    return function (_x7, _x8) {
-      return _ref7.apply(this, arguments);
+    return function (_x4, _x5) {
+      return _ref5.apply(this, arguments);
     };
   }());
 };
@@ -268,10 +201,10 @@ module.exports.sendRawTransaction = function (web3, rawSignedTx) {
   });
 };
 
-module.exports.sendTransaction = function (web3, _ref8) {
-  var from = _ref8.from,
-      to = _ref8.to,
-      valueInPht = _ref8.valueInPht;
+module.exports.sendTransaction = function (web3, _ref6) {
+  var from = _ref6.from,
+      to = _ref6.to,
+      valueInPht = _ref6.valueInPht;
   return new Promise(function (resolve, reject) {
     web3.eth.sendTransaction({
       from: from,
@@ -287,87 +220,89 @@ module.exports.sendTransaction = function (web3, _ref8) {
   });
 };
 
-module.exports.contractCall = function (web3, contractAddress, _ref9) {
-  var abi = _ref9.abi,
-      from = _ref9.from,
-      method = _ref9.method,
-      params = _ref9.params;
+module.exports.contractCall = function (web3, _ref7) {
+  var contractAddr = _ref7.to,
+      abi = _ref7.abi,
+      from = _ref7.from,
+      method = _ref7.method,
+      params = _ref7.params;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref10 = _asyncToGenerator(
+    var _ref8 = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee5(resolve, reject) {
+    regeneratorRuntime.mark(function _callee3(resolve, reject) {
       var _contract$methods, contract, result;
 
-      return regeneratorRuntime.wrap(function _callee5$(_context5) {
+      return regeneratorRuntime.wrap(function _callee3$(_context3) {
         while (1) {
-          switch (_context5.prev = _context5.next) {
+          switch (_context3.prev = _context3.next) {
             case 0:
-              _context5.prev = 0;
-              contract = new web3.eth.Contract(abi, contractAddress);
+              _context3.prev = 0;
+              contract = new web3.eth.Contract(abi, contractAddr);
 
               if (!(typeof contract.methods[method] !== 'function')) {
-                _context5.next = 4;
+                _context3.next = 4;
                 break;
               }
 
               throw new Error("Method ".concat(method, " is not available"));
 
             case 4:
-              _context5.next = 6;
+              _context3.next = 6;
               return (_contract$methods = contract.methods)[method].apply(_contract$methods, _toConsumableArray(params)).call({
                 from: from
               });
 
             case 6:
-              result = _context5.sent;
+              result = _context3.sent;
               resolve(result);
-              _context5.next = 13;
+              _context3.next = 13;
               break;
 
             case 10:
-              _context5.prev = 10;
-              _context5.t0 = _context5["catch"](0);
-              reject(_context5.t0);
+              _context3.prev = 10;
+              _context3.t0 = _context3["catch"](0);
+              reject(_context3.t0);
 
             case 13:
             case "end":
-              return _context5.stop();
+              return _context3.stop();
           }
         }
-      }, _callee5, null, [[0, 10]]);
+      }, _callee3, null, [[0, 10]]);
     }));
 
-    return function (_x9, _x10) {
-      return _ref10.apply(this, arguments);
+    return function (_x6, _x7) {
+      return _ref8.apply(this, arguments);
     };
   }());
 };
 
-module.exports.contractSendTx = function (web3, contractAddress, _ref11) {
-  var abi = _ref11.abi,
-      from = _ref11.from,
-      method = _ref11.method,
-      params = _ref11.params,
-      value = _ref11.value;
+module.exports.contractSendTx = function (web3, _ref9) {
+  var contractAddr = _ref9.to,
+      abi = _ref9.abi,
+      from = _ref9.from,
+      method = _ref9.method,
+      params = _ref9.params,
+      value = _ref9.value;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref12 = _asyncToGenerator(
+    var _ref10 = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee6(resolve, reject) {
+    regeneratorRuntime.mark(function _callee4(resolve, reject) {
       var _contract$methods2, contract, sendTx, estimatedGas;
 
-      return regeneratorRuntime.wrap(function _callee6$(_context6) {
+      return regeneratorRuntime.wrap(function _callee4$(_context4) {
         while (1) {
-          switch (_context6.prev = _context6.next) {
+          switch (_context4.prev = _context4.next) {
             case 0:
-              _context6.prev = 0;
-              contract = new web3.eth.Contract(abi, contractAddress);
+              _context4.prev = 0;
+              contract = new web3.eth.Contract(abi, contractAddr);
 
               if (!(typeof contract.methods[method] !== 'function')) {
-                _context6.next = 4;
+                _context4.next = 4;
                 break;
               }
 
@@ -375,14 +310,14 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref11) {
 
             case 4:
               sendTx = (_contract$methods2 = contract.methods)[method].apply(_contract$methods2, _toConsumableArray(params));
-              _context6.next = 7;
+              _context4.next = 7;
               return calculateEstimatedGas(sendTx, {
                 from: from,
                 value: value
               });
 
             case 7:
-              estimatedGas = _context6.sent;
+              estimatedGas = _context4.sent;
               sendTx.send({
                 from: from,
                 value: value,
@@ -396,57 +331,57 @@ module.exports.contractSendTx = function (web3, contractAddress, _ref11) {
 
                 resolve(txReceipt);
               }).on('error', reject);
-              _context6.next = 14;
+              _context4.next = 14;
               break;
 
             case 11:
-              _context6.prev = 11;
-              _context6.t0 = _context6["catch"](0);
-              reject(_context6.t0);
+              _context4.prev = 11;
+              _context4.t0 = _context4["catch"](0);
+              reject(_context4.t0);
 
             case 14:
             case "end":
-              return _context6.stop();
+              return _context4.stop();
           }
         }
-      }, _callee6, null, [[0, 11]]);
+      }, _callee4, null, [[0, 11]]);
     }));
 
-    return function (_x11, _x12) {
-      return _ref12.apply(this, arguments);
+    return function (_x8, _x9) {
+      return _ref10.apply(this, arguments);
     };
   }());
 };
 
-module.exports.deployContract = function (web3, _ref13) {
-  var from = _ref13.from,
-      abi = _ref13.abi,
-      bytecode = _ref13.bytecode,
-      params = _ref13.params;
+module.exports.deployContract = function (web3, _ref11) {
+  var from = _ref11.from,
+      abi = _ref11.abi,
+      bytecode = _ref11.bytecode,
+      params = _ref11.params;
   return new Promise(
   /*#__PURE__*/
   function () {
-    var _ref14 = _asyncToGenerator(
+    var _ref12 = _asyncToGenerator(
     /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee7(resolve, reject) {
+    regeneratorRuntime.mark(function _callee5(resolve, reject) {
       var contract, contractDeploy, estimatedGas;
-      return regeneratorRuntime.wrap(function _callee7$(_context7) {
+      return regeneratorRuntime.wrap(function _callee5$(_context5) {
         while (1) {
-          switch (_context7.prev = _context7.next) {
+          switch (_context5.prev = _context5.next) {
             case 0:
-              _context7.prev = 0;
+              _context5.prev = 0;
               contract = new web3.eth.Contract(abi);
               contractDeploy = contract.deploy({
                 data: bytecode,
                 arguments: params || []
               });
-              _context7.next = 5;
+              _context5.next = 5;
               return calculateEstimatedGas(contractDeploy, {
                 from: from
               });
 
             case 5:
-              estimatedGas = _context7.sent;
+              estimatedGas = _context5.sent;
               contractDeploy.send({
                 from: from,
                 gas: estimatedGas
@@ -459,24 +394,24 @@ module.exports.deployContract = function (web3, _ref13) {
 
                 resolve(txReceipt);
               }).on('error', reject);
-              _context7.next = 12;
+              _context5.next = 12;
               break;
 
             case 9:
-              _context7.prev = 9;
-              _context7.t0 = _context7["catch"](0);
-              reject(_context7.t0);
+              _context5.prev = 9;
+              _context5.t0 = _context5["catch"](0);
+              reject(_context5.t0);
 
             case 12:
             case "end":
-              return _context7.stop();
+              return _context5.stop();
           }
         }
-      }, _callee7, null, [[0, 9]]);
+      }, _callee5, null, [[0, 9]]);
     }));
 
-    return function (_x13, _x14) {
-      return _ref14.apply(this, arguments);
+    return function (_x10, _x11) {
+      return _ref12.apply(this, arguments);
     };
   }());
 };

@@ -35,7 +35,8 @@ module.exports = function (web3) {
         throw new Error("Missing required value");
       }
 
-      return Web3.contractSendTx(web3, contractAddress, {
+      return Web3.contractSendTx(web3, {
+        to: contractAddress,
         from: from || owner,
         abi: ENS.abi,
         method: 'setSubnodeOwner',
@@ -49,7 +50,8 @@ module.exports = function (web3) {
           resolverAddress = _ref3.resolverAddress,
           node = _ref3.node,
           owner = _ref3.owner;
-      return Web3.contractSendTx(web3, contractAddress, {
+      return Web3.contractSendTx(web3, {
+        to: contractAddress,
         from: from || owner,
         abi: ENS.abi,
         method: 'setResolver',
@@ -61,7 +63,8 @@ module.exports = function (web3) {
       var from = _ref4.from,
           node = _ref4.node,
           newOwner = _ref4.newOwner;
-      return Web3.contractSendTx(web3, contractAddress, {
+      return Web3.contractSendTx(web3, {
+        to: contractAddress,
         from: from,
         abi: ENS.abi,
         method: 'setOwner',
@@ -70,7 +73,8 @@ module.exports = function (web3) {
     },
     owner: function owner(contractAddress, _ref5) {
       var node = _ref5.node;
-      return Web3.contractCall(web3, contractAddress, {
+      return Web3.contractCall(web3, {
+        to: contractAddress,
         abi: ENS.abi,
         method: 'owner',
         params: [node.indexOf('0x') === 0 ? node : namehash.hash(node) // node
@@ -79,7 +83,8 @@ module.exports = function (web3) {
     },
     ttl: function ttl(contractAddress, _ref6) {
       var node = _ref6.node;
-      return Web3.contractCall(web3, contractAddress, {
+      return Web3.contractCall(web3, {
+        to: contractAddress,
         abi: ENS.abi,
         method: 'ttl',
         params: [node.indexOf('0x') === 0 ? node : namehash.hash(node) // node
@@ -88,7 +93,8 @@ module.exports = function (web3) {
     },
     resolver: function resolver(contractAddress, _ref7) {
       var node = _ref7.node;
-      return Web3.contractCall(web3, contractAddress, {
+      return Web3.contractCall(web3, {
+        to: contractAddress,
         abi: ENS.abi,
         method: 'resolver',
         params: [node.indexOf('0x') === 0 ? node : namehash.hash(node) // node

@@ -19,7 +19,8 @@ module.exports = (web3) => ({
     })
   },
   setAddr: (contractAddress, { from, node, address, owner }) => {
-    return Web3.contractSendTx(web3, contractAddress, {
+    return Web3.contractSendTx(web3, {
+      to: contractAddress,
       from: from || owner,
       abi: PublicResolver.abi,
       method: 'setAddr',

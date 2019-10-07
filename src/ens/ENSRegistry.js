@@ -23,7 +23,8 @@ module.exports = (web3) => ({
       throw new Error(`Missing required value`);
     }
 
-    return Web3.contractSendTx(web3, contractAddress, {
+    return Web3.contractSendTx(web3, {
+      to: contractAddress,
       from: from || owner,
       abi: ENS.abi,
       method: 'setSubnodeOwner',
@@ -35,7 +36,8 @@ module.exports = (web3) => ({
     });
   },
   setResolver: (contractAddress, { from, resolverAddress, node, owner }) => {
-    return Web3.contractSendTx(web3, contractAddress, {
+    return Web3.contractSendTx(web3, {
+      to: contractAddress,
       from: from || owner,
       abi: ENS.abi,
       method: 'setResolver',
@@ -46,7 +48,8 @@ module.exports = (web3) => ({
     });
   },
   setOwner: (contractAddress, { from, node, newOwner }) => {
-    return Web3.contractSendTx(web3, contractAddress, {
+    return Web3.contractSendTx(web3, {
+      to: contractAddress,
       from: from,
       abi: ENS.abi,
       method: 'setOwner',
@@ -54,7 +57,8 @@ module.exports = (web3) => ({
     })
   },
   owner: (contractAddress, { node }) => {
-    return Web3.contractCall(web3, contractAddress, {
+    return Web3.contractCall(web3, {
+      to: contractAddress,
       abi: ENS.abi,
       method: 'owner',
       params: [
@@ -63,7 +67,8 @@ module.exports = (web3) => ({
     })
   },
   ttl: (contractAddress, { node }) => {
-    return Web3.contractCall(web3, contractAddress, {
+    return Web3.contractCall(web3, {
+      to: contractAddress,
       abi: ENS.abi,
       method: 'ttl',
       params: [
@@ -72,7 +77,8 @@ module.exports = (web3) => ({
     })
   },
   resolver: (contractAddress, { node }) => {
-    return Web3.contractCall(web3, contractAddress, {
+    return Web3.contractCall(web3, {
+      to: contractAddress,
       abi: ENS.abi,
       method: 'resolver',
       params: [

@@ -91,7 +91,8 @@ function () {
 
           case 16:
             _context.next = 18;
-            return Web3.contractSendTx(web3, profileFactoryAddr, {
+            return Web3.contractSendTx(web3, {
+              to: profileFactoryAddr,
               from: from,
               abi: factoryScJSON.abi,
               method: 'initialize',
@@ -157,7 +158,8 @@ function () {
 
           case 3:
             _context2.next = 5;
-            return Web3.contractSendTx(web3, profileFactoryAddr, {
+            return Web3.contractSendTx(web3, {
+              to: profileFactoryAddr,
               from: account.address,
               abi: factoryScJSON.abi,
               method: 'newProfile',
@@ -203,7 +205,8 @@ function () {
             throw new Error("Requires unlocked account's decrypted web3 obj with its address and private key attrs");
 
           case 3:
-            return _context3.abrupt("return", Web3.contractSendTx(web3, profileAddr, {
+            return _context3.abrupt("return", Web3.contractSendTx(web3, {
+              to: profileAddr,
               from: account.address,
               abi: factoryScJSON.abi,
               method: 'addOwner',
@@ -244,7 +247,8 @@ function () {
             throw new Error("Missing mandatory call params");
 
           case 3:
-            return _context4.abrupt("return", Web3.contractSendTx(web3, contractAddr, {
+            return _context4.abrupt("return", Web3.contractSendTx(web3, {
+              to: contractAddr,
               from: from,
               method: 'recover',
               abi: profileScJSON.abi,

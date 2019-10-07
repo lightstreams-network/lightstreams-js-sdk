@@ -148,10 +148,6 @@ module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
   });
 };
 
-module.exports.sendRawTransaction = (web3, rawSignedTx) => {
-  throw new Error('Missing implementation');
-};
-
 module.exports.sendTransaction = (web3, { to, value }) => {
   return new Promise(async (resolve, reject) => {
     if (!web3.isConnected()) {
@@ -174,14 +170,14 @@ module.exports.sendTransaction = (web3, { to, value }) => {
   });
 };
 
-module.exports.contractCall = (web3, contractAddress, { abi, method, params }) => {
+module.exports.contractCall = (web3, { to: contractAddr, abi, method, params }) => {
   return new Promise(async (resolve, reject) => {
     if (!web3.isConnected()) {
       reject(new Error('Web3 is not connected'));
     }
 
     const contract = window.web3.eth.contract(abi);
-    const contractInstance = contract.at(contractAddress);
+    const contractInstance = contract.at(contractAddr);
 
     // const callData = contractInstance[method].getData(...params);
     // window.web3.eth.call({ to: address, data: callData }, (err, result) => {
@@ -201,14 +197,14 @@ module.exports.contractCall = (web3, contractAddress, { abi, method, params }) =
   });
 };
 
-module.exports.contractSendTx = (web3, contractAddress, { from, abi, method, params, value }) => {
+module.exports.contractSendTx = (web3, { to: contractAddr, from, abi, method, params, value }) => {
   return new Promise(async (resolve, reject) => {
     if (!web3.isConnected()) {
       reject(new Error('Web3 is not connected'));
     }
 
     const contract = web3.eth.contract(abi);
-    const contractInstance = contract.at(contractAddress);
+    const contractInstance = contract.at(contractAddr);
     if (typeof contractInstance[method] === 'undefined') {
       throw new Error(`Method ${method} is not available`);
     }
