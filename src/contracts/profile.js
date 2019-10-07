@@ -44,7 +44,7 @@ module.exports.initializeProfileFactory = async (web3, { profileFactoryAddr, rel
   //   from,
   //   abi: factoryScJSON.abi,
   //   bytecode: factoryScJSON.bytecode,
-  //   params: [Web3.toWei(web3, profileFundingInPht)]
+  //   params: [Web3.utils.toWei(profileFundingInPht)]
   // });
   //
   // const profileFactoryAddr = txReceipt.contractAddress;
@@ -75,30 +75,22 @@ module.exports.initializeProfileFactory = async (web3, { profileFactoryAddr, rel
   return profileFactoryAddr;
 };
 
-module.exports.deployProfile = async (web3, { account, profileFactoryAddr }) => {
-  if (!account.address || !account.privateKey) {
-    throw new Error(`Requires unlocked account's decrypted web3 obj with its address and private key attrs`);
-  }
-
+module.exports.deployProfile = async (web3, { from, profileFactoryAddr }) => {
   const txReceipt = await Web3.contractSendTx(web3, {
     to: profileFactoryAddr,
-    from: account.address,
+    from,
     abi: factoryScJSON.abi,
     method: 'newProfile',
-    params: [account.address]
+    params: [from]
   });
 
   return txReceipt.events['NewProfile'].returnValues['addr'];
 };
 
-module.exports.addOwner = async (web3, { account, ownerAddr, profileAddr }) => {
-  if (!account.address || !account.privateKey) {
-    throw new Error(`Requires unlocked account's decrypted web3 obj with its address and private key attrs`);
-  }
-
+module.exports.addOwner = async (web3, { from, ownerAddr, profileAddr }) => {
   return Web3.contractSendTx(web3, {
     to: profileAddr,
-    from: account.address,
+    from,
     abi: factoryScJSON.abi,
     method: 'addOwner',
     params: [ownerAddr]

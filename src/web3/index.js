@@ -6,7 +6,6 @@
 
 const Web3 = require('web3');
 const net = require('net');
-const web3Utils = require('web3-utils');
 
 const latest = require('./latest');
 const v0_20 = require('./v0_20');
@@ -38,61 +37,9 @@ module.exports.initialize = async (provider, options = {}) => {
   });
 };
 
-module.exports.getAccounts = (web3) => {
-  return new Promise((resolve) => {
-    web3.eth.getAccounts().then(addrs => {
-      resolve(addrs.map(addr => addr.toLowerCase()));
-    })
-  });
-};
+module.exports.keystore = require('./addon/keystore');
 
-module.exports.lockAccount = (web3, { address }) => {
-  return new Promise((resolve, reject) => {
-    if (typeof web3.eth.personal.lockAccount !== 'function') {
-      reject(new Error(`Not supported method`))
-    }
-
-    web3.eth.personal.lockAccount(address)
-      .then(resolve)
-      .catch(reject)
-  });
-};
-
-module.exports.unlockAccount = (web3, { address, password, duration }) => {
-  return new Promise((resolve, reject) => {
-    if (typeof web3.eth.personal.unlockAccount !== 'function') {
-      reject(new Error(`Not supported method`))
-    }
-
-    web3.eth.personal.unlockAccount(address, password, duration || 1000)
-      .then(resolve)
-      .catch(reject)
-  });
-};
-
-module.exports.importAccount = (web3, { encryptedJson, decryptedWallet }) => {
-  if (typeof web3.currentProvider.importAccount !== 'function') {
-    throw new Error(`Not supported method`)
-  }
-
-  web3.currentProvider.importAccount(encryptedJson, decryptedWallet);
-};
-
-module.exports.isAccountLocked = (web3, { address }) => {
-  if (typeof web3.currentProvider.isAccountLocked !== 'function') {
-    throw new Error(`Not supported method`)
-  }
-
-  return web3.currentProvider.isAccountLocked(address);
-};
-
-module.exports.toWei = (web3, pht) => {
-  return web3Utils.toWei(pht)
-};
-
-module.exports.isAddress = (web3, { address }) => {
-  return web3Utils.isAddress(address);
-};
+module.exports.utils = require('./addon/utils');
 
 [...Object.keys(latest), ...Object.keys(isV0_20)].forEach(method => {
   module.exports[method] = (web3, payload) => {

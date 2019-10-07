@@ -48,7 +48,7 @@ export default class ENSPage extends Component {
     const { web3, account} = this.state;
     try {
       if (web3.currentProvider.isAccountLocked(account)) {
-        await Web3.unlockAccount(web3, {address: account, password: this.state.password});
+        await Web3.keystore.unlockAccount(web3, {address: account, password: this.state.password});
       }
 
       const { ensAddress, resolverAddress } = await ENS.SDK.deployNewRegistry(web3, { from: account });

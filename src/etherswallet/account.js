@@ -43,6 +43,10 @@ module.exports.newAccount = (encryptedJson, decryptedWallet = null) => {
       if (!wallet) throw new Error(`Account ${encryptedJson.address} is locked`);
       return wallet.mnemonic;
     },
+    privateKey: () => {
+      if (!wallet) throw new Error(`Account ${encryptedJson.address} is locked`);
+      return wallet.privateKey;
+    },
     signTx: (txParams, cb) => {
       if (!wallet) throw new Error(`Account ${encryptedJson.address} is locked`);
 

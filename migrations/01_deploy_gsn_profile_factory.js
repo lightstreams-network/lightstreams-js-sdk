@@ -6,7 +6,7 @@ const ProfileFactory = artifacts.require("GSNProfileFactory");
 module.exports = function(deployer) {
   const profileFundingInPht = process.env.GSN_PROFILE_FUNDING || '20';
   const factoryFundingInPht = process.env.GSN_PROFILE_FACTORY_FUNDING || '300';
-  const profileFundingInWei = Web3.toWei(web3, profileFundingInPht);
+  const profileFundingInWei = Web3.utils.toWei(profileFundingInPht);
   const relayHub = process.env.RELAY_HUB;
 
   // Factory is funded with 300 PHT and 20 PHT for every new profile created.
