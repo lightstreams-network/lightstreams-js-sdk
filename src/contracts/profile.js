@@ -88,7 +88,6 @@ module.exports.deployProfile = async (web3, { account, profileFactoryAddr }) => 
     params: [account.address]
   });
 
-  debugger;
   return txReceipt.events['NewProfile'].returnValues['addr'];
 };
 

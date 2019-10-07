@@ -168,10 +168,9 @@ function () {
 
           case 5:
             txReceipt = _context2.sent;
-            debugger;
             return _context2.abrupt("return", txReceipt.events['NewProfile'].returnValues['addr']);
 
-          case 8:
+          case 7:
           case "end":
             return _context2.stop();
         }
