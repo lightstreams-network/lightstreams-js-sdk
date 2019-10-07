@@ -6,7 +6,7 @@
 
 
 const { fromConnection } = require('@openzeppelin/network');
-const { fundRecipient: fRecipient, getRelayHub } = require('@openzeppelin/gsn-helpers');
+const { fundRecipient: fRecipient, getRelayHub } = require('@openzeppelin/gsn-helpers/src/helpers');
 const web3Utils = require('web3-utils');
 
 module.exports.Web3 = ({ host, dev, privateKey }) => {
