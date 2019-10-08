@@ -4,10 +4,14 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const assert = chai.assert;
 
-const { fundRecipient } = require('../src/gsn');
-const { fromConnection } = require('@openzeppelin/network');
-const { utils } = require('@openzeppelin/gsn-provider');
-const { isRelayHubDeployedForRecipient, getRecipientFunds } = utils;
+const {
+  fundRecipient,
+  getRecipientFunds,
+  web3Provider: gsnWeb3Provider,
+  isRelayHubDeployedForRecipient
+} = require('../src/gsn');
+
+const Web3 = require('../src/web3');
 
 const ProfileFactory = artifacts.require("GSNProfileFactory");
 const Profile = artifacts.require("GSNProfile");
@@ -17,10 +21,9 @@ contract('GSNProfileFactory', (accounts) => {
   const RELAY_HUB = process.env.RELAY_HUB;
 
   // Factory will be able to create 5 new individual Profiles
-  const FACTORY_PROFILE_FAUCET_FUNDING_PHT = '90';
-  const FACTORY_FUNDING_ETH = '20';
+  const FACTORY_PROFILE_FAUCET_FUNDING_PHT = process.env.GSN_PROFILE_FACTORY_FUNDING;
+  const FACTORY_FUNDING_ETH = process.env.GSN_PROFILE_FUNDING;
 
-  let gsnCtx;
   let emptyAcc;
   let recoveryAcc;
   let factory;
@@ -32,7 +35,7 @@ contract('GSNProfileFactory', (accounts) => {
     emptyAcc = await web3.eth.accounts.create("secret");
     recoveryAcc = await web3.eth.accounts.create("secret");
 
-    factory = await ProfileFactory.new(FACTORY_FUNDING_ETH);
+    factory = await ProfileFactory.new(Web3.utils.toWei(FACTORY_FUNDING_ETH));
 
     console.log(`ProfileFactory addr: ${factory.address}`);
   });
@@ -50,38 +53,35 @@ contract('GSNProfileFactory', (accounts) => {
     const faucetTx = await web3.eth.sendTransaction({
       from: ROOT_ACCOUNT,
       to: factory.address,
-      value: web3.utils.toWei(FACTORY_PROFILE_FAUCET_FUNDING_PHT, "ether")
+      value: Web3.utils.toWei(FACTORY_PROFILE_FAUCET_FUNDING_PHT)
     });
     assert.equal(faucetTx.status, true);
 
     // Required to register the Recipient in RelayHub
-    const balance = await fundRecipient(web3, {
+    await fundRecipient(web3, {
       recipient: factoryAddr,
       relayHub: RELAY_HUB,
       amountInPht: FACTORY_FUNDING_ETH,
       from: ROOT_ACCOUNT
     });
 
-    assert.equal(balance, web3.utils.toWei(FACTORY_FUNDING_ETH, "ether"));
+    const balance = await getRecipientFunds(web3, { recipient: factoryAddr, });
+
+      assert.equal(balance, Web3.utils.toWei(FACTORY_FUNDING_ETH, "ether"));
   });
 
   it('should deploy a Profile from a user without any funds for FREE using ProfileFactory', async () => {
-    const isFactoryDeployed = await isRelayHubDeployedForRecipient(web3, factory.address);
+    const isFactoryDeployed = await isRelayHubDeployedForRecipient(web3, { recipient: factory.address });
     assert.equal(isFactoryDeployed, true);
 
-    const factoryBalance = await getRecipientFunds(web3, factory.address);
-    assert.equal(factoryBalance, web3.utils.toWei(FACTORY_FUNDING_ETH, "ether"));
+    const factoryBalance = await getRecipientFunds(web3, { recipient: factory.address });
+    assert.equal(factoryBalance, Web3.utils.toWei(FACTORY_FUNDING_ETH, "ether"));
 
-    gsnCtx = await fromConnection(
-      web3.eth.currentProvider.host, {
-        gsn: {
-          dev: false,
-          signKey: emptyAcc.privateKey
-        }
+    web3 = await gsnWeb3Provider(web3.currentProvider, {
+      signKey: emptyAcc.privateKey
     });
 
-    web3 = gsnCtx.lib;
-    const factoryGSN = await new gsnCtx.lib.eth.Contract(factory.abi, factory.address);
+    const factoryGSN = await new web3.eth.Contract(factory.abi, factory.address);
 
     const createNewProfileRes = await factoryGSN.methods.newProfile(emptyAcc.address).send({
       from: emptyAcc.address,
@@ -92,10 +92,10 @@ contract('GSNProfileFactory', (accounts) => {
 
     const newProfileAddr = createNewProfileRes.events['NewProfile'].returnValues['addr'];
 
-    const isProfileGSNReady = await isRelayHubDeployedForRecipient(web3, newProfileAddr);
+    const isProfileGSNReady = await isRelayHubDeployedForRecipient(web3, { recipient: newProfileAddr });
     assert.equal(isProfileGSNReady, true);
 
-    newGSNProfile = await new gsnCtx.lib.eth.Contract(Profile.abi, newProfileAddr);
+    newGSNProfile = await new web3.eth.Contract(Profile.abi, newProfileAddr);
     const isEmptyAccOwner = await newGSNProfile.methods.hasOwner(emptyAcc.address).call();
 
     await newGSNProfile.methods.addOwner(recoveryAcc.address).send({
@@ -103,6 +103,7 @@ contract('GSNProfileFactory', (accounts) => {
       gasPrice: gasPrice,
       gasLimit: "7000000",
     });
+
     const isRecoveryAccOwner = await newGSNProfile.methods.hasOwner(recoveryAcc.address).call();
 
     assert.equal(isEmptyAccOwner, true);

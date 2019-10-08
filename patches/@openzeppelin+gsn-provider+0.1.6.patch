@@ -34,7 +34,7 @@ index bb040b3..38cbcd1 100644
                      signature,
                      approvalData,
 -                    relayUrl,
-+                    'https://gsn.sirius.lightstreams.io',
++                    process.env.RELAY_URL || relayUrl,
                      relayHub._address,
                      relayMaxNonce
                  );
@@ -47,7 +47,7 @@ index 89a3e1d..e3b3eb0 100644
                  }
                  firstRelayToRespond = await this.raceToSuccess(
 -                    slice.map(relay => this.getRelayAddressPing(relay.relayUrl, relay.transactionFee, this.gasPrice))
-+                    slice.map(relay => this.getRelayAddressPing('https://gsn.sirius.lightstreams.io', relay.transactionFee, this.gasPrice))
++                    slice.map(relay => this.getRelayAddressPing(process.env.RELAY_URL || relay.relayUrl, relay.transactionFee, this.gasPrice))
                  );
                  if (this.verbose){
                      console.log("race finished with a champion: " + firstRelayToRespond.relayUrl)

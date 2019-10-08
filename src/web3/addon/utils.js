@@ -7,8 +7,8 @@
 
 const web3Utils = require('web3-utils');
 
-module.exports.toWei = (pht) => {
-  return web3Utils.toWei(pht)
+module.exports.toWei = (pht, unit = 'ether') => {
+  return web3Utils.toWei(pht, unit)
 };
 
 module.exports.isAddress = (address) => {

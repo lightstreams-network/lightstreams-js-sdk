@@ -7,13 +7,17 @@
 
 const { fromConnection } = require('@openzeppelin/network');
 const { fundRecipient: fRecipient, getRelayHub } = require('@openzeppelin/gsn-helpers/src/helpers');
+const { isRelayHubDeployedForRecipient, getRecipientFunds } = require('@openzeppelin/gsn-provider').utils;
 const web3Utils = require('web3-utils');
 
-module.exports.Web3 = ({ host, dev, privateKey }) => {
-  return fromConnection(host, {
+module.exports.web3Provider = (connection, { signKey, dev }) => {
+  // return fromConnection(provider).then(ctx => {
+  //   return ctx.lib
+  // });
+  return fromConnection(connection, {
     gsn: {
       dev: dev || false,
-      signKey: privateKey
+      signKey
     }
   }).then(ctx => {
     return ctx.lib
@@ -50,6 +54,26 @@ module.exports.fundRecipient = async (web3, { from, recipient, relayHub, amountI
     relayHubAddress: relayHub,
     amount: web3.utils.toWei(amountInPht, "ether")
   });
+};
+
+module.exports.getRecipientFunds = async(web3, { recipient }) => {
+  try {
+    // Validate RelayHub exists at the passed address
+    return await getRecipientFunds(web3, recipient);
+  } catch ( err ) {
+    console.error(err);
+    return false;
+  }
+};
+
+module.exports.isRelayHubDeployedForRecipient =  async(web3, { recipient }) => {
+  try {
+    // Validate RelayHub exists at the passed address
+    return await isRelayHubDeployedForRecipient(web3, recipient);
+  } catch ( err ) {
+    console.error(err);
+    return false;
+  }
 };
 
 module.exports.isRelayHubDeployed = async (web3, { relayHub }) => {
