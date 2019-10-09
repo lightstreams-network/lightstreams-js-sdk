@@ -75,10 +75,11 @@ module.exports.initializeProfileFactory = async (web3, { profileFactoryAddr, rel
   return profileFactoryAddr;
 };
 
-module.exports.deployProfile = async (web3, { from, profileFactoryAddr }) => {
+module.exports.deployProfile = async (web3, { from, profileFactoryAddr, useGSN }) => {
   const txReceipt = await Web3.contractSendTx(web3, {
     to: profileFactoryAddr,
     from,
+    useGSN: useGSN || false,
     abi: factoryScJSON.abi,
     method: 'newProfile',
     params: [from]
@@ -87,17 +88,18 @@ module.exports.deployProfile = async (web3, { from, profileFactoryAddr }) => {
   return txReceipt.events['NewProfile'].returnValues['addr'];
 };
 
-module.exports.addOwner = async (web3, { from, ownerAddr, profileAddr }) => {
+module.exports.addOwner = async (web3, { from, ownerAddr, profileAddr, useGSN }) => {
   return Web3.contractSendTx(web3, {
     to: profileAddr,
     from,
+    useGSN: useGSN || false,
     abi: factoryScJSON.abi,
     method: 'addOwner',
     params: [ownerAddr]
   });
 };
 
-module.exports.recover = async (web3, contractAddr, { from, newOwner }) => {
+module.exports.recover = async (web3, contractAddr, { from, newOwner, useGSN }) => {
   if (!newOwner && !from) {
     throw new Error(`Missing mandatory call params`);
   }
@@ -105,6 +107,7 @@ module.exports.recover = async (web3, contractAddr, { from, newOwner }) => {
   return Web3.contractSendTx(web3, {
     to: contractAddr,
     from: from,
+    useGSN: useGSN || false,
     method: 'recover',
     abi: profileScJSON.abi,
     params: [newOwner],

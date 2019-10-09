@@ -142,35 +142,27 @@ function () {
   var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(web3, _ref3) {
-    var account, profileFactoryAddr, txReceipt;
+    var from, profileFactoryAddr, useGSN, txReceipt;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            account = _ref3.account, profileFactoryAddr = _ref3.profileFactoryAddr;
-
-            if (!(!account.address || !account.privateKey)) {
-              _context2.next = 3;
-              break;
-            }
-
-            throw new Error("Requires unlocked account's decrypted web3 obj with its address and private key attrs");
-
-          case 3:
-            _context2.next = 5;
+            from = _ref3.from, profileFactoryAddr = _ref3.profileFactoryAddr, useGSN = _ref3.useGSN;
+            _context2.next = 3;
             return Web3.contractSendTx(web3, {
               to: profileFactoryAddr,
-              from: account.address,
+              from: from,
+              useGSN: useGSN || false,
               abi: factoryScJSON.abi,
               method: 'newProfile',
-              params: [account.address]
+              params: [from]
             });
 
-          case 5:
+          case 3:
             txReceipt = _context2.sent;
             return _context2.abrupt("return", txReceipt.events['NewProfile'].returnValues['addr']);
 
-          case 7:
+          case 5:
           case "end":
             return _context2.stop();
         }
@@ -189,30 +181,22 @@ function () {
   var _ref6 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee3(web3, _ref5) {
-    var account, ownerAddr, profileAddr;
+    var from, ownerAddr, profileAddr, useGSN;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            account = _ref5.account, ownerAddr = _ref5.ownerAddr, profileAddr = _ref5.profileAddr;
-
-            if (!(!account.address || !account.privateKey)) {
-              _context3.next = 3;
-              break;
-            }
-
-            throw new Error("Requires unlocked account's decrypted web3 obj with its address and private key attrs");
-
-          case 3:
+            from = _ref5.from, ownerAddr = _ref5.ownerAddr, profileAddr = _ref5.profileAddr, useGSN = _ref5.useGSN;
             return _context3.abrupt("return", Web3.contractSendTx(web3, {
               to: profileAddr,
-              from: account.address,
+              from: from,
+              useGSN: useGSN || false,
               abi: factoryScJSON.abi,
               method: 'addOwner',
               params: [ownerAddr]
             }));
 
-          case 4:
+          case 2:
           case "end":
             return _context3.stop();
         }
@@ -231,12 +215,12 @@ function () {
   var _ref8 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee4(web3, contractAddr, _ref7) {
-    var from, newOwner;
+    var from, newOwner, useGSN;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            from = _ref7.from, newOwner = _ref7.newOwner;
+            from = _ref7.from, newOwner = _ref7.newOwner, useGSN = _ref7.useGSN;
 
             if (!(!newOwner && !from)) {
               _context4.next = 3;
@@ -249,6 +233,7 @@ function () {
             return _context4.abrupt("return", Web3.contractSendTx(web3, {
               to: contractAddr,
               from: from,
+              useGSN: useGSN || false,
               method: 'recover',
               abi: profileScJSON.abi,
               params: [newOwner]

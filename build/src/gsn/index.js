@@ -16,16 +16,25 @@ var _require2 = require('@openzeppelin/gsn-helpers/src/helpers'),
     fRecipient = _require2.fundRecipient,
     getRelayHub = _require2.getRelayHub;
 
+var _require$utils = require('@openzeppelin/gsn-provider').utils,
+    isRelayHubDeployedForRecipient = _require$utils.isRelayHubDeployedForRecipient,
+    getRecipientFunds = _require$utils.getRecipientFunds;
+
 var web3Utils = require('web3-utils');
 
-module.exports.Web3 = function (_ref) {
-  var host = _ref.host,
+module.exports.newWeb3Engine = function (connection, _ref) {
+  var signKey = _ref.signKey,
       dev = _ref.dev,
-      privateKey = _ref.privateKey;
-  return fromConnection(host, {
+      verbose = _ref.verbose;
+  // return fromConnection(provider).then(ctx => {
+  //   return ctx.lib
+  // });
+  return fromConnection(connection, {
     gsn: {
+      useGSN: true,
       dev: dev || false,
-      signKey: privateKey
+      verbose: verbose || false,
+      signKey: signKey
     }
   }).then(function (ctx) {
     return ctx.lib;
@@ -104,24 +113,24 @@ function () {
   };
 }();
 
-module.exports.isRelayHubDeployed =
+module.exports.getRecipientFunds =
 /*#__PURE__*/
 function () {
   var _ref5 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(web3, _ref4) {
-    var relayHub;
+    var recipient;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            relayHub = _ref4.relayHub;
+            recipient = _ref4.recipient;
             _context2.prev = 1;
             _context2.next = 4;
-            return getRelayHub(web3, relayHub);
+            return getRecipientFunds(web3, recipient);
 
           case 4:
-            return _context2.abrupt("return", true);
+            return _context2.abrupt("return", _context2.sent);
 
           case 7:
             _context2.prev = 7;
@@ -139,5 +148,81 @@ function () {
 
   return function (_x3, _x4) {
     return _ref5.apply(this, arguments);
+  };
+}();
+
+module.exports.isRelayHubDeployedForRecipient =
+/*#__PURE__*/
+function () {
+  var _ref7 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee3(web3, _ref6) {
+    var recipient;
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            recipient = _ref6.recipient;
+            _context3.prev = 1;
+            _context3.next = 4;
+            return isRelayHubDeployedForRecipient(web3, recipient);
+
+          case 4:
+            return _context3.abrupt("return", _context3.sent);
+
+          case 7:
+            _context3.prev = 7;
+            _context3.t0 = _context3["catch"](1);
+            console.error(_context3.t0);
+            return _context3.abrupt("return", false);
+
+          case 11:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3, null, [[1, 7]]);
+  }));
+
+  return function (_x5, _x6) {
+    return _ref7.apply(this, arguments);
+  };
+}();
+
+module.exports.isRelayHubDeployed =
+/*#__PURE__*/
+function () {
+  var _ref9 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee4(web3, _ref8) {
+    var relayHub;
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            relayHub = _ref8.relayHub;
+            _context4.prev = 1;
+            _context4.next = 4;
+            return getRelayHub(web3, relayHub);
+
+          case 4:
+            return _context4.abrupt("return", true);
+
+          case 7:
+            _context4.prev = 7;
+            _context4.t0 = _context4["catch"](1);
+            console.error(_context4.t0);
+            return _context4.abrupt("return", false);
+
+          case 11:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4, null, [[1, 7]]);
+  }));
+
+  return function (_x7, _x8) {
+    return _ref9.apply(this, arguments);
   };
 }();

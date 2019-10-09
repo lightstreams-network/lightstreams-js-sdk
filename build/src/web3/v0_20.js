@@ -40,7 +40,7 @@ var calculateEstimateGas = function calculateEstimateGas(web3, _ref) {
       to: to
     }, function (err, result) {
       if (err) reject(err);
-      resolve(result);
+      resolve(result + estimatedGasThreshold);
     });
   });
 };
@@ -231,7 +231,7 @@ module.exports.deployContract = function (web3, _ref6) {
               contract["new"].apply(contract, _toConsumableArray(params).concat([{
                 from: window.ethereum.selectedAddress,
                 data: bytecode,
-                gas: estimatedGas + estimatedGasThreshold,
+                gas: estimatedGas,
                 gasPrice: gasPrice
               }, function (err, myContract) {
                 if (err) {
@@ -392,7 +392,8 @@ module.exports.contractSendTx = function (web3, _ref12) {
       abi = _ref12.abi,
       method = _ref12.method,
       params = _ref12.params,
-      value = _ref12.value;
+      value = _ref12.value,
+      useGSN = _ref12.useGSN;
   return new Promise(
   /*#__PURE__*/
   function () {
@@ -444,8 +445,9 @@ module.exports.contractSendTx = function (web3, _ref12) {
 
               (_contractInstance$met3 = contractInstance[method]).sendTransaction.apply(_contractInstance$met3, _toConsumableArray(params).concat([{
                 from: from,
-                gas: estimatedGas + estimatedGasThreshold,
+                gas: estimatedGas,
                 value: value,
+                useGSN: useGSN || false,
                 gasPrice: gasPrice
               }, function (err, txHash) {
                 if (err) reject(err);

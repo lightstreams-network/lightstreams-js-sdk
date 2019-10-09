@@ -40,6 +40,7 @@ module.exports = function (web3) {
         from: from || owner,
         abi: ENS.abi,
         method: 'setSubnodeOwner',
+        gas: '1000000',
         params: [parentNode.indexOf('0x') === 0 ? parentNode : namehash.hash(parentNode), // domain
         subnode.indexOf('0x') === 0 ? subnode : utils.sha3(subnode), // subdomain
         owner || from]
@@ -55,6 +56,7 @@ module.exports = function (web3) {
         from: from || owner,
         abi: ENS.abi,
         method: 'setResolver',
+        gas: '1000000',
         params: [node.indexOf('0x') === 0 ? node : namehash.hash(node), //node
         resolverAddress]
       });

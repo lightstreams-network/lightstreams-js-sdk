@@ -5,29 +5,8 @@
  */
 
 
-// Increasing estimated gas to prevent wrong estimations
-const gasThreshold = 200000;
-
-
-// const logParser = function(web3, { logs, abi }) {
-//   return logs.map(function(log) {
-//     // return decoders.find(function(decoder) {
-//     //   return (decoder.signature() == log.topics[0].replace("0x", ""));
-//     // }).decode(log);
-//     return web3.eth.abi.decodeLog([{
-//       type: 'string',
-//       name: 'myString'
-//     }, {
-//       type: 'uint256',
-//       name: 'myNumber',
-//       indexed: true
-//     }, {
-//       type: 'uint8',
-//       name: 'mySmallNumber',
-//       indexed: true
-//     }], log.data, log.topics[0].replace("0x", ""));
-//   })
-// };
+// Increasing by % the estimated gas to mitigate wrong estimations
+const gasThreshold = 1.2; // 20%
 
 const waitFor = (waitInSeconds) => {
   return new Promise((resolve) => {
@@ -74,7 +53,7 @@ const calculateEstimatedGas = (method, params) => {
       //   resolve(9000000);
       // }
       else {
-        const gas = estimatedGas + gasThreshold;
+        const gas = parseInt(estimatedGas * gasThreshold);
         resolve(gas);
       }
     });
@@ -141,7 +120,7 @@ module.exports.contractCall = (web3, { to: contractAddr, abi, from, method, para
   });
 };
 
-module.exports.contractSendTx = (web3, { to: contractAddr, abi, from, method, params, value, useGSN }) => {
+module.exports.contractSendTx = (web3, { to: contractAddr, abi, from, method, params, value, gas, useGSN }) => {
   return new Promise(async (resolve, reject) => {
     try {
       const contract = new web3.eth.Contract(abi, contractAddr);
@@ -151,7 +130,7 @@ module.exports.contractSendTx = (web3, { to: contractAddr, abi, from, method, pa
 
 
       const sendTx = contract.methods[method](...params);
-      const estimatedGas = await calculateEstimatedGas(sendTx, { from, value });
+      const estimatedGas = gas || await calculateEstimatedGas(sendTx, { from, value });
 
       sendTx.send({
         from,

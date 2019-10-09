@@ -32,7 +32,8 @@ var RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 var ProviderEngine = require('./engine');
 
 var _require = require('./subproviders'),
-    PersonalSubprovider = _require.PersonalSubprovider;
+    PersonalSubprovider = _require.PersonalSubprovider,
+    GsnSubprovider = _require.GsnSubprovider;
 
 var Keystore = require('../etherswallet/keystore'); // @TODO Decouple from etherswallet module
 
@@ -41,7 +42,9 @@ module.exports = function () {
   var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
   var rpcUrl = opts.rpcUrl,
-      engineOpts = _objectWithoutProperties(opts, ["rpcUrl"]);
+      useGSN = opts.useGSN,
+      verbose = opts.verbose,
+      engineOpts = _objectWithoutProperties(opts, ["rpcUrl", "useGSN", "verbose"]);
 
   var engine = new ProviderEngine(engineOpts);
   var version = '0.0.1';
@@ -93,11 +96,31 @@ module.exports = function () {
   engine.addProvider(new SubscriptionsSubprovider());
   engine.addProvider(new FilterSubprovider());
   engine.addProvider(new NonceSubprovider());
+  engine.addProvider(new GsnSubprovider(engine, {
+    useGSN: useGSN || false,
+    verbose: verbose || false,
+    baseSend: jsonProvider.send.bind(jsonProvider)
+  }));
   engine.addProvider(new HookedWalletSubprovider({
     getAccounts: function getAccounts(cb) {
       var addresses = engine._getAccounts();
 
       cb(null, addresses);
+    },
+    signMessage: function signMessage(payload, cb) {
+      try {
+        var from = payload.from,
+            data = payload.data;
+
+        var account = engine._getAccount(from);
+
+        account.signMsg({
+          data: data,
+          chainId: network.chainId
+        }, cb);
+      } catch (err) {
+        if (typeof cb === 'function') cb(err, '0x0');else throw err;
+      }
     },
     signTransaction: function signTransaction(payload, cb) {
       try {

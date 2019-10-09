@@ -311,7 +311,7 @@ function () {
             throw new Error("Failed to set resolver");
 
           case 15:
-            console.log("Resolver was set correctly.");
+            console.log("Resolver was set correctly. (".concat(txReceipt.cumulativeGasUsed, " usedGas)"));
 
           case 16:
           case "end":
@@ -357,7 +357,7 @@ function () {
             throw new Error("Failed to deploy ENSRegistry ".concat(txReceipt.transactionHash));
 
           case 11:
-            console.log("ENSRegistry deployed correctly at ".concat(address));
+            console.log("ENSRegistry deployed correctly at ".concat(address, " (").concat(txReceipt.cumulativeGasUsed, " usedGas)"));
 
           case 12:
             return _context6.abrupt("return", address);

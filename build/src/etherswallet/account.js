@@ -5,7 +5,8 @@
  * Date: 30/08/19 13:20
  * Copyright 2019 (c) Lightstreams, Granada
  */
-var Util = require('ethereumjs-util');
+var ethUtil = require('ethereumjs-util'); // const ethers = require('ethers');
+
 
 var keystore = require('./keystore');
 
@@ -42,6 +43,11 @@ module.exports.newAccount = function (encryptedJson) {
       if (!wallet) throw new Error("Account ".concat(encryptedJson.address, " is locked"));
       return wallet.mnemonic;
     },
+    privateKey: function privateKey() {
+      if (!wallet) throw new Error("Account ".concat(encryptedJson.address, " is locked"));
+      return wallet.privateKey;
+    },
+    // Code extracted from @openzeppelin/gsn-provider/src/PrivateKeyProvider.js
     signTx: function signTx(txParams, cb) {
       if (!wallet) throw new Error("Account ".concat(encryptedJson.address, " is locked"));
       wallet.sign(txParams).then(function (signedRawTx) {
@@ -50,18 +56,31 @@ module.exports.newAccount = function (encryptedJson) {
         cb(err, null);
       });
     },
-    signMsg: function signTx(msg, cb) {
+    signMsg: function signMsg(_ref, cb) {
+      var data = _ref.data,
+          chainId = _ref.chainId;
       if (!wallet) throw new Error("Account ".concat(encryptedJson.address, " is locked"));
-      wallet.signMsg(msg).then(function(signedMsg) {
-        cb(null, signedMsg);
-      })["catch"](function(err) {
-        cb(err, null);
-      });
+      var dataBuff = ethUtil.toBuffer(data);
+      var msgHash = ethUtil.hashPersonalMessage(dataBuff);
+      var sig = ethUtil.ecsign(msgHash, ethUtil.toBuffer(wallet.privateKey));
+      var signedMsg = ethUtil.bufferToHex(concatSig(sig.v, sig.r, sig.s));
+      cb(null, signedMsg);
     },
-    address: Util.addHexPrefix(encryptedJson.address).toLowerCase()
+    address: ethUtil.addHexPrefix(encryptedJson.address).toLowerCase()
   };
 };
 
 module.exports.formatAddress = function (address) {
-  return Util.addHexPrefix(address).toLowerCase();
-};
+  return ethUtil.addHexPrefix(address).toLowerCase();
+}; // Copied from https://github.com/MetaMask/web3-provider-engine/blob/master/subproviders/hooked-wallet-ethtx.js
+
+
+function concatSig(v, r, s) {
+  r = ethUtil.fromSigned(r);
+  s = ethUtil.fromSigned(s);
+  v = ethUtil.bufferToInt(v);
+  r = ethUtil.toUnsigned(r).toString('hex').padStart(64, 0);
+  s = ethUtil.toUnsigned(s).toString('hex').padStart(64, 0);
+  v = ethUtil.stripHexPrefix(ethUtil.intToHex(v));
+  return ethUtil.addHexPrefix(r.concat(s, v).toString("hex"));
+}

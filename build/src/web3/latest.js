@@ -17,26 +17,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
  * Date: 5/08/19 15:45
  * Copyright 2019 (c) Lightstreams, Granada
  */
-// Increasing estimated gas to prevent wrong estimations
-var gasThreshold = 200000; // const logParser = function(web3, { logs, abi }) {
-//   return logs.map(function(log) {
-//     // return decoders.find(function(decoder) {
-//     //   return (decoder.signature() == log.topics[0].replace("0x", ""));
-//     // }).decode(log);
-//     return web3.eth.abi.decodeLog([{
-//       type: 'string',
-//       name: 'myString'
-//     }, {
-//       type: 'uint256',
-//       name: 'myNumber',
-//       indexed: true
-//     }, {
-//       type: 'uint8',
-//       name: 'mySmallNumber',
-//       indexed: true
-//     }], log.data, log.topics[0].replace("0x", ""));
-//   })
-// };
+// Increasing by % the estimated gas to mitigate wrong estimations
+var gasThreshold = 1.2; // 20%
 
 var waitFor = function waitFor(waitInSeconds) {
   return new Promise(function (resolve) {
@@ -125,7 +107,7 @@ var calculateEstimatedGas = function calculateEstimatedGas(method, params) {
       //   resolve(9000000);
       // }
       else {
-          var gas = estimatedGas + gasThreshold;
+          var gas = parseInt(estimatedGas * gasThreshold);
           resolve(gas);
         }
     });
@@ -285,7 +267,9 @@ module.exports.contractSendTx = function (web3, _ref9) {
       from = _ref9.from,
       method = _ref9.method,
       params = _ref9.params,
-      value = _ref9.value;
+      value = _ref9.value,
+      gas = _ref9.gas,
+      useGSN = _ref9.useGSN;
   return new Promise(
   /*#__PURE__*/
   function () {
@@ -310,20 +294,31 @@ module.exports.contractSendTx = function (web3, _ref9) {
 
             case 4:
               sendTx = (_contract$methods2 = contract.methods)[method].apply(_contract$methods2, _toConsumableArray(params));
-              _context4.next = 7;
+              _context4.t0 = gas;
+
+              if (_context4.t0) {
+                _context4.next = 10;
+                break;
+              }
+
+              _context4.next = 9;
               return calculateEstimatedGas(sendTx, {
                 from: from,
                 value: value
               });
 
-            case 7:
-              estimatedGas = _context4.sent;
+            case 9:
+              _context4.t0 = _context4.sent;
+
+            case 10:
+              estimatedGas = _context4.t0;
               sendTx.send({
                 from: from,
                 value: value,
+                useGSN: useGSN || false,
                 gas: estimatedGas
               }).on('transactionHash', function (txHash) {
-                console.log("Tx executed ", txHash);
+                console.log("Tx executed: ", txHash);
               }).on('receipt', function (txReceipt) {
                 if (!txReceipt.status) {
                   reject(new Error("Failed tx ".concat(txReceipt.hash)));
@@ -331,20 +326,20 @@ module.exports.contractSendTx = function (web3, _ref9) {
 
                 resolve(txReceipt);
               }).on('error', reject);
-              _context4.next = 14;
+              _context4.next = 17;
               break;
 
-            case 11:
-              _context4.prev = 11;
-              _context4.t0 = _context4["catch"](0);
-              reject(_context4.t0);
-
             case 14:
+              _context4.prev = 14;
+              _context4.t1 = _context4["catch"](0);
+              reject(_context4.t1);
+
+            case 17:
             case "end":
               return _context4.stop();
           }
         }
-      }, _callee4, null, [[0, 11]]);
+      }, _callee4, null, [[0, 14]]);
     }));
 
     return function (_x8, _x9) {
@@ -386,7 +381,7 @@ module.exports.deployContract = function (web3, _ref11) {
                 from: from,
                 gas: estimatedGas
               }).on('transactionHash', function (txHash) {
-                console.log("Tx executed ".concat(txHash));
+                console.log("Tx executed: ", txHash);
               }).on('receipt', function (txReceipt) {
                 if (!txReceipt.status) {
                   reject(new Error("Failed tx ".concat(txReceipt.hash)));

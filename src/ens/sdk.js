@@ -121,7 +121,7 @@ const setNodeResolver = async (web3, { from, node, ensAddress, resolverAddress }
     console.error(txReceipt);
     throw new Error(`Failed to set resolver`)
   } else {
-    console.log(`Resolver was set correctly.`)
+    console.log(`Resolver was set correctly. (${txReceipt.cumulativeGasUsed} usedGas)`)
   }
 };
 
@@ -133,7 +133,7 @@ const deployRegistry = async (web3, { from }) => {
     console.error(txReceipt);
     throw new Error(`Failed to deploy ENSRegistry ${txReceipt.transactionHash}`)
   } else {
-    console.log(`ENSRegistry deployed correctly at ${address}`)
+    console.log(`ENSRegistry deployed correctly at ${address} (${txReceipt.cumulativeGasUsed} usedGas)`)
   }
 
   return address;
