@@ -13,16 +13,14 @@ const FilterSubprovider = require('web3-provider-engine/subproviders/filters');
 const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 
 const ProviderEngine = require('./engine');
-const { PersonalSubprovider, GsnSubprovider } = require('./subproviders');
-const Keystore = require('../etherswallet/keystore');
+const { PersonalSubprovider, GsnSubprovider, WalletSubprovider } = require('./subproviders');
 
 // @TODO Decouple from etherswallet module
 module.exports = (opts = {}) => {
   const { rpcUrl, useGSN, verbose, ...engineOpts } = opts;
-  const engine = new ProviderEngine(engineOpts);
-  const version = '0.0.1';
+  const lsProviderEngine = new ProviderEngine(engineOpts);
+  const version = '0.8.0';
 
-  let network;
   const jsonProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
   jsonProvider.send('net_version').then(version => {
     chainId = parseInt(version);
@@ -32,22 +30,21 @@ module.exports = (opts = {}) => {
     // - `Petersburg`
     switch ( chainId ) {
       case 161:
-        network = { name: 'standalone', networkId: chainId, chainId: chainId };
+        lsProviderEngine.setNetwork({ name: 'standalone', networkId: chainId, chainId: chainId });
         break;
       case 162:
-        network = { name: 'sirius', networkId: chainId, chainId: chainId };
+        lsProviderEngine.setNetwork({ name: 'sirius', networkId: chainId, chainId: chainId });
         break;
       case 163:
-        network = { name: 'mainnet', networkId: chainId, chainId: chainId };
+        lsProviderEngine.setNetwork({ name: 'mainnet', networkId: chainId, chainId: chainId });
         break;
       default:
-        throw new Error(`Unsupported chainId ${version}`)
+        lsProviderEngine.setNetwork({ name: 'unknown', networkId: chainId, chainId: chainId });
     }
   });
 
-  engine.host = rpcUrl;
-
-  engine.addProvider(new FixtureSubprovider({
+  lsProviderEngine.host = rpcUrl;
+  lsProviderEngine.addProvider(new FixtureSubprovider({
     web3_clientVersion: `Lightstreams/v${version}/javascript`,
     net_listening: true,
     eth_hashrate: '0x00',
@@ -55,99 +52,32 @@ module.exports = (opts = {}) => {
     eth_syncing: true,
   }));
 
-  engine.addProvider(new SubscriptionsSubprovider());
-  engine.addProvider(new FilterSubprovider());
-  engine.addProvider(new NonceSubprovider());
+  lsProviderEngine.addProvider(new SubscriptionsSubprovider());
+  lsProviderEngine.addProvider(new FilterSubprovider());
+  lsProviderEngine.addProvider(new NonceSubprovider());
 
-  engine.addProvider(new GsnSubprovider(engine, {
+  lsProviderEngine.addProvider(new GsnSubprovider(lsProviderEngine, {
     useGSN: useGSN || false,
     verbose: verbose || false,
-    baseSend: jsonProvider.send.bind(jsonProvider)
+    jsonRpcSend: jsonProvider.send.bind(jsonProvider)
   }));
 
-  engine.addProvider(new HookedWalletSubprovider({
-    getAccounts: (cb) => {
-      const addresses = engine._getAccounts();
-      cb(null, addresses);
-    },
-    signMessage: (payload, cb) => {
-      try {
-        const { from, data } = payload;
-        const account = engine._getAccount(from);
-        account.signMsg({ data, chainId: network.chainId }, cb);
-      } catch ( err ) {
-        if (typeof cb === 'function') cb(err, '0x0');
-        else throw err
-      }
-    },
-    signTransaction: (payload, cb) => {
-      try {
-        const { gas, from, ...params } = payload;
-        const txParams = {
-          ...params,
-          gasLimit: gas,
-        };
+  lsProviderEngine.addProvider(WalletSubprovider(lsProviderEngine));
 
-        const account = engine._getAccount(from);
-        account.signTx({ ...txParams, chainId: network.chainId }, cb);
-      } catch ( err ) {
-        if (typeof cb === 'function') cb(err, '0x0');
-        else throw err
-      }
-    },
-  }));
+  lsProviderEngine.addProvider(new PersonalSubprovider(lsProviderEngine));
 
-  engine.addProvider(new PersonalSubprovider({
-    getAccounts: (cb) => {
-      const addresses = engine._getAccounts();
-      cb(null, addresses);
-    },
-    newAccount: ({ password }, cb) => {
-      const decryptedWallet = Keystore.createRandomWallet();
-      Keystore.encryptWallet(decryptedWallet, password)
-        .then((encryptedJson) => {
-          const address = engine.importAccount(encryptedJson, decryptedWallet);
-          cb(null, address);
-        })
-        .catch(err => {
-          cb(err, null);
-        });
-    },
-    lockAccount: ({ address }, cb) => {
-      try {
-        const account = engine._getAccount(address);
-        account.lock(address);
-        cb(null, `Account "${address}" is locked`);
-      } catch ( err ) {
-        cb(err, null);
-      }
-    },
-    unlockAccount: ({ address, password, duration }, cb) => {
-      try {
-        const account = engine._getAccount(address);
-        account.unlock(password, duration || 0)
-          .then(() => {
-            cb(null, `Account "${address}" was unlock`);
-          })
-          .catch(err => cb(err, null));
-      } catch ( err ) {
-        cb(err, null);
-      }
-    }
-  }));
-
-  engine.addProvider(new RpcSubprovider({
+  lsProviderEngine.addProvider(new RpcSubprovider({
     rpcUrl: rpcUrl, // Expected to be
   }));
 
   // network connectivity error
-  engine.on('error', function(err) {
+  lsProviderEngine.on('error', function(err) {
     // report connectivity errors
     console.error(err.stack)
   });
 
   // start polling for blocks
-  engine.start();
+  lsProviderEngine.start();
 
-  return engine;
+  return lsProviderEngine;
 };

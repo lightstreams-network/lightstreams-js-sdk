@@ -13,9 +13,7 @@ const Web3 = require('../../web3');
 function GsnSubprovider(provider, opts) {
   const web3 = Web3.newEngine(provider);
   this.relayClient = new RelayClient(web3, { ...opts });
-  this.baseSend = opts.baseSend ? opts.baseSend : function() {
-    throw new Error('Missing "baseSend" opts')
-  };
+  this.jsonRpcSend = opts.jsonRpcSend ? opts.jsonRpcSend : mustProvideInConstructor('jsonRpcSend');
   this.options = opts;
   this.relayedTxs = new Set();
 }
@@ -29,7 +27,7 @@ GsnSubprovider.prototype._handleGetTransactionReceipt = function(payload, cb) {
   if (!this._withGSN(payload) && !this.relayedTxs.has(txHash)) return false;
 
   // Set error status if tx was rejected
-  this.baseSend('eth_getTransactionReceipt', [txHash])
+  this.jsonRpcSend('eth_getTransactionReceipt', [txHash])
     .then((receipt) => {
       cb(null, fixTransactionReceiptResponse(receipt, this.options.verbose));
     })
@@ -126,5 +124,11 @@ GsnSubprovider.prototype.handleRequest = function(payload, next, end) {
 
   next();
 };
+
+function mustProvideInConstructor(methodName) {
+  return function(params, cb) {
+    cb(new Error('ProviderEngine - HookedWalletSubprovider - Must provide "' + methodName + '" fn in constructor options'))
+  }
+}
 
 module.exports = GsnSubprovider;

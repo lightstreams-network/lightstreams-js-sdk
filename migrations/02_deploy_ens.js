@@ -14,6 +14,7 @@ module.exports = function(deployer) {
   const fromAccount = process.env.ACCOUNT;
   let ensAddress;
 
+  return;
   deployer.deploy(ENSRegistry)
     .then(instance => {
       ensAddress = instance.address;

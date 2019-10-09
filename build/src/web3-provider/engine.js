@@ -41,6 +41,11 @@ function (_Web3ProviderEngine) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(ProviderEngine).call(this, opts));
     _this.wallets = {};
+    _this.network = opts.network || {
+      name: 'mainnet',
+      networkId: 163,
+      chainId: 163
+    };
     return _this;
   }
 
@@ -76,6 +81,16 @@ function (_Web3ProviderEngine) {
       }
 
       return self.wallets[address].isLocked();
+    }
+  }, {
+    key: "setNetwork",
+    value: function setNetwork(network) {
+      this.network = network;
+    }
+  }, {
+    key: "chainId",
+    value: function chainId() {
+      return this.network.chainId;
     }
   }, {
     key: "_getAccount",

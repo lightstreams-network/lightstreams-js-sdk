@@ -12,6 +12,7 @@ class ProviderEngine extends Web3ProviderEngine {
   constructor(opts = {}) {
     super(opts);
     this.wallets = {};
+    this.network = opts.network || { name: 'mainnet', networkId: 163, chainId: 163 }
   }
 
   importAccount(encryptedJson, decryptedWallet = null) {
@@ -39,6 +40,14 @@ class ProviderEngine extends Web3ProviderEngine {
     }
 
     return self.wallets[address].isLocked();
+  }
+
+  setNetwork(network) {
+    this.network = network;
+  }
+
+  chainId() {
+    return this.network.chainId;
   }
 
   _getAccount(address) {

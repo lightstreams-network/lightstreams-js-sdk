@@ -7,3 +7,4 @@
 
 module.exports.PersonalSubprovider = require('./personal');
 module.exports.GsnSubprovider = require('./gsn');
+module.exports.WalletSubprovider = require('./wallet');
