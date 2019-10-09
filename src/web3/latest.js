@@ -141,7 +141,7 @@ module.exports.contractCall = (web3, { to: contractAddr, abi, from, method, para
   });
 };
 
-module.exports.contractSendTx = (web3, { to: contractAddr, abi, from, method, params, value }) => {
+module.exports.contractSendTx = (web3, { to: contractAddr, abi, from, method, params, value, useGSN }) => {
   return new Promise(async (resolve, reject) => {
     try {
       const contract = new web3.eth.Contract(abi, contractAddr);
@@ -156,9 +156,10 @@ module.exports.contractSendTx = (web3, { to: contractAddr, abi, from, method, pa
       sendTx.send({
         from,
         value,
+        useGSN: useGSN || false,
         gas: estimatedGas
       }).on('transactionHash', (txHash) => {
-        console.log(`Tx executed ${txHash}`)
+        console.log(`Tx executed: `, txHash)
       }).on('receipt', (txReceipt) => {
         if (!txReceipt.status) {
           reject(new Error(`Failed tx ${txReceipt.hash}`))
@@ -183,7 +184,7 @@ module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
         from,
         gas: estimatedGas
       }).on('transactionHash', (txHash) => {
-        console.log(`Tx executed ${txHash}`)
+        console.log(`Tx executed: `, txHash)
       }).on('receipt', (txReceipt) => {
         if (!txReceipt.status) {
           reject(new Error(`Failed tx ${txReceipt.hash}`))

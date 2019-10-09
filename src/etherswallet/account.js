@@ -4,7 +4,8 @@
  * Copyright 2019 (c) Lightstreams, Granada
  */
 
-const Util = require('ethereumjs-util');
+const ethUtil = require('ethereumjs-util');
+// const ethers = require('ethers');
 
 const keystore = require('./keystore');
 
@@ -47,6 +48,7 @@ module.exports.newAccount = (encryptedJson, decryptedWallet = null) => {
       if (!wallet) throw new Error(`Account ${encryptedJson.address} is locked`);
       return wallet.privateKey;
     },
+    // Code extracted from @openzeppelin/gsn-provider/src/PrivateKeyProvider.js
     signTx: (txParams, cb) => {
       if (!wallet) throw new Error(`Account ${encryptedJson.address} is locked`);
 
@@ -58,10 +60,30 @@ module.exports.newAccount = (encryptedJson, decryptedWallet = null) => {
           cb(err, null)
         })
     },
-    address: Util.addHexPrefix(encryptedJson.address).toLowerCase()
+    signMsg: ({ data, chainId }, cb) => {
+      if (!wallet) throw new Error(`Account ${encryptedJson.address} is locked`);
+
+      const dataBuff = ethUtil.toBuffer(data);
+      const msgHash = ethUtil.hashPersonalMessage(dataBuff);
+      const sig = ethUtil.ecsign(msgHash, ethUtil.toBuffer(wallet.privateKey));
+      const signedMsg = ethUtil.bufferToHex(concatSig(sig.v, sig.r, sig.s));
+      cb(null, signedMsg);
+    },
+    address: ethUtil.addHexPrefix(encryptedJson.address).toLowerCase()
   }
 };
 
 module.exports.formatAddress = (address) => {
-  return Util.addHexPrefix(address).toLowerCase()
+  return ethUtil.addHexPrefix(address).toLowerCase()
 };
+
+// Copied from https://github.com/MetaMask/web3-provider-engine/blob/master/subproviders/hooked-wallet-ethtx.js
+function concatSig(v, r, s) {
+  r = ethUtil.fromSigned(r);
+  s = ethUtil.fromSigned(s);
+  v = ethUtil.bufferToInt(v);
+  r = ethUtil.toUnsigned(r).toString('hex').padStart(64, 0);
+  s = ethUtil.toUnsigned(s).toString('hex').padStart(64, 0);
+  v = ethUtil.stripHexPrefix(ethUtil.intToHex(v));
+  return ethUtil.addHexPrefix(r.concat(s, v).toString("hex"))
+}

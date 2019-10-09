@@ -1,0 +1,130 @@
+/**
+ * User: ggarrido
+ * Date: 30/08/19 18:05
+ * Copyright 2019 (c) Lightstreams, Granada
+ */
+
+const inherits = require('util').inherits;
+const Subprovider = require('web3-provider-engine/subproviders/subprovider');
+const RelayClient = require('@openzeppelin/gsn-provider/src/tabookey-gasless/RelayClient');
+const { callAsJsonRpc, fixTransactionReceiptResponse } = require('@openzeppelin/gsn-provider/src/utils');
+const Web3 = require('../../web3');
+
+function GsnSubprovider(provider, opts) {
+  const web3 = Web3.newEngine(provider);
+  this.relayClient = new RelayClient(web3, { ...opts });
+  this.baseSend = opts.baseSend ? opts.baseSend : function() {
+    throw new Error('Missing "baseSend" opts')
+  };
+  this.options = opts;
+  this.relayedTxs = new Set();
+}
+
+inherits(GsnSubprovider, Subprovider);
+
+GsnSubprovider.prototype._handleGetTransactionReceipt = function(payload, cb) {
+  // Check for GSN usage
+  const txHash = payload.params[0];
+
+  if (!this._withGSN(payload) && !this.relayedTxs.has(txHash)) return false;
+
+  // Set error status if tx was rejected
+  this.baseSend('eth_getTransactionReceipt', [txHash])
+    .then((receipt) => {
+      cb(null, fixTransactionReceiptResponse(receipt, this.options.verbose));
+    })
+    .catch(err => {
+      cb(err, null)
+    });
+
+  return true;
+};
+
+GsnSubprovider.prototype._handleSendTransaction = function(payload, cb) {
+  // Check for GSN usage
+  const txParams = payload.params[0];
+  if (!this._withGSN(payload, txParams)) return false;
+
+  // Use sign key address if set
+  if (!txParams.from && this.base.address) txParams.from = this.base.address;
+
+  // TODO: move validations to the relay client
+  if (!txParams.to) {
+    return cb(new Error("Cannot deploy a new contract via the GSN"), null);
+  }
+  if (txParams.value) {
+    const strValue = txParams.value.toString();
+    if (strValue !== '0' && strValue !== '0x0') {
+      return cb(new Error("Cannot send funds via the GSN"), null);
+    }
+  }
+
+  // Delegate to relay client
+  callAsJsonRpc(
+    this.relayClient.sendTransaction.bind(this.relayClient), [payload],
+    payload.id, (err, res) => {
+      cb(err, res.result);
+    },
+    txHash => {
+      this.relayedTxs.add(txHash);
+      return { result: txHash };
+      // return txHash;
+    }
+  );
+
+  return true;
+};
+
+GsnSubprovider.prototype._handleEstimateGas = function(payload, cb) {
+  const txParams = payload.params[0];
+  if (!this._withGSN(payload, txParams)) return false;
+  callAsJsonRpc(
+    this.relayClient.estimateGas.bind(this.relayClient), [txParams],
+    payload.id, cb
+  );
+
+  return true;
+};
+
+GsnSubprovider.prototype._withGSN = function(payload, options) {
+  if (typeof payload.params[0] === 'object'
+    && typeof payload.params[0].useGSN === 'boolean') {
+    return payload.params[0].useGSN;
+  }
+
+  if (options) {
+    const useGSN = options.useGSN;
+    if (typeof(useGSN) !== 'undefined') {
+      return useGSN;
+    }
+  }
+
+  return (typeof(this.useGSN) === 'function')
+    ? this.useGSN(payload)
+    : this.useGSN;
+};
+
+GsnSubprovider.prototype.handleRequest = function(payload, next, end) {
+  switch ( payload.method ) {
+    case 'eth_sendTransaction': {
+      if (this._handleSendTransaction(payload, end)) return;
+      break;
+    }
+    case 'eth_estimateGas': {
+      if (this._handleEstimateGas(payload, end)) return;
+      break;
+    }
+    case 'eth_getTransactionReceipt': {
+      if (this._handleGetTransactionReceipt(payload, end)) return;
+      break;
+    }
+    default: {
+      next();
+      return;
+    }
+  }
+
+  next();
+};
+
+module.exports = GsnSubprovider;

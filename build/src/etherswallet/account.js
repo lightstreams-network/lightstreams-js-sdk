@@ -50,6 +50,14 @@ module.exports.newAccount = function (encryptedJson) {
         cb(err, null);
       });
     },
+    signMsg: function signTx(msg, cb) {
+      if (!wallet) throw new Error("Account ".concat(encryptedJson.address, " is locked"));
+      wallet.signMsg(msg).then(function(signedMsg) {
+        cb(null, signedMsg);
+      })["catch"](function(err) {
+        cb(err, null);
+      });
+    },
     address: Util.addHexPrefix(encryptedJson.address).toLowerCase()
   };
 };

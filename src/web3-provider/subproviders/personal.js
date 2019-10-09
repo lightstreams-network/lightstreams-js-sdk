@@ -51,4 +51,4 @@ PersonalSubprovider.prototype.handleRequest = function(payload, next, end) {
   }
 };
 
-module.exports.PersonalSubprovider = PersonalSubprovider;
+module.exports = PersonalSubprovider;

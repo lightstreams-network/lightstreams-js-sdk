@@ -23,17 +23,9 @@ const defaultCfg = {
   gasPrice: process.env.WEB3_GAS_PRICE || 500000000000,
 };
 
-module.exports.initialize = async (provider, options = {}) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const web3 = new Web3(provider || defaultCfg.provider, net, {
-        defaultGasPrice: options.gasPrice || defaultCfg.gasPrice,
-      });
-
-      resolve(web3);
-    } catch ( err ) {
-      reject(err);
-    }
+module.exports.newEngine = (provider, options = {}) => {
+  return new Web3(provider || defaultCfg.provider, net, {
+    defaultGasPrice: options.gasPrice || defaultCfg.gasPrice,
   });
 };
 

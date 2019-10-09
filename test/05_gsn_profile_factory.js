@@ -7,11 +7,12 @@ const assert = chai.assert;
 const {
   fundRecipient,
   getRecipientFunds,
-  web3Provider: gsnWeb3Provider,
+  newWeb3Engine,
   isRelayHubDeployedForRecipient
 } = require('../src/gsn');
 
 const Web3 = require('../src/web3');
+const Web3Provider = require('../src/web3-provider');
 
 const ProfileFactory = artifacts.require("GSNProfileFactory");
 const Profile = artifacts.require("GSNProfile");
@@ -24,16 +25,13 @@ contract('GSNProfileFactory', (accounts) => {
   const FACTORY_PROFILE_FAUCET_FUNDING_PHT = process.env.GSN_PROFILE_FACTORY_FUNDING;
   const FACTORY_FUNDING_ETH = process.env.GSN_PROFILE_FUNDING;
 
-  let emptyAcc;
-  let recoveryAcc;
+  let emptyAccAddr;
+  let recoveryAccAddr;
   let factory;
-  let newGSNProfile;
   let gasPrice;
 
   it('should deploy a profile factory', async () => {
     gasPrice = await web3.eth.getGasPrice();
-    emptyAcc = await web3.eth.accounts.create("secret");
-    recoveryAcc = await web3.eth.accounts.create("secret");
 
     factory = await ProfileFactory.new(Web3.utils.toWei(FACTORY_FUNDING_ETH));
 
@@ -67,46 +65,55 @@ contract('GSNProfileFactory', (accounts) => {
 
     const balance = await getRecipientFunds(web3, { recipient: factoryAddr, });
 
-      assert.equal(balance, Web3.utils.toWei(FACTORY_FUNDING_ETH, "ether"));
+    assert.equal(balance, Web3.utils.toWei(FACTORY_FUNDING_ETH, "ether"));
   });
 
   it('should deploy a Profile from a user without any funds for FREE using ProfileFactory', async () => {
-    const isFactoryDeployed = await isRelayHubDeployedForRecipient(web3, { recipient: factory.address });
+    const web3ls = await Web3.newEngine(Web3Provider({
+      rpcUrl: web3.eth.currentProvider.host,
+      useGSN: false, // Use true in case you want GSN by default
+      verbose: false
+    }));
+
+    emptyAccAddr = await web3ls.eth.personal.newAccount("secret");
+    recoveryAccAddr = await web3ls.eth.personal.newAccount("secret");
+
+    const isFactoryDeployed = await isRelayHubDeployedForRecipient(web3ls, { recipient: factory.address });
     assert.equal(isFactoryDeployed, true);
 
-    const factoryBalance = await getRecipientFunds(web3, { recipient: factory.address });
+    const factoryBalance = await getRecipientFunds(web3ls, { recipient: factory.address });
     assert.equal(factoryBalance, Web3.utils.toWei(FACTORY_FUNDING_ETH, "ether"));
 
-    web3 = await gsnWeb3Provider(web3.currentProvider, {
-      signKey: emptyAcc.privateKey
-    });
-
-    const factoryGSN = await new web3.eth.Contract(factory.abi, factory.address);
-
-    const createNewProfileRes = await factoryGSN.methods.newProfile(emptyAcc.address).send({
-      from: emptyAcc.address,
+    const factoryGSN = await new web3ls.eth.Contract(factory.abi, factory.address);
+    const createNewProfileRes = await factoryGSN.methods.newProfile(emptyAccAddr).send({
+      from: emptyAccAddr,
       gasPrice: gasPrice,
       gasLimit: "7000000",
+      useGSN: true,
     });
     assert.equal(createNewProfileRes.status, true);
 
     const newProfileAddr = createNewProfileRes.events['NewProfile'].returnValues['addr'];
 
-    const isProfileGSNReady = await isRelayHubDeployedForRecipient(web3, { recipient: newProfileAddr });
+    const isProfileGSNReady = await isRelayHubDeployedForRecipient(web3ls, { recipient: newProfileAddr });
     assert.equal(isProfileGSNReady, true);
 
-    newGSNProfile = await new web3.eth.Contract(Profile.abi, newProfileAddr);
-    const isEmptyAccOwner = await newGSNProfile.methods.hasOwner(emptyAcc.address).call();
-
-    await newGSNProfile.methods.addOwner(recoveryAcc.address).send({
-      from: emptyAcc.address,
-      gasPrice: gasPrice,
-      gasLimit: "7000000",
+    const txReceipt = await Web3.contractSendTx(web3ls, {
+      to: newProfileAddr,
+      abi: Profile.abi,
+      from: emptyAccAddr,
+      method: 'addOwner',
+      useGSN: true,
+      params: [recoveryAccAddr]
     });
+    assert.equal(txReceipt.status, true);
 
-    const isRecoveryAccOwner = await newGSNProfile.methods.hasOwner(recoveryAcc.address).call();
-
-    assert.equal(isEmptyAccOwner, true);
+    const isRecoveryAccOwner = await Web3.contractCall(web3ls, {
+      to: newProfileAddr,
+      abi: Profile.abi,
+      method: 'hasOwner',
+      params: [recoveryAccAddr]
+    });
     assert.equal(isRecoveryAccOwner, true);
   });
 });

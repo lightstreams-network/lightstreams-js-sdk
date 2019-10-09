@@ -13,12 +13,12 @@ const FilterSubprovider = require('web3-provider-engine/subproviders/filters');
 const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 
 const ProviderEngine = require('./engine');
-const { PersonalSubprovider } = require('./subproviders');
+const { PersonalSubprovider, GsnSubprovider } = require('./subproviders');
 const Keystore = require('../etherswallet/keystore');
 
 // @TODO Decouple from etherswallet module
 module.exports = (opts = {}) => {
-  const { rpcUrl, ...engineOpts } = opts;
+  const { rpcUrl, useGSN, verbose, ...engineOpts } = opts;
   const engine = new ProviderEngine(engineOpts);
   const version = '0.0.1';
 
@@ -59,10 +59,26 @@ module.exports = (opts = {}) => {
   engine.addProvider(new FilterSubprovider());
   engine.addProvider(new NonceSubprovider());
 
+  engine.addProvider(new GsnSubprovider(engine, {
+    useGSN: useGSN || false,
+    verbose: verbose || false,
+    baseSend: jsonProvider.send.bind(jsonProvider)
+  }));
+
   engine.addProvider(new HookedWalletSubprovider({
     getAccounts: (cb) => {
       const addresses = engine._getAccounts();
       cb(null, addresses);
+    },
+    signMessage: (payload, cb) => {
+      try {
+        const { from, data } = payload;
+        const account = engine._getAccount(from);
+        account.signMsg({ data, chainId: network.chainId }, cb);
+      } catch ( err ) {
+        if (typeof cb === 'function') cb(err, '0x0');
+        else throw err
+      }
     },
     signTransaction: (payload, cb) => {
       try {

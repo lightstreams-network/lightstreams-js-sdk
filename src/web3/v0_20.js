@@ -20,7 +20,7 @@ const calculateEstimateGas = (web3, { data, to }) => {
   return new Promise((resolve, reject) => {
     web3.eth.estimateGas({ data, to }, (err, result) => {
       if (err) reject(err);
-      resolve(result)
+      resolve(result + estimatedGasThreshold)
     });
   });
 };
@@ -124,7 +124,7 @@ module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
       contract.new(...params, {
         from: window.ethereum.selectedAddress,
         data: bytecode,
-        gas: estimatedGas + estimatedGasThreshold,
+        gas: estimatedGas,
         gasPrice
       }, (err, myContract) => {
         if (err) {
@@ -197,7 +197,7 @@ module.exports.contractCall = (web3, { to: contractAddr, abi, method, params }) 
   });
 };
 
-module.exports.contractSendTx = (web3, { to: contractAddr, from, abi, method, params, value }) => {
+module.exports.contractSendTx = (web3, { to: contractAddr, from, abi, method, params, value, useGSN }) => {
   return new Promise(async (resolve, reject) => {
     if (!web3.isConnected()) {
       reject(new Error('Web3 is not connected'));
@@ -220,8 +220,9 @@ module.exports.contractSendTx = (web3, { to: contractAddr, from, abi, method, pa
 
     contractInstance[method].sendTransaction(...params, {
       from,
-      gas: estimatedGas + estimatedGasThreshold,
+      gas: estimatedGas,
       value: value,
+      useGSN: useGSN || false,
       gasPrice
     }, (err, txHash) => {
       if (err) reject(err);

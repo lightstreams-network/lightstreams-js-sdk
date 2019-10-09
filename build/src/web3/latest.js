@@ -323,7 +323,7 @@ module.exports.contractSendTx = function (web3, _ref9) {
                 value: value,
                 gas: estimatedGas
               }).on('transactionHash', function (txHash) {
-                console.log("Tx executed ".concat(txHash));
+                console.log("Tx executed ", txHash);
               }).on('receipt', function (txReceipt) {
                 if (!txReceipt.status) {
                   reject(new Error("Failed tx ".concat(txReceipt.hash)));

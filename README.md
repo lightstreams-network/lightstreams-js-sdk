@@ -78,7 +78,7 @@ overwritten to use the key local storage.
 import { Web3, Web3Provider } from 'lightstreams-js-sdk';
 
 const provider = Web3Provider({ rpcUrl: window.process.env.WEB3_PROVIDER});
-Web3.initialize(provider).then(web3 => {
+Web3.newEngine(provider).then(web3 => {
   window.web3 = this.state.web3;
 });
 ```
