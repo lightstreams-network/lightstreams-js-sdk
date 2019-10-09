@@ -49,7 +49,7 @@ function () {
   var _ref3 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee(web3, _ref2) {
-    var from, recipient, relayHub, amountInPht;
+    var from, recipient, relayHub, amountInPht, curBalance;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -92,15 +92,22 @@ function () {
             throw new Error("Invalid \"amountInPht\" value ".concat(amountInPht, ". Expected a float number"));
 
           case 11:
-            _context.next = 13;
+            console.log("Account ".concat(from, " depositing ").concat(amountInPht, " PHT in relayhub ").concat(relayHub, " to fund recipient ").concat(recipient, " "));
+            _context.next = 14;
             return fRecipient(web3, {
               from: from,
               recipient: recipient,
               relayHubAddress: relayHub,
-              amount: web3.utils.toWei(amountInPht, "ether")
+              // IMPORTANT: Amount cannot be higher than relay server address balance
+              // @TODO: Implement validation
+              amount: web3Utils.toWei(amountInPht, "ether")
             });
 
-          case 13:
+          case 14:
+            curBalance = _context.sent;
+            return _context.abrupt("return", curBalance);
+
+          case 16:
           case "end":
             return _context.stop();
         }

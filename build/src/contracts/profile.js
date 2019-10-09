@@ -15,8 +15,6 @@ var _require = require('../gsn'),
     fundRecipient = _require.fundRecipient,
     isRelayHubDeployed = _require.isRelayHubDeployed;
 
-var web3Utils = require('web3-utils');
-
 var factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 
 var profileScJSON = require('../../build/contracts/GSNProfile.json');
@@ -27,14 +25,14 @@ function () {
   var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee(web3, _ref) {
-    var profileFactoryAddr, relayHub, from, factoryFundingInPht, profileFundingInPht, isRelayHub;
+    var contractAddr, relayHub, from, factoryFundingInPht, profileFundingInPht, isRelayHub, txReceipt;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            profileFactoryAddr = _ref.profileFactoryAddr, relayHub = _ref.relayHub, from = _ref.from, factoryFundingInPht = _ref.factoryFundingInPht, profileFundingInPht = _ref.profileFundingInPht;
+            contractAddr = _ref.contractAddr, relayHub = _ref.relayHub, from = _ref.from, factoryFundingInPht = _ref.factoryFundingInPht, profileFundingInPht = _ref.profileFundingInPht;
 
-            if (web3Utils.isAddress(from)) {
+            if (Web3.utils.isAddress(from)) {
               _context.next = 3;
               break;
             }
@@ -42,7 +40,7 @@ function () {
             throw new Error("Invalid argument \"from\": ".concat(from, ". Expected eth address"));
 
           case 3:
-            if (web3Utils.isAddress(relayHub)) {
+            if (Web3.utils.isAddress(relayHub)) {
               _context.next = 5;
               break;
             }
@@ -50,12 +48,12 @@ function () {
             throw new Error("Invalid argument \"relayHub\": ".concat(relayHub, ". Expected eth address"));
 
           case 5:
-            if (web3Utils.isAddress(profileFactoryAddr)) {
+            if (Web3.utils.isAddress(contractAddr)) {
               _context.next = 7;
               break;
             }
 
-            throw new Error("Invalid argument \"profileFactoryAddr\": ".concat(profileFactoryAddr, ". Expected eth address"));
+            throw new Error("Invalid argument \"profileFactoryAddr\": ".concat(contractAddr, ". Expected eth address"));
 
           case 7:
             if (!isNaN(parseFloat(factoryFundingInPht))) {
@@ -92,7 +90,7 @@ function () {
           case 16:
             _context.next = 18;
             return Web3.contractSendTx(web3, {
-              to: profileFactoryAddr,
+              to: contractAddr,
               from: from,
               abi: factoryScJSON.abi,
               method: 'initialize',
@@ -100,30 +98,41 @@ function () {
             });
 
           case 18:
-            console.log("Activated GSN for ProfileFactory instance for RelayHub ".concat(relayHub, "...")); // Step 3: Top up factory contract
+            txReceipt = _context.sent;
 
-            _context.next = 21;
+            if (txReceipt.status) {
+              _context.next = 23;
+              break;
+            }
+
+            throw new Error("ProfileFactory initialization failed");
+
+          case 23:
+            console.log("Activated GSN for ProfileFactory instance for RelayHub ".concat(relayHub, "..."));
+
+          case 24:
+            _context.next = 26;
             return Web3.sendTransaction(web3, {
               from: from,
-              to: profileFactoryAddr,
+              to: contractAddr,
               valueInPht: factoryFundingInPht
             });
 
-          case 21:
+          case 26:
             console.log("Topped up ProfileFactory with ".concat(factoryFundingInPht, " PHTs..."));
-            _context.next = 24;
+            _context.next = 29;
             return fundRecipient(web3, {
               from: from,
-              recipient: profileFactoryAddr,
+              recipient: contractAddr,
               relayHub: relayHub,
               amountInPht: profileFundingInPht
             });
 
-          case 24:
-            console.log("Recipient ".concat(profileFactoryAddr, " is sponsored by relayHub with ").concat(profileFundingInPht, " PHTs..."));
-            return _context.abrupt("return", profileFactoryAddr);
+          case 29:
+            console.log("Recipient ".concat(contractAddr, " is sponsored by relayHub with ").concat(profileFundingInPht, " PHTs..."));
+            return _context.abrupt("return", contractAddr);
 
-          case 26:
+          case 31:
           case "end":
             return _context.stop();
         }

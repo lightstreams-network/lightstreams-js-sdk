@@ -17,9 +17,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
  * Date: 5/08/19 15:45
  * Copyright 2019 (c) Lightstreams, Granada
  */
-// Increasing by % the estimated gas to mitigate wrong estimations
-var gasThreshold = 1.2; // 20%
-
 var waitFor = function waitFor(waitInSeconds) {
   return new Promise(function (resolve) {
     setTimeout(resolve, waitInSeconds * 1000);
@@ -107,7 +104,14 @@ var calculateEstimatedGas = function calculateEstimatedGas(method, params) {
       //   resolve(9000000);
       // }
       else {
-          var gas = parseInt(estimatedGas * gasThreshold);
+          // @TODO Investigate issue with wrong gas estimation
+          // As temporal HACK, increasing by % the estimated gas to mitigate wrong estimations
+          // and define a minimum gas
+          var gasOverflow = parseInt(estimatedGas * 1.2); // 20% Increment
+
+          var gasMin = 100000;
+          var gas = gasMin > gasOverflow ? gasMin : gasOverflow; // const gas = parseInt(estimatedGas * gasThreshold);
+
           resolve(gas);
         }
     });

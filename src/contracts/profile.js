@@ -5,24 +5,23 @@
  */
 const Web3 = require('../web3');
 const { fundRecipient, isRelayHubDeployed } = require('../gsn');
-const web3Utils = require('web3-utils');
 
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
 
-module.exports.initializeProfileFactory = async (web3, { profileFactoryAddr, relayHub, from, factoryFundingInPht, profileFundingInPht }) => {
+module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub, from, factoryFundingInPht, profileFundingInPht }) => {
 
   // Step 0: Validate arguments
-  if (!web3Utils.isAddress(from)) {
+  if (!Web3.utils.isAddress(from)) {
     throw new Error(`Invalid argument "from": ${from}. Expected eth address`);
   }
 
-  if (!web3Utils.isAddress(relayHub)) {
+  if (!Web3.utils.isAddress(relayHub)) {
     throw new Error(`Invalid argument "relayHub": ${relayHub}. Expected eth address`);
   }
 
-  if (!web3Utils.isAddress(profileFactoryAddr)) {
-    throw new Error(`Invalid argument "profileFactoryAddr": ${profileFactoryAddr}. Expected eth address`);
+  if (!Web3.utils.isAddress(contractAddr)) {
+    throw new Error(`Invalid argument "profileFactoryAddr": ${contractAddr}. Expected eth address`);
   }
 
   if (isNaN(parseFloat(factoryFundingInPht))) {
@@ -37,42 +36,34 @@ module.exports.initializeProfileFactory = async (web3, { profileFactoryAddr, rel
   if(!isRelayHub) {
     throw new Error(`RelayHub is not found at ${relayHub}`);
   }
-
-  // Step 1: Deploy Profile factory smart contract
-  // console.log(`Deploying profile factory...`);
-  // const txReceipt = await Web3.deployContract(web3, {
-  //   from,
-  //   abi: factoryScJSON.abi,
-  //   bytecode: factoryScJSON.bytecode,
-  //   params: [Web3.utils.toWei(profileFundingInPht)]
-  // });
-  //
-  // const profileFactoryAddr = txReceipt.contractAddress;
-  // console.log(`GSNProfileFactory.sol successfully deployed at ${profileFactoryAddr}!`);
-
+  
   // Step 2: Initialize gsn feature within profile factory contract
-  await Web3.contractSendTx(web3, {
-    to: profileFactoryAddr,
+  const txReceipt = await Web3.contractSendTx(web3, {
+    to: contractAddr,
     from,
     abi: factoryScJSON.abi,
     method: 'initialize',
     params: [relayHub]
   });
-  console.log(`Activated GSN for ProfileFactory instance for RelayHub ${relayHub}...`);
+  if (!txReceipt.status) {
+    throw new Error(`ProfileFactory initialization failed`);
+  } else {
+    console.log(`Activated GSN for ProfileFactory instance for RelayHub ${relayHub}...`);
+  }
 
   // Step 3: Top up factory contract
-  await Web3.sendTransaction(web3, { from, to: profileFactoryAddr, valueInPht: factoryFundingInPht });
+  await Web3.sendTransaction(web3, { from, to: contractAddr, valueInPht: factoryFundingInPht });
   console.log(`Topped up ProfileFactory with ${factoryFundingInPht} PHTs...`);
 
   await fundRecipient(web3, {
     from,
-    recipient: profileFactoryAddr,
+    recipient: contractAddr,
     relayHub: relayHub,
     amountInPht: profileFundingInPht
   });
 
-  console.log(`Recipient ${profileFactoryAddr} is sponsored by relayHub with ${profileFundingInPht} PHTs...`);
-  return profileFactoryAddr;
+  console.log(`Recipient ${contractAddr} is sponsored by relayHub with ${profileFundingInPht} PHTs...`);
+  return contractAddr;
 };
 
 module.exports.deployProfile = async (web3, { from, profileFactoryAddr, useGSN }) => {

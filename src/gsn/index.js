@@ -50,12 +50,17 @@ module.exports.fundRecipient = async (web3, { from, recipient, relayHub, amountI
     throw new Error(`Invalid "amountInPht" value ${amountInPht}. Expected a float number`);
   }
 
-  await fRecipient(web3, {
+  console.log(`Account ${from} depositing ${amountInPht} PHT in relayhub ${relayHub} to fund recipient ${recipient} `);
+  const curBalance = await fRecipient(web3, {
     from,
     recipient,
     relayHubAddress: relayHub,
-    amount: web3.utils.toWei(amountInPht, "ether")
+    // IMPORTANT: Amount cannot be higher than relay server address balance
+    // @TODO: Implement validation
+    amount: web3Utils.toWei(amountInPht, "ether")
   });
+
+  return curBalance;
 };
 
 module.exports.getRecipientFunds = async(web3, { recipient }) => {

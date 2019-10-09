@@ -5,9 +5,6 @@
  */
 
 
-// Increasing by % the estimated gas to mitigate wrong estimations
-const gasThreshold = 1.2; // 20%
-
 const waitFor = (waitInSeconds) => {
   return new Promise((resolve) => {
     setTimeout(resolve, waitInSeconds * 1000);
@@ -53,7 +50,13 @@ const calculateEstimatedGas = (method, params) => {
       //   resolve(9000000);
       // }
       else {
-        const gas = parseInt(estimatedGas * gasThreshold);
+        // @TODO Investigate issue with wrong gas estimation
+        // As temporal HACK, increasing by % the estimated gas to mitigate wrong estimations
+        // and define a minimum gas
+        const gasOverflow = parseInt(estimatedGas * 1.2); // 20% Increment
+        const gasMin = 100000;
+        const gas = gasMin > gasOverflow ? gasMin : gasOverflow;
+        // const gas = parseInt(estimatedGas * gasThreshold);
         resolve(gas);
       }
     });

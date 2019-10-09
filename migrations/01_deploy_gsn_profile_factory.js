@@ -13,7 +13,7 @@ module.exports = function(deployer) {
   // Therefore the total amount of pre-funded profiles will be of 300/20 = 15 profiles
   deployer.deploy(ProfileFactory, profileFundingInWei).then(instance => {
     return initializeProfileFactory(web3, {
-      profileFactoryAddr: instance.address,
+      contractAddr: instance.address,
       relayHub: relayHub,
       from: process.env.ACCOUNT,
       factoryFundingInPht: factoryFundingInPht,
