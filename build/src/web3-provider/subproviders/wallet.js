@@ -1,7 +1,5 @@
 "use strict";
 
-var _this = void 0;
-
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -14,67 +12,35 @@ function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) r
 
 /**
  * User: ggarrido
- * Date: 14/08/19 9:49
+ * Date: 9/10/19 18:06
  * Copyright 2019 (c) Lightstreams, Granada
  */
-var WalletSubprovider = require('../web3-provider/subproviders/wallet');
+var HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet');
 
-var Web3Provider = require('../web3-provider');
+module.exports = function WalletSubprovider(provider) {
+  var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  return new HookedWalletSubprovider({
+    getAccounts: opts.getAccounts || function (cb) {
+      var addresses = provider._getAccounts();
 
-var Web3 = require('../web3');
-
-module.exports.isInstalled = function () {
-  return typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
-};
-
-module.exports.isConnected = function () {
-  return _this.isInstalled() && typeof window.web3 !== 'undefined' && window.web3.isConnected();
-};
-
-module.exports.isEnabled = function () {
-  return _this.isConnected() && typeof window.ethereum.selectedAddress !== 'undefined';
-};
-
-module.exports.enable = function () {
-  return window.ethereum.enable();
-};
-
-module.exports.selectedAddress = function () {
-  if (!_this.isConnected()) {
-    throw new Error('Web3 is not connected');
-  }
-
-  return window.ethereum.selectedAddress;
-};
-
-module.exports.web3 = function () {
-  var providerEngine = window.web3;
-  var chainId = parseInt(web3.currentProvider.networkVersion);
-  var selectedAddr = window.ethereum.selectedAddress.toLowerCase();
-  var walletSubprovider = WalletSubprovider(providerEngine, {
-    getAccounts: function getAccounts(cb) {
-      providerEngine.eth.getAccounts(cb);
+      cb(null, addresses);
     },
-    signMessage: function signMessage(payload, cb) {
+    signMessage: opts.signMessage || function (payload, cb) {
       try {
-        // debugger;
         var from = payload.from,
             data = payload.data;
 
-        if (from.toLowerCase() !== selectedAddr) {
-          cb(new Error("Selected metamask address is not expected ".concat(from)), null);
-        } // providerEngine.sign(web3.toHex("msg"), web3.eth.defaultAccount, (err, res) => console.log(err, res))
+        var account = provider._getAccount(from);
 
-
-        providerEngine.personal.sign(data, from, function (err, res) {
-          // debugger;
-          cb(err, res);
-        });
+        account.signMsg({
+          data: data,
+          chainId: provider.chainId()
+        }, cb);
       } catch (err) {
         if (typeof cb === 'function') cb(err, '0x0');else throw err;
       }
     },
-    signTransaction: function signTransaction(payload, cb) {
+    signTransaction: opts.signTransaction || function (payload, cb) {
       try {
         var gas = payload.gas,
             from = payload.from,
@@ -82,25 +48,16 @@ module.exports.web3 = function () {
 
         var txParams = _objectSpread({}, params, {
           gasLimit: gas
-        }); // debugger;
-
-
-        if (from.toLowerCase() !== selectedAddr) {
-          cb(new Error("Selected metamask address is not expected ".concat(from)), null);
-        }
-
-        providerEngine.personal.signTransaction(txParams, from, function (err, res) {
-          cb(err, res);
         });
+
+        var account = provider._getAccount(from);
+
+        account.signTx(_objectSpread({}, txParams, {
+          chainId: provider.chainId()
+        }), cb);
       } catch (err) {
         if (typeof cb === 'function') cb(err, '0x0');else throw err;
       }
     }
   });
-  var provider = Web3Provider({
-    rpcUrl: 'http://localhost:8545'
-  }, walletSubprovider);
-  return Web3.newEngine(provider);
-}; // web3.personal.sign(web3.toHex("msg"), web3.eth.defaultAccount, (err, res) => console.log(err, res))
-// web3.currentProvider.networkVersion
-// window.ethereum.selectedAddress
+};

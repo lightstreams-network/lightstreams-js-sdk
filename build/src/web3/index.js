@@ -23,8 +23,6 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
  */
 var Web3 = require('web3');
 
-var Web3Provider = require('../web3-provider/index');
-
 var net = require('net');
 
 var latest = require('./latest');
@@ -48,6 +46,9 @@ module.exports.newEngine = function (provider) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
   if (typeof provider === 'string') {
+    var Web3Provider = require('../web3-provider'); // @ISSUE when imported top due to recursive dependency
+
+
     console.log(Web3Provider);
     provider = Web3Provider(_objectSpread({}, options, {
       rpcUrl: provider
