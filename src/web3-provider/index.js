@@ -6,7 +6,6 @@
 const ethers = require('ethers');
 const FixtureSubprovider = require('web3-provider-engine/subproviders/fixture.js');
 
-const HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet');
 const SubscriptionsSubprovider = require('web3-provider-engine/subproviders/subscriptions');
 const NonceSubprovider = require('web3-provider-engine/subproviders/nonce-tracker');
 const FilterSubprovider = require('web3-provider-engine/subproviders/filters');
@@ -16,7 +15,7 @@ const ProviderEngine = require('./engine');
 const { PersonalSubprovider, GsnSubprovider, WalletSubprovider } = require('./subproviders');
 
 // @TODO Decouple from etherswallet module
-module.exports = (opts = {}) => {
+module.exports = (opts = {}, walletSubprovider = null) => {
   const { rpcUrl, ...engineOpts } = opts;
   const lsProviderEngine = new ProviderEngine(engineOpts);
   const version = '0.8.0';
@@ -61,7 +60,11 @@ module.exports = (opts = {}) => {
     jsonRpcSend: jsonProvider.send.bind(jsonProvider)
   }));
 
-  lsProviderEngine.addProvider(WalletSubprovider(lsProviderEngine, engineOpts));
+  if (walletSubprovider) {
+    lsProviderEngine.addProvider(walletSubprovider);
+  } else {
+    lsProviderEngine.addProvider(WalletSubprovider(lsProviderEngine, engineOpts));
+  }
 
   lsProviderEngine.addProvider(new PersonalSubprovider(lsProviderEngine));
 

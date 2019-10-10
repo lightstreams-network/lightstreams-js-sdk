@@ -25,8 +25,7 @@ export default class ENSPage extends Component {
   }
 
   componentDidMount() {
-    const provider = Web3Provider({ rpcUrl: window.process.env.WEB3_PROVIDER });
-    Web3.newEngine(provider).then(web3 => {
+    Web3.newEngine(window.process.env.WEB3_PROVIDER).then(web3 => {
       this.setState({ web3 });
       window.web3 = this.state.web3;
       window.ethers = require('ethers');

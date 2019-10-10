@@ -66,9 +66,9 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
   return contractAddr;
 };
 
-module.exports.deployProfile = async (web3, { from, profileFactoryAddr, useGSN }) => {
+module.exports.deployProfileByFactory = async (web3, { from, contractAddr, useGSN }) => {
   const txReceipt = await Web3.contractSendTx(web3, {
-    to: profileFactoryAddr,
+    to: contractAddr,
     from,
     useGSN: useGSN || false,
     abi: factoryScJSON.abi,
@@ -79,12 +79,12 @@ module.exports.deployProfile = async (web3, { from, profileFactoryAddr, useGSN }
   return txReceipt.events['NewProfile'].returnValues['addr'];
 };
 
-module.exports.addOwner = async (web3, { from, ownerAddr, profileAddr, useGSN }) => {
+module.exports.addOwner = async (web3, { from, contractAddr, useGSN, ownerAddr }) => {
   return Web3.contractSendTx(web3, {
-    to: profileAddr,
+    to: contractAddr,
     from,
     useGSN: useGSN || false,
-    abi: factoryScJSON.abi,
+    abi: profileScJSON.abi,
     method: 'addOwner',
     params: [ownerAddr]
   });

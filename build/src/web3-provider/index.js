@@ -19,8 +19,6 @@ var ethers = require('ethers');
 
 var FixtureSubprovider = require('web3-provider-engine/subproviders/fixture.js');
 
-var HookedWalletSubprovider = require('web3-provider-engine/subproviders/hooked-wallet');
-
 var SubscriptionsSubprovider = require('web3-provider-engine/subproviders/subscriptions');
 
 var NonceSubprovider = require('web3-provider-engine/subproviders/nonce-tracker');
@@ -39,6 +37,7 @@ var _require = require('./subproviders'),
 
 module.exports = function () {
   var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var walletSubprovider = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
   var rpcUrl = opts.rpcUrl,
       engineOpts = _objectWithoutProperties(opts, ["rpcUrl"]);
@@ -99,7 +98,13 @@ module.exports = function () {
   lsProviderEngine.addProvider(new GsnSubprovider(lsProviderEngine, _objectSpread({}, engineOpts, {
     jsonRpcSend: jsonProvider.send.bind(jsonProvider)
   })));
-  lsProviderEngine.addProvider(WalletSubprovider(lsProviderEngine, engineOpts));
+
+  if (walletSubprovider) {
+    lsProviderEngine.addProvider(walletSubprovider);
+  } else {
+    lsProviderEngine.addProvider(WalletSubprovider(lsProviderEngine, engineOpts));
+  }
+
   lsProviderEngine.addProvider(new PersonalSubprovider(lsProviderEngine));
   lsProviderEngine.addProvider(new RpcSubprovider({
     rpcUrl: rpcUrl // Expected to be

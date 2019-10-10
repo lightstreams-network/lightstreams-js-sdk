@@ -69,11 +69,10 @@ contract('GSNProfileFactory', (accounts) => {
   });
 
   it('should deploy a Profile from a user without any funds for FREE using ProfileFactory', async () => {
-    const web3ls = await Web3.newEngine(Web3Provider({
-      rpcUrl: web3.eth.currentProvider.host,
+    const web3ls = await Web3.newEngine(web3.eth.currentProvider.host, {
       useGSN: false, // Use true in case you want GSN by default
       verbose: false
-    }));
+    });
 
     emptyAccAddr = await web3ls.eth.personal.newAccount("secret");
     recoveryAccAddr = await web3ls.eth.personal.newAccount("secret");

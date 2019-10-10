@@ -75,10 +75,9 @@ overwritten to use the key local storage.
 **How to initialize a LS web3 provider**
 
 ```js
-import { Web3, Web3Provider } from 'lightstreams-js-sdk';
+import { Web3 } from 'lightstreams-js-sdk';
 
-const provider = Web3Provider({ rpcUrl: window.process.env.WEB3_PROVIDER});
-Web3.newEngine(provider).then(web3 => {
+Web3.newEngine(window.process.env.WEB3_PROVIDER).then(web3 => {
   window.web3 = this.state.web3;
 });
 ```

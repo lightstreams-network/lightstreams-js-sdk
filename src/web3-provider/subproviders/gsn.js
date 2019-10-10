@@ -61,7 +61,7 @@ GsnSubprovider.prototype._handleSendTransaction = function(payload, cb) {
   callAsJsonRpc(
     this.relayClient.sendTransaction.bind(this.relayClient), [payload],
     payload.id, (err, res) => {
-      cb(err, res.result);
+      cb(err, res && res.result);
     },
     txHash => {
       this.relayedTxs.add(txHash);

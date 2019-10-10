@@ -145,21 +145,21 @@ function () {
   };
 }();
 
-module.exports.deployProfile =
+module.exports.deployProfileByFactory =
 /*#__PURE__*/
 function () {
   var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(web3, _ref3) {
-    var from, profileFactoryAddr, useGSN, txReceipt;
+    var from, contractAddr, useGSN, txReceipt;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            from = _ref3.from, profileFactoryAddr = _ref3.profileFactoryAddr, useGSN = _ref3.useGSN;
+            from = _ref3.from, contractAddr = _ref3.contractAddr, useGSN = _ref3.useGSN;
             _context2.next = 3;
             return Web3.contractSendTx(web3, {
-              to: profileFactoryAddr,
+              to: contractAddr,
               from: from,
               useGSN: useGSN || false,
               abi: factoryScJSON.abi,
@@ -190,17 +190,17 @@ function () {
   var _ref6 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee3(web3, _ref5) {
-    var from, ownerAddr, profileAddr, useGSN;
+    var from, contractAddr, useGSN, ownerAddr;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            from = _ref5.from, ownerAddr = _ref5.ownerAddr, profileAddr = _ref5.profileAddr, useGSN = _ref5.useGSN;
+            from = _ref5.from, contractAddr = _ref5.contractAddr, useGSN = _ref5.useGSN, ownerAddr = _ref5.ownerAddr;
             return _context3.abrupt("return", Web3.contractSendTx(web3, {
-              to: profileAddr,
+              to: contractAddr,
               from: from,
               useGSN: useGSN || false,
-              abi: factoryScJSON.abi,
+              abi: profileScJSON.abi,
               method: 'addOwner',
               params: [ownerAddr]
             }));
