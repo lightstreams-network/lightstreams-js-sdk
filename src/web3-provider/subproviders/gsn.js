@@ -24,7 +24,7 @@ GsnSubprovider.prototype._handleGetTransactionReceipt = function(payload, cb) {
   // Check for GSN usage
   const txHash = payload.params[0];
 
-  if (!this._withGSN(payload) && !this.relayedTxs.has(txHash)) return false;
+  if (!this.relayedTxs.has(txHash)) return false;
 
   // Set error status if tx was rejected
   this.jsonRpcSend('eth_getTransactionReceipt', [txHash])

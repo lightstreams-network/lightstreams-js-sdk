@@ -17,7 +17,7 @@ const { PersonalSubprovider, GsnSubprovider, WalletSubprovider } = require('./su
 
 // @TODO Decouple from etherswallet module
 module.exports = (opts = {}) => {
-  const { rpcUrl, useGSN, verbose, ...engineOpts } = opts;
+  const { rpcUrl, ...engineOpts } = opts;
   const lsProviderEngine = new ProviderEngine(engineOpts);
   const version = '0.8.0';
 
@@ -57,12 +57,11 @@ module.exports = (opts = {}) => {
   lsProviderEngine.addProvider(new NonceSubprovider());
 
   lsProviderEngine.addProvider(new GsnSubprovider(lsProviderEngine, {
-    useGSN: useGSN || false,
-    verbose: verbose || false,
+    ...engineOpts,
     jsonRpcSend: jsonProvider.send.bind(jsonProvider)
   }));
 
-  lsProviderEngine.addProvider(WalletSubprovider(lsProviderEngine));
+  lsProviderEngine.addProvider(WalletSubprovider(lsProviderEngine, engineOpts));
 
   lsProviderEngine.addProvider(new PersonalSubprovider(lsProviderEngine));
 
