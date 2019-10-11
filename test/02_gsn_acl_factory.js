@@ -14,7 +14,7 @@ const ACL = artifacts.require("GSNAcl");
 
 contract('AclFactory', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
-  const RELAY_HUB = process.env.RELAYHUB;
+  const RELAY_HUB = process.env.RELAY_HUB;
 
   // Factory will be able to create 5 new individual ACLs
   const FACTORY_ACL_FAUCET_FUNDING_ETH = '50';

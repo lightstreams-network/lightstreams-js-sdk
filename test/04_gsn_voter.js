@@ -14,7 +14,7 @@ const Voter = artifacts.require("Voter");
 // TODO: Move the file to examples.
 contract('Voter', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
-  const RELAY_HUB = process.env.RELAYHUB;
+  const RELAY_HUB = process.env.RELAY_HUB;
 
   let gsnCtx;
   let emptyAcc;
