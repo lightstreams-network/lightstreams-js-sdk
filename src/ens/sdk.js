@@ -30,11 +30,6 @@ module.exports.initializeNewRegistry = async (web3, { from, ensAddress }) => {
     subnode: defaultResolverNodeId // Default
   });
 
-  // We need for few seconds till node registration is completed
-  // @TODO Improve understanding of this wait
-  // console.log("Waiting few seconds for node to registration to completed");
-  // await waitFor(5);
-
   await setNodeResolver(web3, { from, ensAddress, resolverAddress, node: defaultResolverNodeId });
   return { resolverAddress };
 };
@@ -54,11 +49,6 @@ module.exports.registerNode = async (web3, {ensAddress, parentNode, from, subnod
     parentNode,
     subnode
   });
-
-  // We need for few seconds till node registration is completed
-  // @TODO Improve understanding of this wait
-  // console.log("Waiting few seconds for node to registration to completed");
-  // await waitFor(5);
 
   await setNodeResolver(web3, {
     from,

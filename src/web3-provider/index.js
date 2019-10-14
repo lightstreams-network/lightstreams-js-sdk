@@ -14,19 +14,15 @@ const RpcSubprovider = require('web3-provider-engine/subproviders/rpc');
 const ProviderEngine = require('./engine');
 const { PersonalSubprovider, GsnSubprovider, WalletSubprovider } = require('./subproviders');
 
-// @TODO Decouple from etherswallet module
 module.exports = (opts = {}, walletSubprovider = null) => {
   const { rpcUrl, ...engineOpts } = opts;
   const lsProviderEngine = new ProviderEngine(engineOpts);
   const version = '0.8.0';
 
+  // @TODO Decouple from etherswallet module
   const jsonProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
   jsonProvider.send('net_version').then(version => {
     chainId = parseInt(version);
-    // The possible `hardfork` parameter values
-    // - `Byzantium`
-    // - `Constantinople`
-    // - `Petersburg`
     switch ( chainId ) {
       case 161:
         lsProviderEngine.setNetwork({ name: 'standalone', networkId: chainId, chainId: chainId });
@@ -60,11 +56,42 @@ module.exports = (opts = {}, walletSubprovider = null) => {
     jsonRpcSend: jsonProvider.send.bind(jsonProvider)
   }));
 
-  if (walletSubprovider) {
-    lsProviderEngine.addProvider(walletSubprovider);
-  } else {
-    lsProviderEngine.addProvider(WalletSubprovider(lsProviderEngine, engineOpts));
+  if (!walletSubprovider) {
+    // Initialize default wallet subprovider using in memory wallets
+    walletSubprovider = WalletSubprovider({
+      getAccounts: (cb) => {
+        const addresses = lsProviderEngine._getAccounts();
+        cb(null, addresses);
+      },
+      signMessage: (payload, cb) => {
+        try {
+          const { from, data } = payload;
+          const account = lsProviderEngine._getAccount(from);
+          account.signMsg({ data, chainId: lsProviderEngine._getChainId() }, cb);
+        } catch ( err ) {
+          if (typeof cb === 'function') cb(err, '0x0');
+          else throw err
+        }
+      },
+      signTransaction: (payload, cb) => {
+        try {
+          const { gas, from, ...params } = payload;
+          const txParams = {
+            ...params,
+            gasLimit: gas,
+          };
+
+          const account = lsProviderEngine._getAccount(from);
+          account.signTx({ ...txParams, chainId: lsProviderEngine._getChainId() }, cb);
+        } catch ( err ) {
+          if (typeof cb === 'function') cb(err, '0x0');
+          else throw err
+        }
+      },
+    });
   }
+
+  lsProviderEngine.addProvider(walletSubprovider);
 
   lsProviderEngine.addProvider(new PersonalSubprovider(lsProviderEngine));
 

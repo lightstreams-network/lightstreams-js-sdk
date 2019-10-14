@@ -1,8 +1,7 @@
 pragma solidity ^0.5.0;
 
-import "./utils/GSN.sol";
+import "../utils/GSN.sol";
 
-// TODO: Move the file to examples.
 contract Voter is GSN {
     uint256 public count;
 

@@ -11,7 +11,6 @@ const { isRelayHubDeployedForRecipient, getRecipientFunds } = utils;
 
 const Voter = artifacts.require("Voter");
 
-// TODO: Move the file to examples.
 contract('Voter', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
   const RELAY_HUB = process.env.RELAY_HUB;
@@ -23,7 +22,6 @@ contract('Voter', (accounts) => {
 
   it('should deploy Voter', async () => {
     voter = await Voter.new();
-
     gasPrice = await web3.eth.getGasPrice();
     emptyAcc = await web3.eth.accounts.create("secret");
   });
@@ -69,6 +67,7 @@ contract('Voter', (accounts) => {
       gasPrice: gasPrice,
       gasLimit: "1000000",
     });
+
     assert.equal(tx.status, true);
 
     const lastVoter = tx.events['Voted'].returnValues['account'];

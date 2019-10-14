@@ -24,10 +24,11 @@ module.exports.newAccount = (encryptedJson, decryptedWallet = null) => {
       return wallet === null;
     },
     unlock: (password, timeout = 0) => {
-      // @TODO Session timeout for unlocked accounts
-      // setTimeout(function() {
-      //   wallet = null;
-      // }, timeout);
+      if(timeout) {
+        setTimeout(() => {
+          wallet = null;
+        }, timeout);
+      }
 
       return keystore.decryptWallet(encryptedJson, password)
         .then(unlockWallet => {

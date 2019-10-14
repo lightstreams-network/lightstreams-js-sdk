@@ -44,18 +44,16 @@ const handleReceipt = (web3, { txHash, resolve, reject }) => {
 const calculateEstimatedGas = (method, params) => {
   return new Promise((resolve, reject) => {
     method.estimateGas(params, (err, estimatedGas) => {
-      if (err) reject(err);
-      // if (err) {
-      //   resolve(9000000);
-      // }
-      else {
+      if (err) {
+        //   resolve(9000000);
+        reject(err);
+      } else {
         // @TODO Investigate issue with wrong gas estimation
         // As temporal HACK, increasing by % the estimated gas to mitigate wrong estimations
         // and define a minimum gas
         const gasOverflow = parseInt(estimatedGas * 1.2); // 20% Increment
         const gasMin = 100000;
         const gas = gasMin > gasOverflow ? gasMin : gasOverflow;
-        // const gas = parseInt(estimatedGas * gasThreshold);
         resolve(gas);
       }
     });

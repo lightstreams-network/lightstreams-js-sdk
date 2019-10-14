@@ -46,7 +46,7 @@ class ProviderEngine extends Web3ProviderEngine {
     this.network = network;
   }
 
-  chainId() {
+  _getChainId() {
     return this.network.chainId;
   }
 

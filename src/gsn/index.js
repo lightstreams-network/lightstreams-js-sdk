@@ -26,10 +26,9 @@ module.exports.newWeb3Engine = (connection, { signKey, dev, verbose }) => {
   });
 };
 
-// From account is sending $amountInPht tokens to the relayHub to sponsor the usage
-// of the smart contract address specified at the recipient
+// The "from" account is sending "amountInPht" tokens to the "relayHub" address to sponsor the usage
+// of the smart contract address specified at the "recipient"
 module.exports.fundRecipient = async (web3, { from, recipient, relayHub, amountInPht }) => {
-  // @TODO: Validate relayHub has funds enough
   if(!web3Utils.isAddress(from)) {
     throw new Error(`Invalid "from" address ${from}. Expected a valid eth addr`);
   }
@@ -45,7 +44,6 @@ module.exports.fundRecipient = async (web3, { from, recipient, relayHub, amountI
   // Validate RelayHub exists at the passed address
   await getRelayHub(web3, relayHub);
 
-
   if(isNaN(parseFloat(amountInPht))) {
     throw new Error(`Invalid "amountInPht" value ${amountInPht}. Expected a float number`);
   }
@@ -55,8 +53,7 @@ module.exports.fundRecipient = async (web3, { from, recipient, relayHub, amountI
     from,
     recipient,
     relayHubAddress: relayHub,
-    // IMPORTANT: Amount cannot be higher than relay server address balance
-    // @TODO: Implement validation
+    // IMPORTANT: Amount cannot be higher than relay server address balance (@TODO: Implement validation)
     amount: web3Utils.toWei(amountInPht, "ether")
   });
 
