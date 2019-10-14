@@ -12,7 +12,13 @@ module.exports = function(deployer) {
   const tld = process.env.TLD;
   const domain = process.env.DOMAIN;
   const fromAccount = process.env.ACCOUNT;
+  const migrateENS = process.env.MIGRATE_ENS;
+
   let ensAddress;
+
+  if (migrateENS === "false") {
+    return;
+  }
 
   deployer.deploy(ENSRegistry)
     .then(instance => {
