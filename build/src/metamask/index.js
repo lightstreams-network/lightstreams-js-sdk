@@ -48,16 +48,21 @@ module.exports.selectedAddress = function () {
 };
 
 module.exports.web3 = function () {
-  var providerEngine = window.web3;
-  var chainId = parseInt(web3.currentProvider.networkVersion);
+  var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var providerEngine = window.web3; // const chainId = parseInt(web3.currentProvider.networkVersion);
+
   var selectedAddr = window.ethereum.selectedAddress.toLowerCase();
+
+  if (!opts.rpcUrl) {
+    throw new Error("Missing option \"rpcUrl\"");
+  }
+
   var walletSubprovider = WalletSubprovider(providerEngine, {
     getAccounts: function getAccounts(cb) {
       providerEngine.eth.getAccounts(cb);
     },
     signMessage: function signMessage(payload, cb) {
       try {
-        // debugger;
         var from = payload.from,
             data = payload.data;
 
@@ -67,7 +72,6 @@ module.exports.web3 = function () {
 
 
         providerEngine.personal.sign(data, from, function (err, res) {
-          // debugger;
           cb(err, res);
         });
       } catch (err) {
@@ -82,8 +86,7 @@ module.exports.web3 = function () {
 
         var txParams = _objectSpread({}, params, {
           gasLimit: gas
-        }); // debugger;
-
+        });
 
         if (from.toLowerCase() !== selectedAddr) {
           cb(new Error("Selected metamask address is not expected ".concat(from)), null);
@@ -98,7 +101,7 @@ module.exports.web3 = function () {
     }
   });
   var provider = Web3Provider({
-    rpcUrl: 'http://localhost:8545'
+    rpcUrl: opts.rpcUrl
   }, walletSubprovider);
   return Web3.newEngine(provider);
 }; // web3.personal.sign(web3.toHex("msg"), web3.eth.defaultAccount, (err, res) => console.log(err, res))

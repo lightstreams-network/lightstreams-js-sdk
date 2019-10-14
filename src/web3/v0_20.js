@@ -181,7 +181,6 @@ module.exports.contractCall = (web3, { to: contractAddr, abi, method, params }) 
 
     // const callData = contractInstance[method].getData(...params);
     // window.web3.eth.call({ to: address, data: callData }, (err, result) => {
-    //   debugger;
     //   if (err) reject(err);
     //   resolve(result);
     // });

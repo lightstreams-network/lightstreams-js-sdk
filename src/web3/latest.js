@@ -46,7 +46,6 @@ const calculateEstimatedGas = (method, params) => {
     method.estimateGas(params, (err, estimatedGas) => {
       if (err) reject(err);
       // if (err) {
-      //   debugger;
       //   resolve(9000000);
       // }
       else {

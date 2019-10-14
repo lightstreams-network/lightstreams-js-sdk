@@ -35,17 +35,21 @@ module.exports.selectedAddress = () => {
   return window.ethereum.selectedAddress;
 };
 
-module.exports.web3 = () => {
+module.exports.web3 = (opts = {}) => {
   const providerEngine = window.web3;
-  const chainId = parseInt(web3.currentProvider.networkVersion);
+  // const chainId = parseInt(web3.currentProvider.networkVersion);
   const selectedAddr = window.ethereum.selectedAddress.toLowerCase();
+
+  if(!opts.rpcUrl) {
+    throw new Error(`Missing option "rpcUrl"`);
+  }
+
   const walletSubprovider = WalletSubprovider(providerEngine, {
     getAccounts: (cb) => {
       providerEngine.eth.getAccounts(cb)
     },
     signMessage: (payload, cb) => {
       try {
-        // debugger;
         const { from, data } = payload;
         if (from.toLowerCase() !== selectedAddr) {
           cb(new Error(`Selected metamask address is not expected ${from}`), null);
@@ -53,7 +57,6 @@ module.exports.web3 = () => {
 
         // providerEngine.sign(web3.toHex("msg"), web3.eth.defaultAccount, (err, res) => console.log(err, res))
         providerEngine.personal.sign(data, from, (err, res) => {
-          // debugger;
           cb(err, res);
         });
       } catch ( err ) {
@@ -69,7 +72,6 @@ module.exports.web3 = () => {
           gasLimit: gas,
         };
 
-        // debugger;
         if (from.toLowerCase() !== selectedAddr) {
           cb(new Error(`Selected metamask address is not expected ${from}`), null);
         }
@@ -84,7 +86,7 @@ module.exports.web3 = () => {
     }
   });
 
-  const provider = Web3Provider({ rpcUrl: 'http://localhost:8545'}, walletSubprovider);
+  const provider = Web3Provider({ rpcUrl: opts.rpcUrl }, walletSubprovider);
   return Web3.newEngine(provider);
 };
 

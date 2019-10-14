@@ -100,7 +100,6 @@ var calculateEstimatedGas = function calculateEstimatedGas(method, params) {
   return new Promise(function (resolve, reject) {
     method.estimateGas(params, function (err, estimatedGas) {
       if (err) reject(err); // if (err) {
-      //   debugger;
       //   resolve(9000000);
       // }
       else {

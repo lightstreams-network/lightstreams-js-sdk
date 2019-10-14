@@ -112,7 +112,6 @@ function (_Web3ProviderEngine) {
     } // Copyrights by @Portis team
     // https://github.com/portis-project/web-sdk/blob/master/packages/portis-web3/src/index.ts
     // send(payload, callback) {
-    //   debugger;
     //   const self = this;
     //   // Web3 1.0 beta.38 (and above) calls `send` with method and parameters
     //   if (typeof payload === 'string') {
