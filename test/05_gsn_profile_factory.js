@@ -7,12 +7,10 @@ const assert = chai.assert;
 const {
   fundRecipient,
   getRecipientFunds,
-  newWeb3Engine,
   isRelayHubDeployedForRecipient
 } = require('../src/gsn');
 
 const Web3 = require('../src/web3');
-const Web3Provider = require('../src/web3-provider');
 
 const ProfileFactory = artifacts.require("GSNProfileFactory");
 const Profile = artifacts.require("GSNProfile");

@@ -202,6 +202,35 @@ npm i
 npm run build
 ```
 
+### Deploy migrations
+
+To deploy every migration over a network, such as `standalone`, you can run:
+```
+$> npm run deploy -- standalone
+```
+
+In case you want to run only force migration 01 and 03, you have to run:
+```
+$> FORCE_MIGRATION='01_03' npx truffle migration --reset --network standalone
+```
+
+### Run test
+
+To run the full test suite over `standalone` network
+```
+npm run test -- standalone
+```
+
+To run a single test file:
+```
+npx truffle test ./test/{filename} --network standalone
+```
+
+To run a single test file along with a single migration:
+```
+FORCE_MIGRATION='01' npx truffle test ./test/{filename} --network standalone
+```
+
 ## Sample project
 - [Gateway Proxy Server](https://github.com/lightstreams-network/lightstreams-js-sdk/tree/master/example/gateway-proxy)
 - [Gateway Browser](https://github.com/lightstreams-network/lightstreams-js-sdk/tree/master/example/gateway-proxy) (Veryyy drafted)

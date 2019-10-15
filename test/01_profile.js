@@ -11,7 +11,7 @@ chai.use(require('chai-as-promised'));
 const assert = chai.assert;
 
 const Profile = artifacts.require("GSNProfile");
-const ACL = artifacts.require("Acl");
+const ACL = artifacts.require("ACL");
 
 contract('Profile', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
