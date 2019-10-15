@@ -14,21 +14,20 @@ module.exports = function(deployer) {
   deployer.then(() => {
     return ProfileFactory.deployed();
   }).then((curInstance) => {
-    if (curInstance.address && process.env.FORCED_MIGRATIONS.indexOf('01') === -1) {
+    if (curInstance.address && !global.forceMigration('01')) {
       console.log(`Contract already deployed ${curInstance.address}. Skipped migration "01_deploy_gsn_profile_factory.js`);
-      return null;
-    } else {
-      return ProfileFactory.new(profileFundingInWei);
+      return;
     }
-  }).then((instance) => {
-    if(!instance) return;
 
-    return initializeProfileFactory(web3, {
-      contractAddr: instance.address,
-      relayHub: relayHub,
-      from: process.env.ACCOUNT,
-      factoryFundingInPht: factoryFundingInPht,
-      profileFundingInPht: profileFundingInPht
-    });
+    return deployer.deploy(ProfileFactory, profileFundingInWei)
+      .then((instance) => {
+        return initializeProfileFactory(web3, {
+          contractAddr: instance.address,
+          relayHub: relayHub,
+          from: process.env.ACCOUNT,
+          factoryFundingInPht: factoryFundingInPht,
+          profileFundingInPht: profileFundingInPht
+        });
+      })
   })
 };

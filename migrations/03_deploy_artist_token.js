@@ -21,17 +21,16 @@ module.exports = function(deployer) {
   deployer.then(() => {
     return FundingPoolMock.deployed();
   }).then((curInstance) => {
-    if (curInstance.address && process.env.FORCED_MIGRATIONS.indexOf('03') === -1) {
+    if (curInstance.address && !global.forceMigration('03')) {
       console.log(`Contract already deployed ${curInstance.address}. Skipped migration "03_deploy_artist_token.js`);
       return null;
-    } else {
-      return FundingPoolMock.new();
     }
-  }).then(instance => {
-    if (!instance) return;
 
-    fundingPoolInstance = instance;
-    return deployer.deploy(WPHT, fromAccount)
+    return deployer.deploy(FundingPoolMock)
+      .then(instance => {
+        fundingPoolInstance = instance;
+        return deployer.deploy(WPHT, fromAccount)
+      })
       .then(instance => {
         WPHTInstance = instance;
         return deployer.deploy(
@@ -50,5 +49,5 @@ module.exports = function(deployer) {
           minExternalContibution,
           { gas: 10000000 });
       });
-  });
+  })
 };

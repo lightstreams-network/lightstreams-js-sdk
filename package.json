@@ -18,8 +18,8 @@
     "build": "babel src -d build/src",
     "build-single": "babel src --out-file ./build/src/index.js",
     "compile": "rm -rf ./build/contracts/*; truffle compile --all --reset",
-    "test": "FORCE_MIGRATION='false' truffle test --network",
-    "deploy": "FORCE_MIGRATION='true' truffle migrate --reset --network"
+    "test": "truffle test --reset --network",
+    "deploy": "truffle migrate --reset --network"
   },
   "repository": {
     "type": "git",

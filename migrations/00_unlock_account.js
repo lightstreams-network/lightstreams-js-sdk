@@ -1,15 +1,20 @@
 require('dotenv').config({ path: `${process.env.PWD}/.env` });
 
+global.forceMigration = (migrationId) => {
+  if (typeof process.env.FORCE_MIGRATION !== 'string') {
+    return false;
+  }
+
+  if (['true', 'false'].indexOf(process.env.FORCE_MIGRATION) !== -1) {
+    return process.env.FORCE_MIGRATION === 'true'
+  }
+
+  const forcedMigrations = process.env.FORCE_MIGRATION.split('_');
+  return forcedMigrations.indexOf(migrationId) !== -1
+};
+
 module.exports = (deployer) => {
   process.env.NETWORK = deployer.network;
-  process.env.MIGRATIONS = (() => {
-    // return every migration ID in case of force migration is "true"
-    // @TODO: Automatically load file prefix(Migration IDs) from local filesystem
-    if (process.env.FORCE_MIGRATION === 'true') return ['01', '02', '03'];
-
-    // Otherwise extract ID in between following symbol '_'
-    process.env.FORCED_MIGRATIONS = process.env.FORCE_MIGRATION.split('_');
-  })();
 
   deployer.then(function() {
     if (deployer.network === 'ganache') {

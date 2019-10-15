@@ -206,24 +206,24 @@ npm run build
 
 To deploy every migration over a network, such as `standalone`, you can run:
 ```
-$> npm run deploy -- standalone
+$> FORCE_MIGRATION='true' npm run deploy -- standalone
 ```
 
 In case you want to run only force migration 01 and 03, you have to run:
 ```
-$> FORCE_MIGRATION='01_03' npx truffle migration --reset --network standalone
+$> FORCE_MIGRATION='01_03' npm run deploy -- standalone
 ```
 
 ### Run test
 
-To run the full test suite over `standalone` network
+To run the full test suite over `standalone` network and every migrations
 ```
-npm run test -- standalone
+FORCE_MIGRATION='true' npm run test -- standalone
 ```
 
-To run a single test file:
+To run a single test file with every migration
 ```
-npx truffle test ./test/{filename} --network standalone
+FORCE_MIGRATION='true' npx truffle test ./test/{filename} --network standalone
 ```
 
 To run a single test file along with a single migration:
