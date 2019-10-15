@@ -6,7 +6,7 @@ const FundingPoolMock = artifacts.require("FundingPoolMock");
 // Curve parameters:
 const reserveRatio = 142857;  // Kappa (~ 6)
 const theta = 350000;         // 35% in ppm
-const p0 =  1;                // Price of internal token in external tokens.
+const p0 = 1;                // Price of internal token in external tokens.
 const initialRaise = 300000;  // Raise amount in external tokens.
 const friction = 20000;       // 2% in ppm
 const gasPrice = 15000000000; // 15 gwei
@@ -18,30 +18,37 @@ module.exports = function(deployer) {
   let fundingPoolInstance;
   let WPHTInstance;
 
-  deployer.deploy(FundingPoolMock)
-    .then(instance => {
-      fundingPoolInstance = instance;
+  deployer.then(() => {
+    return FundingPoolMock.deployed();
+  }).then((curInstance) => {
+    if (curInstance.address && process.env.FORCED_MIGRATIONS.indexOf('03') === -1) {
+      console.log(`Contract already deployed ${curInstance.address}. Skipped migration "03_deploy_artist_token.js`);
+      return null;
+    } else {
+      return FundingPoolMock.new();
+    }
+  }).then(instance => {
+    if (!instance) return;
 
-      return deployer.deploy(WPHT, fromAccount);
-    })
-    .then(instance => {
-      WPHTInstance = instance;
-
-      return deployer.deploy(
-        ArtistToken,
-        "Armin Van Lightstreams",
-        "AVL",
-        WPHTInstance.address, // _externalToken
-        reserveRatio,
-        gasPrice,
-        theta,
-        p0,
-        initialRaise,
-        fundingPoolInstance.address,
-        friction,
-        duration,
-        minExternalContibution,
-        { gas: 10000000 }
-      );
-    });
+    fundingPoolInstance = instance;
+    return deployer.deploy(WPHT, fromAccount)
+      .then(instance => {
+        WPHTInstance = instance;
+        return deployer.deploy(
+          ArtistToken,
+          "Armin Van Lightstreams",
+          "AVL",
+          WPHTInstance.address, // _externalToken
+          reserveRatio,
+          gasPrice,
+          theta,
+          p0,
+          initialRaise,
+          fundingPoolInstance.address,
+          friction,
+          duration,
+          minExternalContibution,
+          { gas: 10000000 });
+      });
+  });
 };

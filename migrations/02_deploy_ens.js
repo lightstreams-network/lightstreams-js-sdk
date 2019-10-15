@@ -20,17 +20,25 @@ module.exports = function(deployer) {
     return;
   }
 
-  deployer.deploy(ENSRegistry)
-    .then(instance => {
-      ensAddress = instance.address;
-      return ensSdk.initializeNewRegistry(web3, {
-        ensAddress,
-        from: fromAccount
-      }).then(({ resolverAddress }) => {
-        console.log(`ENS initialized with resolver ${resolverAddress}.`)
-      })
-    })
-    .then(() => {
+  deployer.then(() => {
+    return ENSRegistry.deployed();
+  }).then((curInstance) => {
+    if (curInstance.address && process.env.FORCED_MIGRATIONS.indexOf('02') === -1) {
+      console.log(`Contract already deployed ${curInstance.address}. Skipped migration "02_deploy_ens.js`);
+      return null;
+    } else {
+      return ENSRegistry.new();
+    }
+  }).then(instance => {
+    if (!instance) return;
+
+    ensAddress = instance.address;
+    return ensSdk.initializeNewRegistry(web3, {
+      ensAddress,
+      from: fromAccount
+    }).then(({ resolverAddress }) => {
+      console.log(`ENS initialized with resolver ${resolverAddress}.`)
+    }).then(() => {
       console.log(`Start registration of TLD ${tld}...`);
       return ensSdk.registerNode(web3, {
         ensAddress,
@@ -39,8 +47,7 @@ module.exports = function(deployer) {
       }).then(() => {
         console.log(`Registration of TLD "${tld}" completed.`);
       })
-    })
-    .then(() => {
+    }).then(() => {
       console.log(`Start registration of "${domain}.${tld}"...`);
       return ensSdk.registerNode(web3, {
         ensAddress,
@@ -51,4 +58,5 @@ module.exports = function(deployer) {
         console.log(`Registration of domain "${domain}.${tld}" completed.`);
       });
     });
+  });
 };

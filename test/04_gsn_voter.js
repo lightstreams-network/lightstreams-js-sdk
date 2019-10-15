@@ -4,26 +4,21 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const assert = chai.assert;
 
-const { fundRecipient } = require('../src/gsn');
-const { fromConnection } = require('@openzeppelin/network');
+const { fundRecipient, newWeb3Engine } = require('../src/gsn');
 const { utils } = require('@openzeppelin/gsn-provider');
 const { isRelayHubDeployedForRecipient, getRecipientFunds } = utils;
 
+const Web3 = require('../src/web3');
 const Voter = artifacts.require("Voter");
 
 contract('Voter', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
   const RELAY_HUB = process.env.RELAY_HUB;
 
-  let gsnCtx;
-  let emptyAcc;
-  let gasPrice;
   let voter;
 
   it('should deploy Voter', async () => {
     voter = await Voter.new();
-    gasPrice = await web3.eth.getGasPrice();
-    emptyAcc = await web3.eth.accounts.create("secret");
   });
 
   it('should initialize the GSN for Voter by configuring its RelayHub and funding it', async () => {
@@ -44,36 +39,30 @@ contract('Voter', (accounts) => {
       from: ROOT_ACCOUNT
     });
 
-    assert.equal(balance, web3.utils.toWei(voterFundingPHTs, "ether"));
+    assert.equal(balance, Web3.utils.toWei(voterFundingPHTs, "ether"));
   });
 
   it('should execute upVote TX for FREE from a user without any funds', async () => {
     const isVoterReady = await isRelayHubDeployedForRecipient(web3, voter.address);
     assert.equal(isVoterReady, true);
 
-    gsnCtx = await fromConnection(
-      web3.eth.currentProvider.host, {
-        gsn: {
-          dev: false,
-          signKey: emptyAcc.privateKey
-        }
-    });
+    web3gsn = await Web3.newEngine(web3.eth.currentProvider.host);
 
-    web3 = gsnCtx.lib;
-    const voterGSN = await new gsnCtx.lib.eth.Contract(voter.abi, voter.address);
+    emptyAccAddr = await web3gsn.eth.personal.newAccount("secret");
 
-    const tx = await voterGSN.methods.upVote().send({
-      from: emptyAcc.address,
-      gasPrice: gasPrice,
-      gasLimit: "1000000",
+    const tx = await Web3.contractSendTx(web3gsn, {
+      from: emptyAccAddr,
+      to: voter.address,
+      abi: voter.abi,
+      method: 'upVote',
+      useGSN: true,
     });
 
     assert.equal(tx.status, true);
-
     const lastVoter = tx.events['Voted'].returnValues['account'];
     const newCount = tx.events['Voted'].returnValues['newCount'];
 
-    assert.equal(lastVoter, emptyAcc.address);
+    assert.equal(lastVoter, emptyAccAddr);
     assert.equal(newCount, 1);
   });
 });

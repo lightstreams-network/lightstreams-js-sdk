@@ -10,11 +10,8 @@ const { fundRecipient: fRecipient, getRelayHub } = require('@openzeppelin/gsn-he
 const { isRelayHubDeployedForRecipient, getRecipientFunds } = require('@openzeppelin/gsn-provider').utils;
 const web3Utils = require('web3-utils');
 
-module.exports.newWeb3Engine = (connection, { signKey, dev, verbose }) => {
-  // return fromConnection(provider).then(ctx => {
-  //   return ctx.lib
-  // });
-  return fromConnection(connection, {
+module.exports.newWeb3Engine = (provider, { signKey, dev, verbose }) => {
+  return fromConnection(provider, {
     gsn: {
       useGSN: true,
       dev: dev || false,
