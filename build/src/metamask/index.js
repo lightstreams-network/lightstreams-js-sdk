@@ -49,8 +49,7 @@ module.exports.selectedAddress = function () {
 
 module.exports.web3 = function () {
   var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var providerEngine = window.web3; // const chainId = parseInt(web3.currentProvider.networkVersion);
-
+  var providerEngine = window.web3;
   var selectedAddr = window.ethereum.selectedAddress.toLowerCase();
 
   if (!opts.rpcUrl) {

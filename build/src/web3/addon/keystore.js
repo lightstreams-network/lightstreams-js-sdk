@@ -76,3 +76,15 @@ module.exports.isAccountLocked = function (web3, _ref5) {
 
   return web3.currentProvider.isAccountLocked(address);
 };
+
+module.exports.exportMnemonic = function (web3, _ref6) {
+  var address = _ref6.address;
+
+  if (typeof web3.currentProvider._getAccount !== 'function') {
+    throw new Error("Not supported method");
+  }
+
+  var account = web3.currentProvider._getAccount(address);
+
+  return account.seedPhrase();
+};

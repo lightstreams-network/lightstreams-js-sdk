@@ -88,8 +88,8 @@ function (_Web3ProviderEngine) {
       this.network = network;
     }
   }, {
-    key: "chainId",
-    value: function chainId() {
+    key: "_getChainId",
+    value: function _getChainId() {
       return this.network.chainId;
     }
   }, {

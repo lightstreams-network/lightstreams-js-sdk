@@ -57,7 +57,7 @@ GsnSubprovider.prototype._handleSendTransaction = function (payload, cb) {
   var txParams = payload.params[0];
   if (!this._withGSN(payload, txParams)) return false; // Use sign key address if set
 
-  if (!txParams.from && this.base.address) txParams.from = this.base.address; // TODO: move validations to the relay client
+  if (!txParams.from && this.base.address) txParams.from = this.base.address;
 
   if (!txParams.to) {
     return cb(new Error("Cannot deploy a new contract via the GSN"), null);

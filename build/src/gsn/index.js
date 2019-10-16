@@ -22,14 +22,11 @@ var _require$utils = require('@openzeppelin/gsn-provider').utils,
 
 var web3Utils = require('web3-utils');
 
-module.exports.newWeb3Engine = function (connection, _ref) {
+module.exports.newWeb3Engine = function (provider, _ref) {
   var signKey = _ref.signKey,
       dev = _ref.dev,
       verbose = _ref.verbose;
-  // return fromConnection(provider).then(ctx => {
-  //   return ctx.lib
-  // });
-  return fromConnection(connection, {
+  return fromConnection(provider, {
     gsn: {
       useGSN: true,
       dev: dev || false,
@@ -39,8 +36,8 @@ module.exports.newWeb3Engine = function (connection, _ref) {
   }).then(function (ctx) {
     return ctx.lib;
   });
-}; // From account is sending $amountInPht tokens to the relayHub to sponsor the usage
-// of the smart contract address specified at the recipient
+}; // The "from" account is sending "amountInPht" tokens to the "relayHub" address to sponsor the usage
+// of the smart contract address specified at the "recipient"
 
 
 module.exports.fundRecipient =
@@ -98,8 +95,7 @@ function () {
               from: from,
               recipient: recipient,
               relayHubAddress: relayHub,
-              // IMPORTANT: Amount cannot be higher than relay server address balance
-              // @TODO: Implement validation
+              // IMPORTANT: Amount cannot be higher than relay server address balance (@TODO: Implement validation)
               amount: web3Utils.toWei(amountInPht, "ether")
             });
 

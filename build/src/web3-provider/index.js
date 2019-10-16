@@ -32,8 +32,7 @@ var ProviderEngine = require('./engine');
 var _require = require('./subproviders'),
     PersonalSubprovider = _require.PersonalSubprovider,
     GsnSubprovider = _require.GsnSubprovider,
-    WalletSubprovider = _require.WalletSubprovider; // @TODO Decouple from etherswallet module
-
+    WalletSubprovider = _require.WalletSubprovider;
 
 module.exports = function () {
   var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -43,13 +42,11 @@ module.exports = function () {
       engineOpts = _objectWithoutProperties(opts, ["rpcUrl"]);
 
   var lsProviderEngine = new ProviderEngine(engineOpts);
-  var version = '0.8.0';
+  var version = '0.8.0'; // @TODO Decouple from etherswallet module
+
   var jsonProvider = new ethers.providers.JsonRpcProvider(rpcUrl);
   jsonProvider.send('net_version').then(function (version) {
-    chainId = parseInt(version); // The possible `hardfork` parameter values
-    // - `Byzantium`
-    // - `Constantinople`
-    // - `Petersburg`
+    chainId = parseInt(version);
 
     switch (chainId) {
       case 161:
@@ -99,12 +96,52 @@ module.exports = function () {
     jsonRpcSend: jsonProvider.send.bind(jsonProvider)
   })));
 
-  if (walletSubprovider) {
-    lsProviderEngine.addProvider(walletSubprovider);
-  } else {
-    lsProviderEngine.addProvider(WalletSubprovider(lsProviderEngine, engineOpts));
+  if (!walletSubprovider) {
+    // Initialize default wallet subprovider using in memory wallets
+    walletSubprovider = WalletSubprovider({
+      getAccounts: function getAccounts(cb) {
+        var addresses = lsProviderEngine._getAccounts();
+
+        cb(null, addresses);
+      },
+      signMessage: function signMessage(payload, cb) {
+        try {
+          var from = payload.from,
+              data = payload.data;
+
+          var account = lsProviderEngine._getAccount(from);
+
+          account.signMsg({
+            data: data,
+            chainId: lsProviderEngine._getChainId()
+          }, cb);
+        } catch (err) {
+          if (typeof cb === 'function') cb(err, '0x0');else throw err;
+        }
+      },
+      signTransaction: function signTransaction(payload, cb) {
+        try {
+          var gas = payload.gas,
+              from = payload.from,
+              params = _objectWithoutProperties(payload, ["gas", "from"]);
+
+          var txParams = _objectSpread({}, params, {
+            gasLimit: gas
+          });
+
+          var account = lsProviderEngine._getAccount(from);
+
+          account.signTx(_objectSpread({}, txParams, {
+            chainId: lsProviderEngine._getChainId()
+          }), cb);
+        } catch (err) {
+          if (typeof cb === 'function') cb(err, '0x0');else throw err;
+        }
+      }
+    });
   }
 
+  lsProviderEngine.addProvider(walletSubprovider);
   lsProviderEngine.addProvider(new PersonalSubprovider(lsProviderEngine));
   lsProviderEngine.addProvider(new RpcSubprovider({
     rpcUrl: rpcUrl // Expected to be
