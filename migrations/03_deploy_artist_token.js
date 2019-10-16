@@ -31,7 +31,7 @@ module.exports = function(deployer) {
         return null;
       }
 
-    return deployFundingPool(web3, fromAccount)
+    return deployFundingPool(web3, { from: fromAccount })
       .then(receipt => {
         fundingPoolAddr = receipt.contractAddress;
 
@@ -42,8 +42,8 @@ module.exports = function(deployer) {
 
         return deployArtistToken(
           web3,
-          fromAccount,
           {
+            from: fromAccount,
             name: "Armin Van Lightstreams",
             symbol: "AVL",
             wphtAddr: WPHTInstance.address,

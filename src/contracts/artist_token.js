@@ -8,8 +8,9 @@ const Web3Wrapper = require('../web3');
 
 const artistTokenSc = require('../../build/contracts/ArtistToken.json');
 const fundingPoolSc = require('../../build/contracts/FundingPoolMock.json');
+const wphtSc        = require('../../build/contracts/WPHT.json');
 
-module.exports.deployFundingPool = async (web3, from) => {
+module.exports.deployFundingPool = async (web3, { from }) => {
   if (!Web3Wrapper.utils.isAddress(from)) {
     throw new Error(`Invalid argument "from": "${from}". Expected eth address`);
   }
@@ -32,8 +33,8 @@ module.exports.deployFundingPool = async (web3, from) => {
 
 module.exports.deployArtistToken = async (
   web3,
-  from,
   {
+    from,
     name,
     symbol,
     wphtAddr,
@@ -125,11 +126,7 @@ module.exports.deployArtistToken = async (
   return receipt;
 };
 
-module.exports.isArtistTokenHatched = async (web3, from, artistTokenAddr) => {
-  if (!Web3Wrapper.utils.isAddress(from)) {
-    throw new Error(`Invalid argument "from": "${from}". Expected eth address`);
-  }
-
+module.exports.isArtistTokenHatched = async (web3, { artistTokenAddr }) => {
   if (!Web3Wrapper.utils.isAddress(artistTokenAddr)) {
     throw new Error(`Invalid argument "artistTokenAddr": "${artistTokenAddr}". Expected eth address`);
   }
@@ -138,7 +135,6 @@ module.exports.isArtistTokenHatched = async (web3, from, artistTokenAddr) => {
     web3,
     {
       to: artistTokenAddr,
-      from: from,
       useGSN: false,
       method: 'isHatched',
       abi: artistTokenSc.abi,
@@ -149,4 +145,49 @@ module.exports.isArtistTokenHatched = async (web3, from, artistTokenAddr) => {
   console.log(`ArtistToken ${artistTokenAddr} is hatched: ${isHatched}`);
 
   return isHatched;
+};
+
+module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr, amountWeiBn }) => {
+  if (!Web3Wrapper.utils.isAddress(from)) {
+    throw new Error(`Invalid argument "from": "${from}". Expected eth address`);
+  }
+
+  if (!Web3Wrapper.utils.isAddress(artistTokenAddr)) {
+    throw new Error(`Invalid argument "artistTokenAddr": "${artistTokenAddr}". Expected eth address`);
+  }
+
+  if (!Web3Wrapper.utils.isAddress(wphtAddr)) {
+    throw new Error(`Invalid argument "wphtAddr": "${wphtAddr}". Expected eth address`);
+  }
+
+  if (!Web3Wrapper.utils.isBN(amountWeiBn)) {
+    throw new Error(`Invalid "amount" value "${amountWeiBn}". Expected valid Wei amount represented as a BN`);
+  }
+
+  await Web3Wrapper.contractSendTx(
+    web3,
+    {
+      to: wphtAddr,
+      from: from,
+      useGSN: false,
+      method: 'approve',
+      abi: wphtSc.abi,
+      params: [artistTokenAddr, amountWeiBn.toString()],
+    }
+  );
+
+  await Web3Wrapper.contractSendTx(
+    web3,
+    {
+      to: artistTokenAddr,
+      from: from,
+      useGSN: false,
+      method: 'hatchContribute',
+      gas: 1000000,
+      abi: artistTokenSc.abi,
+      params: [amountWeiBn.toString()],
+    }
+  );
+
+  console.log(`Hatcher ${from} sent a hatch worth ${Web3Wrapper.utils.wei2pht(amountWeiBn)} PHT to ArtistToken ${artistTokenAddr}`);
 };

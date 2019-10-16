@@ -1,6 +1,7 @@
 require('dotenv').config({ path: `${__dirname}/.env` });
 
 const { BN, constants, expectEvent, shouldFail, ether } = require('openzeppelin-test-helpers');
+const { panic } = require('./utils');
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -18,7 +19,10 @@ function wei2pht (n) {
   return web3.utils.fromWei(n, 'ether');
 }
 
-const { isArtistTokenHatched } = require('../src/contracts/artist_token');
+const {
+  isArtistTokenHatched,
+  hatchArtistToken
+} = require('../src/contracts/artist_token');
 
 contract('ArtistToken', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
@@ -166,27 +170,48 @@ contract('ArtistToken', (accounts) => {
   });
 
   it("should be in a 'hatching phase' after deployed", async () => {
-    const isHatched = await isArtistTokenHatched(web3, ROOT_ACCOUNT, artistToken.address);
+    const isHatched = await isArtistTokenHatched(web3, { artistTokenAddr: artistToken.address });
 
     assert.isFalse(isHatched);
   });
 
   it('should end the hatching phase by contributing configured minimum amount to raise from 2 hatchers', async () => {
-    await wPHT.approve(artistToken.address, PER_HATCHER_CONTRIBUTION_WEI, {from: hatcher1});
-    await artistToken.hatchContribute(PER_HATCHER_CONTRIBUTION_WEI, {from: hatcher1});
-    let isHatched = await artistToken.isHatched();
+    try {
+      await hatchArtistToken(
+        web3,
+        {
+          from: hatcher1,
+          artistTokenAddr: artistToken.address,
+          wphtAddr: wPHT.address,
+          amountWeiBn: PER_HATCHER_CONTRIBUTION_WEI
+        }
+      );
 
-    console.log(`Hatcher1 contributed: ${wei2pht(PER_HATCHER_CONTRIBUTION_WEI)} WPHT`);
+      console.log(`Hatcher1 contributed: ${wei2pht(PER_HATCHER_CONTRIBUTION_WEI)} WPHT`);
 
-    assert.isFalse(isHatched);
+      let isHatched = await artistToken.isHatched();
+      assert.isFalse(isHatched);
+    } catch (e) {
+      panic(e);
+    }
 
-    await wPHT.approve(artistToken.address, PER_HATCHER_CONTRIBUTION_WEI, {from: hatcher2});
-    await artistToken.hatchContribute(PER_HATCHER_CONTRIBUTION_WEI, {from: hatcher2});
-    isHatched = await artistToken.isHatched();
+    try {
+      await hatchArtistToken(
+        web3,
+        {
+          from: hatcher2,
+          artistTokenAddr: artistToken.address,
+          wphtAddr: wPHT.address,
+          amountWeiBn: PER_HATCHER_CONTRIBUTION_WEI
+        }
+      );
+      console.log(`Hatcher1 contributed: ${wei2pht(PER_HATCHER_CONTRIBUTION_WEI)} WPHT`);
 
-    console.log(`Hatcher2 contributed: ${wei2pht(PER_HATCHER_CONTRIBUTION_WEI)} WPHT`);
-
-    assert.isTrue(isHatched);
+      let isHatched = await artistToken.isHatched();
+      assert.isTrue(isHatched);
+    } catch (e) {
+      panic(e);
+    }
   });
 
   it('should query WPHT and ensure ArtistToken has received the raised amount in WPHTs', async () => {
