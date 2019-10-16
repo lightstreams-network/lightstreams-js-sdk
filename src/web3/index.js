@@ -17,7 +17,6 @@ const defaultCfg = {
 module.exports.newEngine = (provider, options = {}) => {
   if(typeof provider === 'string') {
     const Web3Provider = require('../web3-provider'); // @ISSUE when imported top due to recursive dependency
-    console.log(Web3Provider);
     provider = Web3Provider({
       ...options,
       rpcUrl: provider
