@@ -3,6 +3,8 @@ const WPHT = artifacts.require("WPHT");
 const ArtistToken = artifacts.require("ArtistToken");
 const FundingPoolMock = artifacts.require("FundingPoolMock");
 
+const { deployArtistToken } = require('../src/contracts/artist_token');
+
 // Curve parameters:
 const reserveRatio = 142857;  // Kappa (~ 6)
 const theta = 350000;         // 35% in ppm
@@ -10,7 +12,7 @@ const p0 = 1;                 // Price of internal token in external tokens.
 const initialRaise = 300000;  // Raise amount in external tokens.
 const friction = 20000;       // 2% in ppm
 const gasPrice = 15000000000; // 15 gwei
-const duration = 3024000000000000; // ~5 weeks.
+const durationSeconds = 3024000000000000; // ~5 weeks.
 const minExternalContibution = 100000;
 
 module.exports = function(deployer) {
@@ -33,21 +35,25 @@ module.exports = function(deployer) {
       })
       .then(instance => {
         WPHTInstance = instance;
-        return deployer.deploy(
-          ArtistToken,
-          "Armin Van Lightstreams",
-          "AVL",
-          WPHTInstance.address, // _externalToken
-          reserveRatio,
-          gasPrice,
-          theta,
-          p0,
-          initialRaise,
-          fundingPoolInstance.address,
-          friction,
-          duration,
-          minExternalContibution,
-          { gas: 10000000 });
+
+        return deployArtistToken(
+          web3,
+          fromAccount,
+          {
+            name: "Armin Van Lightstreams",
+            symbol: "AVL",
+            wphtAddr: WPHTInstance.address,
+            fundingPoolAddr: fundingPoolInstance.address,
+            reserveRatio: reserveRatio,
+            gasPrice: gasPrice,
+            theta: theta,
+            p0: p0,
+            initialRaise: initialRaise,
+            friction: friction,
+            durationSeconds: durationSeconds,
+            minExternalContribution: minExternalContibution
+          }
+        );
       });
   })
 };
