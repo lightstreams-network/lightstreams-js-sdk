@@ -7,6 +7,28 @@
 const Web3Wrapper = require('../web3');
 
 const artistTokenSc = require('../../build/contracts/ArtistToken.json');
+const fundingPoolSc = require('../../build/contracts/FundingPoolMock.json');
+
+module.exports.deployFundingPool = async (web3, from) => {
+  if (!Web3Wrapper.utils.isAddress(from)) {
+    throw new Error(`Invalid argument "from": "${from}". Expected eth address`);
+  }
+
+  const receipt = await Web3Wrapper.deployContract(
+    web3,
+    {
+      from,
+      useGSN: false,
+      abi: fundingPoolSc.abi,
+      bytecode: fundingPoolSc.bytecode,
+      params: []
+    }
+  );
+
+  console.log(`\n   FundingPool deployed at: ${receipt.contractAddress}\n`);
+
+  return receipt;
+};
 
 module.exports.deployArtistToken = async (
   web3,

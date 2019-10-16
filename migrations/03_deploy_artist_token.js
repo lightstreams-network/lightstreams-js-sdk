@@ -3,7 +3,7 @@ const WPHT = artifacts.require("WPHT");
 const ArtistToken = artifacts.require("ArtistToken");
 const FundingPoolMock = artifacts.require("FundingPoolMock");
 
-const { deployArtistToken } = require('../src/contracts/artist_token');
+const { deployArtistToken, deployFundingPool } = require('../src/contracts/artist_token');
 
 // Curve parameters:
 const reserveRatio = 142857;  // Kappa (~ 6)
@@ -17,20 +17,24 @@ const minExternalContibution = 100000;
 
 module.exports = function(deployer) {
   const fromAccount = process.env.ACCOUNT;
-  let fundingPoolInstance;
+  let fundingPoolAddr;
   let WPHTInstance;
 
-  deployer.then(() => {
-    return FundingPoolMock.deployed();
-  }).then((fundingPoolInstance) => {
-    if (fundingPoolInstance.address && !global.forceMigration('03')) {
-      console.log(`Contract already deployed ${fundingPoolInstance.address}. Skipped migration "03_deploy_artist_token.js`);
-      return null;
-    }
+  deployer
+    .then(() => {
+      return FundingPoolMock.deployed();
+    })
+    .then((fundingPoolInstance) => {
+      if (fundingPoolInstance.address && !global.forceMigration('03')) {
+        console.log(`Contract already deployed ${fundingPoolInstance.address}. Skipped migration "03_deploy_artist_token.js`);
 
-    return deployer.deploy(FundingPoolMock)
-      .then(instance => {
-        fundingPoolInstance = instance;
+        return null;
+      }
+
+    return deployFundingPool(web3, fromAccount)
+      .then(receipt => {
+        fundingPoolAddr = receipt.contractAddress;
+
         return deployer.deploy(WPHT, fromAccount)
       })
       .then(instance => {
@@ -43,7 +47,7 @@ module.exports = function(deployer) {
             name: "Armin Van Lightstreams",
             symbol: "AVL",
             wphtAddr: WPHTInstance.address,
-            fundingPoolAddr: fundingPoolInstance.address,
+            fundingPoolAddr: fundingPoolAddr,
             reserveRatio: reserveRatio,
             gasPrice: gasPrice,
             theta: theta,
