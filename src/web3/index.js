@@ -7,7 +7,7 @@
 const Web3 = require('web3');
 const net = require('net');
 
-const { fetchTxReceipt, calculateEstimatedGas, isLatest } = require('./helpers');
+const { fetchTxReceipt, calculateEstimatedGas, isLatest, FailedTxError } = require('./helpers');
 
 const defaultCfg = {
   provider: process.env.WEB3_PROVIDER || 'http://locahost:8545',
@@ -47,7 +47,7 @@ module.exports.sendRawTransaction = (web3, rawSignedTx) => {
     web3.eth.sendSignedTransaction(rawSignedTx, (err, txHash) => {
       if (err) reject(err);
       getTxReceipt(web3, { txHash }).then(txReceipt => {
-        if (!txReceipt.status) reject(txReceipt);
+        if (!txReceipt.status) reject(FailedTxError(txReceipt));
         else resolve(txReceipt);
       }).catch(reject);
     });
@@ -64,7 +64,7 @@ module.exports.sendTransaction = (web3, { from, to, valueInPht }) => {
       value: web3.utils.toWei(valueInPht, "ether"),
     }).on('transactionHash', (txHash) => {
       getTxReceipt(web3, { txHash }).then(txReceipt => {
-        if (!txReceipt.status) reject(txReceipt);
+        if (!txReceipt.status) reject(FailedTxError(txReceipt));
         else resolve(txReceipt);
       }).catch(reject);
     }).on('error', reject);
@@ -135,7 +135,7 @@ module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
       }).on('transactionHash', (txHash) => {
         console.log(`Tx executed: `, txHash)
       }).on('receipt', (txReceipt) => {
-        if (!txReceipt.status) reject(txReceipt);
+        if (!txReceipt.status) reject(FailedTxError(txReceipt));
         else resolve(txReceipt);
       }).on('error', reject);
 
