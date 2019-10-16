@@ -40,8 +40,9 @@ GsnSubprovider.prototype._handleGetTransactionReceipt = function(payload, cb) {
 
 GsnSubprovider.prototype._handleSendTransaction = function(payload, cb) {
   // Check for GSN usage
+  if (!this._withGSN(payload, this.options)) return false;
+
   const txParams = payload.params[0];
-  if (!this._withGSN(payload, txParams)) return false;
 
   // Use sign key address if set
   if (!txParams.from && this.base.address) txParams.from = this.base.address;
@@ -73,8 +74,10 @@ GsnSubprovider.prototype._handleSendTransaction = function(payload, cb) {
 };
 
 GsnSubprovider.prototype._handleEstimateGas = function(payload, cb) {
+  if (!this._withGSN(payload, this.options)) return false;
+
   const txParams = payload.params[0];
-  if (!this._withGSN(payload, txParams)) return false;
+
   callAsJsonRpc(
     this.relayClient.estimateGas.bind(this.relayClient), [txParams],
     payload.id, cb
@@ -84,21 +87,17 @@ GsnSubprovider.prototype._handleEstimateGas = function(payload, cb) {
 };
 
 GsnSubprovider.prototype._withGSN = function(payload, options) {
-  if (typeof payload.params[0] === 'object'
-    && typeof payload.params[0].useGSN === 'boolean') {
-    return payload.params[0].useGSN;
+  if (typeof payload.params[0] === 'object') {
+    if(typeof payload.params[0].useGSN === 'boolean') return payload.params[0].useGSN;
+    else if(typeof payload.params[0].useGSN === 'function') return payload.params[0].useGSN(payload);
   }
 
-  if (options) {
-    const useGSN = options.useGSN;
-    if (typeof(useGSN) !== 'undefined') {
-      return useGSN;
-    }
+  if (typeof options === 'object'){
+    if(typeof(options.useGSN) === 'function') return options.useGSN(payload);
+    if(typeof(options.useGSN) === 'boolean') return options.useGSN;
   }
 
-  return (typeof(this.useGSN) === 'function')
-    ? this.useGSN(payload)
-    : this.useGSN;
+  return true;
 };
 
 GsnSubprovider.prototype.handleRequest = function(payload, next, end) {

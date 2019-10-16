@@ -52,6 +52,7 @@ module.exports = (opts = {}, walletSubprovider = null) => {
   lsProviderEngine.addProvider(new NonceSubprovider());
 
   lsProviderEngine.addProvider(new GsnSubprovider(lsProviderEngine, {
+    useGSN: false,
     ...engineOpts,
     jsonRpcSend: jsonProvider.send.bind(jsonProvider)
   }));
@@ -75,7 +76,7 @@ module.exports = (opts = {}, walletSubprovider = null) => {
       },
       signTransaction: (payload, cb) => {
         try {
-          const { gas, from, ...params } = payload;
+          const { gas, from, useGSN, ...params } = payload;
           const txParams = {
             ...params,
             gasLimit: gas,
