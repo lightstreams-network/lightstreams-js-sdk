@@ -25,7 +25,7 @@ module.exports.deployFundingPool = async (web3, from) => {
     }
   );
 
-  console.log(`\n   FundingPool deployed at: ${receipt.contractAddress}\n`);
+  console.log(`FundingPool deployed at: ${receipt.contractAddress}`);
 
   return receipt;
 };
@@ -120,7 +120,33 @@ module.exports.deployArtistToken = async (
       }
     );
 
-  console.log(`\n   ArtistToken deployed at: ${receipt.contractAddress}\n`);
+  console.log(`ArtistToken deployed at: ${receipt.contractAddress}`);
 
   return receipt;
+};
+
+module.exports.isArtistTokenHatched = async (web3, from, artistTokenAddr) => {
+  if (!Web3Wrapper.utils.isAddress(from)) {
+    throw new Error(`Invalid argument "from": "${from}". Expected eth address`);
+  }
+
+  if (!Web3Wrapper.utils.isAddress(artistTokenAddr)) {
+    throw new Error(`Invalid argument "artistTokenAddr": "${artistTokenAddr}". Expected eth address`);
+  }
+
+  const isHatched = await Web3Wrapper.contractCall(
+    web3,
+    {
+      to: artistTokenAddr,
+      from: from,
+      useGSN: false,
+      method: 'isHatched',
+      abi: artistTokenSc.abi,
+      params: [],
+    }
+  );
+
+  console.log(`ArtistToken ${artistTokenAddr} is hatched: ${isHatched}`);
+
+  return isHatched;
 };

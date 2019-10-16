@@ -18,6 +18,8 @@ function wei2pht (n) {
   return web3.utils.fromWei(n, 'ether');
 }
 
+const { isArtistTokenHatched } = require('../src/contracts/artist_token');
+
 contract('ArtistToken', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
 
@@ -164,7 +166,7 @@ contract('ArtistToken', (accounts) => {
   });
 
   it("should be in a 'hatching phase' after deployed", async () => {
-    const isHatched = await artistToken.isHatched();
+    const isHatched = await isArtistTokenHatched(web3, ROOT_ACCOUNT, artistToken.address);
 
     assert.isFalse(isHatched);
   });
