@@ -19,6 +19,9 @@ module.exports.sha3 = (text) => {
   return web3Utils.sha3(text);
 };
 
+module.exports.toPht = (wei) => {
+  return web3Utils.fromWei(wei, 'ether')
+};
 module.exports.isAddress = (address) => {
   return web3Utils.isAddress(address);
 };
