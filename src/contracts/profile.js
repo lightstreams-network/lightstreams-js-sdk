@@ -3,26 +3,16 @@
  * Date: 14/08/19 15:44
  * Copyright 2019 (c) Lightstreams, Granada
  */
-const Web3 = require('../web3');
+const Web3Wrapper = require('../web3');
 const { fundRecipient, isRelayHubDeployed } = require('../gsn');
 
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
 
 module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub, from, factoryFundingInPht, profileFundingInPht }) => {
-
-  // Step 0: Validate arguments
-  if (!Web3.utils.isAddress(from)) {
-    throw new Error(`Invalid argument "from": ${from}. Expected eth address`);
-  }
-
-  if (!Web3.utils.isAddress(relayHub)) {
-    throw new Error(`Invalid argument "relayHub": ${relayHub}. Expected eth address`);
-  }
-
-  if (!Web3.utils.isAddress(contractAddr)) {
-    throw new Error(`Invalid argument "profileFactoryAddr": ${contractAddr}. Expected eth address`);
-  }
+  Web3Wrapper.validator.validateAddress("from", from);
+  Web3Wrapper.validator.validateAddress("relayHub", relayHub);
+  Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
 
   if (isNaN(parseFloat(factoryFundingInPht))) {
     throw new Error(`Invalid "factoryFundingInPht" value ${factoryFundingInPht}. Expected a float number`);
@@ -36,9 +26,9 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
   if(!isRelayHub) {
     throw new Error(`RelayHub is not found at ${relayHub}`);
   }
-  
+
   // Step 2: Initialize gsn feature within profile factory contract
-  const txReceipt = await Web3.contractSendTx(web3, {
+  const txReceipt = await Web3Wrapper.contractSendTx(web3, {
     to: contractAddr,
     from,
     abi: factoryScJSON.abi,
@@ -52,7 +42,7 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
   }
 
   // Step 3: Top up factory contract
-  await Web3.sendTransaction(web3, { from, to: contractAddr, valueInPht: factoryFundingInPht });
+  await Web3Wrapper.sendTransaction(web3, { from, to: contractAddr, valueInPht: factoryFundingInPht });
   console.log(`Topped up ProfileFactory with ${factoryFundingInPht} PHTs...`);
 
   await fundRecipient(web3, {
@@ -67,7 +57,7 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
 };
 
 module.exports.deployProfileByFactory = async (web3, { from, contractAddr, useGSN }) => {
-  const txReceipt = await Web3.contractSendTx(web3, {
+  const txReceipt = await Web3Wrapper.contractSendTx(web3, {
     to: contractAddr,
     from,
     useGSN: useGSN || false,
@@ -80,7 +70,7 @@ module.exports.deployProfileByFactory = async (web3, { from, contractAddr, useGS
 };
 
 module.exports.addOwner = async (web3, { from, contractAddr, useGSN, ownerAddr }) => {
-  return Web3.contractSendTx(web3, {
+  return Web3Wrapper.contractSendTx(web3, {
     to: contractAddr,
     from,
     useGSN: useGSN || false,
@@ -95,7 +85,7 @@ module.exports.recover = async (web3, contractAddr, { from, newOwner, useGSN }) 
     throw new Error(`Missing mandatory call params`);
   }
 
-  return Web3.contractSendTx(web3, {
+  return Web3Wrapper.contractSendTx(web3, {
     to: contractAddr,
     from: from,
     useGSN: useGSN || false,
