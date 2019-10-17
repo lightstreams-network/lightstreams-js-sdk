@@ -5,10 +5,10 @@
  * Copyright 2019 (c) Lightstreams, Granada
  */
 
-const web3Utils = require('web3-utils');
+const { isAddress } = require('./utils');
 
 module.exports.validateAddress = (argName, argValue) => {
-  if (!web3Utils.isAddress(argValue)) {
+  if (!isAddress(argValue)) {
     throw new Error(`Invalid argument "${argName}": "${argValue}". Expected a valid eth address`);
   }
 };
