@@ -25,6 +25,7 @@ const {
   getArtistTokenTotalSupply,
   buyArtistTokens,
   sellArtistTokens,
+  getArtistTokenBalanceOf,
 } = require('../src/contracts/artist_token');
 
 contract('ArtistToken', (accounts) => {
@@ -289,7 +290,7 @@ contract('ArtistToken', (accounts) => {
   it('should validate a hatcher has 0 claimed tokens and 0 artist tokens in their direct balance prior first purchases from public (all initial tokens are locked)', async () => {
     await artistToken.claimTokens({from: hatcher1});
 
-    let balance = await artistToken.balanceOf(hatcher1);
+    let balance = await getArtistTokenBalanceOf(web3, { artistTokenAddr: artistToken.address, accountAddr: hatcher1 });
 
     console.log(`Hatcher1 has prior-minting/claiming balance of: ${wei2pht(balance)} ${artistTokenSymbol}`);
 
@@ -323,7 +324,7 @@ contract('ArtistToken', (accounts) => {
     const postFundingPoolWPHTBalance = await wPHT.balanceOf(fundingPool.address);
     const postArtistTokenWPHTBalance = await wPHT.balanceOf(artistToken.address);
     const postArtistTokenTotalSupply = await artistToken.totalSupply();
-    postBuyer1ArtistTokensBalance = await artistToken.balanceOf(buyer1);
+    postBuyer1ArtistTokensBalance = await getArtistTokenBalanceOf(web3, { artistTokenAddr: artistToken.address, accountAddr: buyer1 });
 
     console.log(`Post-buying:`);
     console.log(` - FundingPool balance: ${wei2pht(postFundingPoolWPHTBalance)} WPHT`);

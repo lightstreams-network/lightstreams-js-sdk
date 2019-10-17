@@ -242,7 +242,7 @@ module.exports.getArtistTokenBalanceOf = async (web3, { artistTokenAddr, account
 
   console.log(`Account ${accountAddr} has ${Web3Wrapper.utils.wei2pht(balance.toString())} ${symbol} of ArtistToken ${artistTokenAddr}`);
 
-  return balance;
+  return Web3Wrapper.utils.toBN(balance);
 };
 
 module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr, amountWeiBn }) => {
@@ -295,7 +295,7 @@ module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr,
 
   console.log(`Buyer ${from} purchased ${Web3Wrapper.utils.wei2pht(tokens.toString())} ${symbol} of ArtistToken ${artistTokenAddr}`);
 
-  return tokens;
+  return Web3Wrapper.utils.toBN(tokens);
 };
 
 module.exports.sellArtistTokens = async (web3, { from, artistTokenAddr, amountBn }) => {

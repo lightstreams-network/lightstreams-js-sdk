@@ -26,3 +26,7 @@ module.exports.isAddress = (address) => {
 module.exports.isBN = (value) => {
   return web3Utils.isBN(value);
 };
+
+module.exports.toBN = (value) => {
+  return web3Utils.toBN(value);
+};
