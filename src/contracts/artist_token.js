@@ -143,7 +143,7 @@ module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr
   Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
   Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
 
-  if (!Web3Wrapper.validator.isBN(amountWeiBn)) {
+  if (!Web3Wrapper.utils.isBN(amountWeiBn)) {
     throw new Error(`Invalid "amount" value "${amountWeiBn}". Expected valid Wei amount represented as a BN`);
   }
 
