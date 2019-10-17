@@ -21,7 +21,8 @@ function wei2pht (n) {
 
 const {
   isArtistTokenHatched,
-  hatchArtistToken
+  hatchArtistToken,
+  getArtistTokenTotalSupply
 } = require('../src/contracts/artist_token');
 
 contract('ArtistToken', (accounts) => {
@@ -251,7 +252,7 @@ contract('ArtistToken', (accounts) => {
   });
 
   it('should have increased total supply to the level of reserve itself', async () => {
-    const totalSupply = await artistToken.totalSupply();
+    const totalSupply = await getArtistTokenTotalSupply(web3, { artistTokenAddr: artistToken.address });
     const totalSupplyExpected = await artistToken.balanceOf(artistToken.address);
 
     console.log(`ArtistToken total supply: ${wei2pht(totalSupply)} ${artistTokenSymbol}`);

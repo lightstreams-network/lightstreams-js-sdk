@@ -191,3 +191,24 @@ module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr
 
   console.log(`Hatcher ${from} sent a hatch worth ${Web3Wrapper.utils.wei2pht(amountWeiBn)} PHT to ArtistToken ${artistTokenAddr}`);
 };
+
+module.exports.getArtistTokenTotalSupply = async (web3, { artistTokenAddr }) => {
+  if (!Web3Wrapper.utils.isAddress(artistTokenAddr)) {
+    throw new Error(`Invalid argument "artistTokenAddr": "${artistTokenAddr}". Expected eth address`);
+  }
+
+  const totalSupply = await Web3Wrapper.contractCall(
+    web3,
+    {
+      to: artistTokenAddr,
+      useGSN: false,
+      method: 'totalSupply',
+      abi: artistTokenSc.abi,
+      params: [],
+    }
+  );
+
+  console.log(`ArtistToken ${artistTokenAddr} total supply is: ${Web3Wrapper.utils.wei2pht(totalSupply)} PHT`);
+
+  return totalSupply;
+};
