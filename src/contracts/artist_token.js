@@ -142,10 +142,7 @@ module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
   Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
-
-  if (!Web3Wrapper.utils.isBN(amountWeiBn)) {
-    throw new Error(`Invalid "amount" value "${amountWeiBn}". Expected valid Wei amount represented as a BN`);
-  }
+  Web3Wrapper.validator.validateWeiBn("amountWeiBn", amountWeiBn);
 
   await Web3Wrapper.contractSendTx(
     web3,
@@ -192,4 +189,111 @@ module.exports.getArtistTokenTotalSupply = async (web3, { artistTokenAddr }) => 
   console.log(`ArtistToken ${artistTokenAddr} total supply is: ${Web3Wrapper.utils.wei2pht(totalSupply)} PHT`);
 
   return totalSupply;
+};
+
+const getArtistTokenName = async (web3, { artistTokenAddr }) => {
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
+
+  return await Web3Wrapper.contractCall(
+    web3,
+    {
+      to: artistTokenAddr,
+      useGSN: false,
+      method: 'name',
+      abi: artistTokenSc.abi,
+      params: [],
+    }
+  );
+};
+module.exports.getArtistTokenSymbol = getArtistTokenName;
+
+const getArtistTokenSymbol = async (web3, { artistTokenAddr }) => {
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
+
+  return await Web3Wrapper.contractCall(
+    web3,
+    {
+      to: artistTokenAddr,
+      useGSN: false,
+      method: 'symbol',
+      abi: artistTokenSc.abi,
+      params: [],
+    }
+  );
+};
+module.exports.getArtistTokenSymbol = getArtistTokenSymbol;
+
+module.exports.getArtistTokenBalanceOf = async (web3, { artistTokenAddr, accountAddr }) => {
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
+  Web3Wrapper.validator.validateAddress("accountAddr", accountAddr);
+
+  const symbol = await getArtistTokenSymbol(web3, { artistTokenAddr });
+
+  const balance = await Web3Wrapper.contractCall(
+    web3,
+    {
+      to: artistTokenAddr,
+      useGSN: false,
+      method: 'balanceOf',
+      abi: artistTokenSc.abi,
+      params: [accountAddr],
+    }
+  );
+
+  console.log(`Account ${accountAddr} has ${Web3Wrapper.utils.wei2pht(balance.toString())} ${symbol} of ArtistToken ${artistTokenAddr}`);
+
+  return balance;
+};
+
+module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr, amountWeiBn }) => {
+  Web3Wrapper.validator.validateAddress("from", from);
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
+  Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
+  Web3Wrapper.validator.validateWeiBn("amountWeiBn", amountWeiBn);
+
+  const symbol = await getArtistTokenSymbol(web3, { artistTokenAddr });
+
+  await Web3Wrapper.contractSendTx(
+    web3,
+    {
+      from: from,
+      to: wphtAddr,
+      value: amountWeiBn.toString(),
+      useGSN: false,
+      method: 'deposit',
+      abi: wphtSc.abi,
+      params: [],
+    }
+  );
+
+  await Web3Wrapper.contractSendTx(
+    web3,
+    {
+      from: from,
+      to: wphtAddr,
+      useGSN: false,
+      method: 'approve',
+      abi: wphtSc.abi,
+      params: [artistTokenAddr, amountWeiBn.toString()],
+    }
+  );
+
+  const receipt = await Web3Wrapper.contractSendTx(
+    web3,
+    {
+      from: from,
+      to: artistTokenAddr,
+      useGSN: false,
+      method: 'mint',
+      gas: 1000000,
+      abi: artistTokenSc.abi,
+      params: [amountWeiBn.toString()],
+    }
+  );
+
+  const tokens = receipt.events['CurvedMint'].returnValues['amount'];
+
+  console.log(`Buyer ${from} purchased ${Web3Wrapper.utils.wei2pht(tokens.toString())} ${symbol} of ArtistToken ${artistTokenAddr}`);
+
+  return tokens;
 };
