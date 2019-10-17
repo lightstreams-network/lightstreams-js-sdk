@@ -297,3 +297,30 @@ module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr,
 
   return tokens;
 };
+
+module.exports.sellArtistTokens = async (web3, { from, artistTokenAddr, amountBn }) => {
+  Web3Wrapper.validator.validateAddress("from", from);
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
+  Web3Wrapper.validator.validateWeiBn("amountBn", amountBn);
+
+  const symbol = await getArtistTokenSymbol(web3, { artistTokenAddr });
+
+  const receipt = await Web3Wrapper.contractSendTx(
+    web3,
+    {
+      from: from,
+      to: artistTokenAddr,
+      useGSN: false,
+      method: 'burn',
+      gas: 1000000,
+      abi: artistTokenSc.abi,
+      params: [amountBn.toString()],
+    }
+  );
+
+  const wphtReimbursement = receipt.events['CurvedBurn'].returnValues['reimbursement'];
+
+  console.log(`Account ${from} sold ${Web3Wrapper.utils.wei2pht(amountBn.toString())} ${symbol} of ArtistToken ${artistTokenAddr} for ${Web3Wrapper.utils.wei2pht(wphtReimbursement.toString())} WPHT`);
+
+  return wphtReimbursement;
+};

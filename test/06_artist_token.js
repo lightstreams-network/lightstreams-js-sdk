@@ -23,7 +23,8 @@ const {
   isArtistTokenHatched,
   hatchArtistToken,
   getArtistTokenTotalSupply,
-  buyArtistTokens
+  buyArtistTokens,
+  sellArtistTokens,
 } = require('../src/contracts/artist_token');
 
 contract('ArtistToken', (accounts) => {
@@ -364,7 +365,12 @@ contract('ArtistToken', (accounts) => {
     const preBuyer1ArtistTokensBalance = await artistToken.balanceOf(buyer1);
     const preArtistTokenTotalSupply = await artistToken.totalSupply();
 
-    await artistToken.burn(burnAmount, {from: buyer1, gasPrice: GAS_PRICE_WEI});
+    const reimbursementWPHT = await sellArtistTokens(web3, {
+      from: buyer1,
+      artistTokenAddr: artistToken.address,
+      amountBn: burnAmount,
+    });
+    const reimbursementWPHTBn = new BN(reimbursementWPHT, 10);
 
     const postFundingPoolWPHTBalance = await wPHT.balanceOf(fundingPool.address);
     const postArtistTokenWPHTBalance = await wPHT.balanceOf(artistToken.address);
@@ -406,6 +412,7 @@ contract('ArtistToken', (accounts) => {
     // const postBuyer1WPHTBalanceExpected = preBuyer1WPHTBalance.add(revenue);
     // assert.equal(postBuyer1WPHTBalance.toString(), postBuyer1WPHTBalanceExpected.toString());
 
+    assert.isTrue(reimbursementWPHTBn.lt(postBuyer1MinimumWPHTBalanceExpected));
     assert.isTrue(postBuyer1MinimumWPHTBalanceExpected.lt(postBuyer1WPHTBalance, 'selling 33% of all buyer tokens should be worth at least 10% of his purchase cost'));
     assert.isTrue(postFundingPoolWPHTBalance.gt(preFundingPoolWPHTBalance), 'funding pool balance should increase when burning tokens');
   });
