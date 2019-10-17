@@ -172,4 +172,6 @@ module.exports.keystore = require('./addon/keystore');
 
 module.exports.utils = require('./addon/utils');
 
+module.exports.validator = require('./addon/validator');
+
 module.exports.v0_20 = require('./addon/v0_20');
