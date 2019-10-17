@@ -18,3 +18,11 @@ module.exports.wei2pht = (n) => {
 module.exports.sha3 = (text) => {
   return web3Utils.sha3(text);
 };
+
+module.exports.isAddress = (address) => {
+  return web3Utils.isAddress(address);
+};
+
+module.exports.isBN = (value) => {
+  return web3Utils.isBN(value);
+};

@@ -12,11 +12,3 @@ module.exports.validateAddress = (argName, argValue) => {
     throw new Error(`Invalid argument "${argName}": "${argValue}". Expected a valid eth address`);
   }
 };
-
-module.exports.isAddress = (address) => {
-  return web3Utils.isAddress(address);
-};
-
-module.exports.isBN = (value) => {
-  return web3Utils.isBN(value);
-};
