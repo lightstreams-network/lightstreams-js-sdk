@@ -11,9 +11,7 @@ const fundingPoolSc = require('../../build/contracts/FundingPoolMock.json');
 const wphtSc        = require('../../build/contracts/WPHT.json');
 
 module.exports.deployFundingPool = async (web3, { from }) => {
-  if (!Web3Wrapper.utils.isAddress(from)) {
-    throw new Error(`Invalid argument "from": "${from}". Expected eth address`);
-  }
+  Web3Wrapper.validator.validateAddress("from", from);
 
   const receipt = await Web3Wrapper.deployContract(
     web3,
@@ -57,13 +55,8 @@ module.exports.deployArtistToken = async (
   }
   symbol = symbol.toUpperCase();
 
-  if (!Web3Wrapper.utils.isAddress(wphtAddr)) {
-    throw new Error(`Invalid argument "wphtAddr": "${wphtAddr}". Expected WPHT contract eth address`);
-  }
-
-  if (!Web3Wrapper.utils.isAddress(fundingPoolAddr)) {
-    throw new Error(`Invalid argument "fundingPoolAddr": "${fundingPoolAddr}". Expected FundingPool contract eth address`);
-  }
+  Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
+  Web3Wrapper.validator.validateAddress("fundingPoolAddr", fundingPoolAddr);
 
   if (isNaN(parseInt(reserveRatio))) {
     throw new Error(`Invalid "reserveRatio" value "${reserveRatio}". Expected an integer number`);
@@ -127,9 +120,7 @@ module.exports.deployArtistToken = async (
 };
 
 module.exports.isArtistTokenHatched = async (web3, { artistTokenAddr }) => {
-  if (!Web3Wrapper.utils.isAddress(artistTokenAddr)) {
-    throw new Error(`Invalid argument "artistTokenAddr": "${artistTokenAddr}". Expected eth address`);
-  }
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
 
   const isHatched = await Web3Wrapper.contractCall(
     web3,
@@ -148,19 +139,11 @@ module.exports.isArtistTokenHatched = async (web3, { artistTokenAddr }) => {
 };
 
 module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr, amountWeiBn }) => {
-  if (!Web3Wrapper.utils.isAddress(from)) {
-    throw new Error(`Invalid argument "from": "${from}". Expected eth address`);
-  }
+  Web3Wrapper.validator.validateAddress("from", from);
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
+  Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
 
-  if (!Web3Wrapper.utils.isAddress(artistTokenAddr)) {
-    throw new Error(`Invalid argument "artistTokenAddr": "${artistTokenAddr}". Expected eth address`);
-  }
-
-  if (!Web3Wrapper.utils.isAddress(wphtAddr)) {
-    throw new Error(`Invalid argument "wphtAddr": "${wphtAddr}". Expected eth address`);
-  }
-
-  if (!Web3Wrapper.utils.isBN(amountWeiBn)) {
+  if (!Web3Wrapper.validator.isBN(amountWeiBn)) {
     throw new Error(`Invalid "amount" value "${amountWeiBn}". Expected valid Wei amount represented as a BN`);
   }
 
@@ -193,9 +176,7 @@ module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr
 };
 
 module.exports.getArtistTokenTotalSupply = async (web3, { artistTokenAddr }) => {
-  if (!Web3Wrapper.utils.isAddress(artistTokenAddr)) {
-    throw new Error(`Invalid argument "artistTokenAddr": "${artistTokenAddr}". Expected eth address`);
-  }
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
 
   const totalSupply = await Web3Wrapper.contractCall(
     web3,
