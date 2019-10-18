@@ -22,7 +22,10 @@ function wei2pht (n) {
 const {
   isArtistTokenHatched,
   hatchArtistToken,
-  getArtistTokenTotalSupply
+  getArtistTokenTotalSupply,
+  buyArtistTokens,
+  sellArtistTokens,
+  getArtistTokenBalanceOf,
 } = require('../src/contracts/artist_token');
 
 contract('ArtistToken', (accounts) => {
@@ -287,22 +290,11 @@ contract('ArtistToken', (accounts) => {
   it('should validate a hatcher has 0 claimed tokens and 0 artist tokens in their direct balance prior first purchases from public (all initial tokens are locked)', async () => {
     await artistToken.claimTokens({from: hatcher1});
 
-    let balance = await artistToken.balanceOf(hatcher1);
+    let balance = await getArtistTokenBalanceOf(web3, { artistTokenAddr: artistToken.address, accountAddr: hatcher1 });
 
     console.log(`Hatcher1 has prior-minting/claiming balance of: ${wei2pht(balance)} ${artistTokenSymbol}`);
 
     assert.equal(balance.toString(), "0");
-  });
-
-  it('should let a buyer1, an average Joe, to purchase WPHT tokens in order to be able to exchange them for artist tokens afterwards', async () => {
-    await wPHT.deposit({
-      from: buyer1,
-      value: BUYER_WPHT_PURCHASE_COST_WEI
-    });
-
-    const balance = await wPHT.balanceOf(buyer1);
-
-    assert.equal(balance.toString(), BUYER_WPHT_PURCHASE_COST_WEI.toString());
   });
 
   it('should let a buyer1, an average Joe, to buy(mint) artist tokens in exchange for WPHT', async () => {
@@ -322,13 +314,17 @@ contract('ArtistToken', (accounts) => {
     console.log(` - Buyer1 purchase cost: ${wei2pht(BUYER_WPHT_PURCHASE_COST_WEI)} WPHT`);
     console.log(` - Buyer1 has: ${wei2pht(preBuyer1ArtistTokensBalance)} ${artistTokenSymbol}`);
 
-    await wPHT.approve(artistToken.address, BUYER_WPHT_PURCHASE_COST_WEI, {from: buyer1});
-    await artistToken.mint(BUYER_WPHT_PURCHASE_COST_WEI, {from: buyer1, gasPrice: GAS_PRICE_WEI});
+    const tokens = await buyArtistTokens(web3, {
+      from: buyer1,
+      artistTokenAddr: artistToken.address,
+      wphtAddr: wPHT.address,
+      amountWeiBn: BUYER_WPHT_PURCHASE_COST_WEI,
+    });
 
     const postFundingPoolWPHTBalance = await wPHT.balanceOf(fundingPool.address);
     const postArtistTokenWPHTBalance = await wPHT.balanceOf(artistToken.address);
     const postArtistTokenTotalSupply = await artistToken.totalSupply();
-    postBuyer1ArtistTokensBalance = await artistToken.balanceOf(buyer1);
+    postBuyer1ArtistTokensBalance = await getArtistTokenBalanceOf(web3, { artistTokenAddr: artistToken.address, accountAddr: buyer1 });
 
     console.log(`Post-buying:`);
     console.log(` - FundingPool balance: ${wei2pht(postFundingPoolWPHTBalance)} WPHT`);
@@ -340,6 +336,7 @@ contract('ArtistToken', (accounts) => {
     assert.equal(postArtistTokenWPHTBalance.toString(), postArtistTokenWPHTBalanceExpected.toString());
     assert.equal(postArtistTokenTotalSupply.toString(), postArtistTokenTotalSupplyExpected.toString());
     assert.equal(postBuyer1ArtistTokensBalance.toString(), purchasedTokensAmountExpected.toString());
+    assert.equal(postBuyer1ArtistTokensBalance.toString(), tokens.toString());
   });
 
   it('should be more expensive for buyer2 to purchase artist tokens after buyer1 contribution', async () => {
@@ -369,7 +366,12 @@ contract('ArtistToken', (accounts) => {
     const preBuyer1ArtistTokensBalance = await artistToken.balanceOf(buyer1);
     const preArtistTokenTotalSupply = await artistToken.totalSupply();
 
-    await artistToken.burn(burnAmount, {from: buyer1, gasPrice: GAS_PRICE_WEI});
+    const reimbursementWPHT = await sellArtistTokens(web3, {
+      from: buyer1,
+      artistTokenAddr: artistToken.address,
+      amountBn: burnAmount,
+    });
+    const reimbursementWPHTBn = new BN(reimbursementWPHT, 10);
 
     const postFundingPoolWPHTBalance = await wPHT.balanceOf(fundingPool.address);
     const postArtistTokenWPHTBalance = await wPHT.balanceOf(artistToken.address);
@@ -411,6 +413,7 @@ contract('ArtistToken', (accounts) => {
     // const postBuyer1WPHTBalanceExpected = preBuyer1WPHTBalance.add(revenue);
     // assert.equal(postBuyer1WPHTBalance.toString(), postBuyer1WPHTBalanceExpected.toString());
 
+    assert.isTrue(reimbursementWPHTBn.lt(postBuyer1MinimumWPHTBalanceExpected));
     assert.isTrue(postBuyer1MinimumWPHTBalanceExpected.lt(postBuyer1WPHTBalance, 'selling 33% of all buyer tokens should be worth at least 10% of his purchase cost'));
     assert.isTrue(postFundingPoolWPHTBalance.gt(preFundingPoolWPHTBalance), 'funding pool balance should increase when burning tokens');
   });
