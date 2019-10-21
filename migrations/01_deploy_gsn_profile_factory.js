@@ -12,22 +12,21 @@ module.exports = function(deployer) {
   // Factory is funded with 300 PHT and 20 PHT for every new profile created.
   // Therefore the total amount of pre-funded profiles will be of 300/20 = 15 profiles
   deployer.then(() => {
-    return ProfileFactory.deployed();
-  }).then((curInstance) => {
-    if (curInstance.address && !global.forceMigration('01')) {
-      console.log(`Contract already deployed ${curInstance.address}. Skipped migration "01_deploy_gsn_profile_factory.js`);
+    return global.forceMigration('01')
+    ? deployer.deploy(ProfileFactory, profileFundingInWei)
+      : ProfileFactory.deployed();
+  }).then((instance) => {
+    if (!global.forceMigration('01')) {
+      console.log(`Contract already deployed ${instance.address}. Skipped migration "01_deploy_gsn_profile_factory.js`);
       return;
     }
 
-    return deployer.deploy(ProfileFactory, profileFundingInWei)
-      .then((instance) => {
-        return initializeProfileFactory(web3, {
-          contractAddr: instance.address,
-          relayHub: relayHub,
-          from: process.env.ACCOUNT,
-          factoryFundingInPht: factoryFundingInPht,
-          profileFundingInPht: profileFundingInPht
-        });
-      })
+    return initializeProfileFactory(web3, {
+      contractAddr: instance.address,
+      relayHub: relayHub,
+      from: process.env.ACCOUNT,
+      factoryFundingInPht: factoryFundingInPht,
+      profileFundingInPht: profileFundingInPht
+    });
   })
 };

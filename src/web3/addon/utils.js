@@ -33,3 +33,7 @@ module.exports.isBN = (value) => {
 module.exports.toBN = (value) => {
   return web3Utils.toBN(value);
 };
+
+module.exports.toHex = (value) => {
+  return web3Utils.toHex(value);
+};

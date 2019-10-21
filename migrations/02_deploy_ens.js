@@ -15,43 +15,40 @@ module.exports = function(deployer) {
   let ensAddress;
 
   deployer.then(() => {
-    return ENSRegistry.deployed();
-  }).then((curInstance) => {
-    if (curInstance.address && !global.forceMigration('02')) {
-      console.log(`Contract already deployed ${curInstance.address}. Skipped migration "02_deploy_ens.js`);
+    return global.forceMigration('02')
+      ? deployer.deploy(ENSRegistry)
+      : ENSRegistry.deployed()
+  }).then((instance) => {
+    if (!global.forceMigration('02')) {
+      console.log(`Contract already deployed ${instance.address}. Skipped migration "02_deploy_ens.js`);
       return null;
     }
 
-    return deployer.deploy(ENSRegistry)
-      .then(instance => {
-        ensAddress = instance.address;
-        return ensSdk.initializeNewRegistry(web3, {
-          ensAddress,
-          from: fromAccount
-        }).then(({ resolverAddress }) => {
-          console.log(`ENS initialized with resolver ${resolverAddress}.`)
-        })
+    ensAddress = instance.address;
+    return ensSdk.initializeNewRegistry(web3, {
+      ensAddress,
+      from: fromAccount
+    }).then(({ resolverAddress }) => {
+      console.log(`ENS initialized with resolver ${resolverAddress}.`)
+    }).then(() => {
+      console.log(`Start registration of TLD ${tld}...`);
+      return ensSdk.registerNode(web3, {
+        ensAddress,
+        from: fromAccount,
+        subnode: tld
+      }).then(() => {
+        console.log(`Registration of TLD "${tld}" completed.`);
       })
-      .then(() => {
-        console.log(`Start registration of TLD ${tld}...`);
-        return ensSdk.registerNode(web3, {
-          ensAddress,
-          from: fromAccount,
-          subnode: tld
-        }).then(() => {
-          console.log(`Registration of TLD "${tld}" completed.`);
-        })
-      })
-      .then(() => {
-        console.log(`Start registration of "${domain}.${tld}"...`);
-        return ensSdk.registerNode(web3, {
-          ensAddress,
-          from: fromAccount,
-          subnode: domain,
-          parentNode: tld
-        }).then(() => {
-          console.log(`Registration of domain "${domain}.${tld}" completed.`);
-        });
+    }).then(() => {
+      console.log(`Start registration of "${domain}.${tld}"...`);
+      return ensSdk.registerNode(web3, {
+        ensAddress,
+        from: fromAccount,
+        subnode: domain,
+        parentNode: tld
+      }).then(() => {
+        console.log(`Registration of domain "${domain}.${tld}" completed.`);
       });
+    });
   });
 };

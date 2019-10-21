@@ -17,47 +17,38 @@ const minExternalContibution = 100000;
 
 module.exports = function(deployer) {
   const fromAccount = process.env.ACCOUNT;
-  let fundingPoolAddr;
   let WPHTInstance;
 
   deployer
     .then(() => {
-      return FundingPoolMock.deployed();
+      return global.forceMigration('03')
+        ? deployer.deploy(FundingPoolMock)
+        : FundingPoolMock.deployed();
     })
     .then((fundingPoolInstance) => {
-      if (fundingPoolInstance.address && !global.forceMigration('03')) {
+      if (!global.forceMigration('03')) {
         console.log(`Contract already deployed ${fundingPoolInstance.address}. Skipped migration "03_deploy_artist_token.js`);
-
         return null;
       }
 
-    return deployFundingPool(web3, { from: fromAccount })
-      .then(receipt => {
-        fundingPoolAddr = receipt.contractAddress;
-
-        return deployer.deploy(WPHT, fromAccount)
-      })
-      .then(instance => {
-        WPHTInstance = instance;
-
-        return deployArtistToken(
-          web3,
-          {
-            from: fromAccount,
-            name: "Armin Van Lightstreams",
-            symbol: "AVL",
-            wphtAddr: WPHTInstance.address,
-            fundingPoolAddr: fundingPoolAddr,
-            reserveRatio: reserveRatio,
-            gasPrice: gasPrice,
-            theta: theta,
-            p0: p0,
-            initialRaise: initialRaise,
-            friction: friction,
-            durationSeconds: durationSeconds,
-            minExternalContribution: minExternalContibution
-          }
-        );
-      });
-  })
+      return deployer.deploy(WPHT, fromAccount)
+        .then(WPHTInstance => {
+          return deployArtistToken(web3, {
+              from: fromAccount,
+              name: "Armin Van Lightstreams",
+              symbol: "AVL",
+              wphtAddr: WPHTInstance.address,
+              fundingPoolAddr: fundingPoolInstance.address,
+              reserveRatio: reserveRatio,
+              gasPrice: gasPrice,
+              theta: theta,
+              p0: p0,
+              initialRaise: initialRaise,
+              friction: friction,
+              durationSeconds: durationSeconds,
+              minExternalContribution: minExternalContibution
+            }
+          );
+        });
+    })
 };
