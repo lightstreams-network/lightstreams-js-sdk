@@ -27,7 +27,7 @@ module.exports.newAccount = (encryptedJson, decryptedWallet = null) => {
       if(timeout) {
         setTimeout(() => {
           wallet = null;
-        }, timeout);
+        }, timeout * 1000);
       }
 
       return keystore.decryptWallet(encryptedJson, password)
