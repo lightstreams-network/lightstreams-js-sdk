@@ -92,7 +92,9 @@ module.exports = function () {
   lsProviderEngine.addProvider(new SubscriptionsSubprovider());
   lsProviderEngine.addProvider(new FilterSubprovider());
   lsProviderEngine.addProvider(new NonceSubprovider());
-  lsProviderEngine.addProvider(new GsnSubprovider(lsProviderEngine, _objectSpread({}, engineOpts, {
+  lsProviderEngine.addProvider(new GsnSubprovider(lsProviderEngine, _objectSpread({
+    useGSN: false
+  }, engineOpts, {
     jsonRpcSend: jsonProvider.send.bind(jsonProvider)
   })));
 
@@ -123,7 +125,8 @@ module.exports = function () {
         try {
           var gas = payload.gas,
               from = payload.from,
-              params = _objectWithoutProperties(payload, ["gas", "from"]);
+              useGSN = payload.useGSN,
+              params = _objectWithoutProperties(payload, ["gas", "from", "useGSN"]);
 
           var txParams = _objectSpread({}, params, {
             gasLimit: gas

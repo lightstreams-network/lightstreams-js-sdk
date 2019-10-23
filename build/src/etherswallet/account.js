@@ -29,7 +29,7 @@ module.exports.newAccount = function (encryptedJson) {
       if (timeout) {
         setTimeout(function () {
           wallet = null;
-        }, timeout);
+        }, timeout * 1000);
       }
 
       return keystore.decryptWallet(encryptedJson, password).then(function (unlockWallet) {

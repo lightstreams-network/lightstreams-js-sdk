@@ -19,6 +19,12 @@ module.exports.isV0_20 = function (web3) {
   return _typeof(web3.version) === 'object' && web3.version.api.indexOf('0.20') === 0;
 };
 
+module.exports.FailedTxError = function (txReceipt) {
+  var err = new Error("Tx ".concat(txReceipt.hash, " has been reverted"));
+  err.receipt = txReceipt;
+  return err;
+};
+
 var waitFor = module.exports.waitFor = function (waitInSeconds) {
   return new Promise(function (resolve) {
     setTimeout(resolve, waitInSeconds * 1000);

@@ -30,7 +30,8 @@ var net = require('net');
 var _require = require('./helpers'),
     fetchTxReceipt = _require.fetchTxReceipt,
     calculateEstimatedGas = _require.calculateEstimatedGas,
-    isLatest = _require.isLatest;
+    isLatest = _require.isLatest,
+    FailedTxError = _require.FailedTxError;
 
 var defaultCfg = {
   provider: process.env.WEB3_PROVIDER || 'http://locahost:8545',
@@ -44,7 +45,6 @@ module.exports.newEngine = function (provider) {
     var Web3Provider = require('../web3-provider'); // @ISSUE when imported top due to recursive dependency
 
 
-    console.log(Web3Provider);
     provider = Web3Provider(_objectSpread({}, options, {
       rpcUrl: provider
     }));
@@ -74,7 +74,7 @@ module.exports.sendRawTransaction = function (web3, rawSignedTx) {
       getTxReceipt(web3, {
         txHash: txHash
       }).then(function (txReceipt) {
-        if (!txReceipt.status) reject(txReceipt);else resolve(txReceipt);
+        if (!txReceipt.status) reject(FailedTxError(txReceipt));else resolve(txReceipt);
       })["catch"](reject);
     });
   });
@@ -94,7 +94,7 @@ module.exports.sendTransaction = function (web3, _ref2) {
       getTxReceipt(web3, {
         txHash: txHash
       }).then(function (txReceipt) {
-        if (!txReceipt.status) reject(txReceipt);else resolve(txReceipt);
+        if (!txReceipt.status) reject(FailedTxError(txReceipt));else resolve(txReceipt);
       })["catch"](reject);
     }).on('error', reject);
   });
@@ -280,7 +280,7 @@ module.exports.deployContract = function (web3, _ref7) {
               }).on('transactionHash', function (txHash) {
                 console.log("Tx executed: ", txHash);
               }).on('receipt', function (txReceipt) {
-                if (!txReceipt.status) reject(txReceipt);else resolve(txReceipt);
+                if (!txReceipt.status) reject(FailedTxError(txReceipt));else resolve(txReceipt);
               }).on('error', reject);
               _context3.next = 13;
               break;
@@ -359,4 +359,5 @@ module.exports.networkVersion = function (web3) {
 
 module.exports.keystore = require('./addon/keystore');
 module.exports.utils = require('./addon/utils');
+module.exports.validator = require('./addon/validator');
 module.exports.v0_20 = require('./addon/v0_20');

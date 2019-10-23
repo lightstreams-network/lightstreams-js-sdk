@@ -9,7 +9,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
  * Date: 14/08/19 15:44
  * Copyright 2019 (c) Lightstreams, Granada
  */
-var Web3 = require('../web3');
+var Web3Wrapper = require('../web3');
 
 var _require = require('../gsn'),
     fundRecipient = _require.fundRecipient,
@@ -31,65 +31,44 @@ function () {
         switch (_context.prev = _context.next) {
           case 0:
             contractAddr = _ref.contractAddr, relayHub = _ref.relayHub, from = _ref.from, factoryFundingInPht = _ref.factoryFundingInPht, profileFundingInPht = _ref.profileFundingInPht;
+            Web3Wrapper.validator.validateAddress("from", from);
+            Web3Wrapper.validator.validateAddress("relayHub", relayHub);
+            Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
 
-            if (Web3.utils.isAddress(from)) {
-              _context.next = 3;
-              break;
-            }
-
-            throw new Error("Invalid argument \"from\": ".concat(from, ". Expected eth address"));
-
-          case 3:
-            if (Web3.utils.isAddress(relayHub)) {
-              _context.next = 5;
-              break;
-            }
-
-            throw new Error("Invalid argument \"relayHub\": ".concat(relayHub, ". Expected eth address"));
-
-          case 5:
-            if (Web3.utils.isAddress(contractAddr)) {
-              _context.next = 7;
-              break;
-            }
-
-            throw new Error("Invalid argument \"profileFactoryAddr\": ".concat(contractAddr, ". Expected eth address"));
-
-          case 7:
             if (!isNaN(parseFloat(factoryFundingInPht))) {
-              _context.next = 9;
+              _context.next = 6;
               break;
             }
 
             throw new Error("Invalid \"factoryFundingInPht\" value ".concat(factoryFundingInPht, ". Expected a float number"));
 
-          case 9:
+          case 6:
             if (!isNaN(parseFloat(profileFundingInPht))) {
-              _context.next = 11;
+              _context.next = 8;
               break;
             }
 
             throw new Error("Invalid \"profileFundingInPht\" value ".concat(profileFundingInPht, ". Expected a float number"));
 
-          case 11:
-            _context.next = 13;
+          case 8:
+            _context.next = 10;
             return isRelayHubDeployed(web3, {
               relayHub: relayHub
             });
 
-          case 13:
+          case 10:
             isRelayHub = _context.sent;
 
             if (isRelayHub) {
-              _context.next = 16;
+              _context.next = 13;
               break;
             }
 
             throw new Error("RelayHub is not found at ".concat(relayHub));
 
-          case 16:
-            _context.next = 18;
-            return Web3.contractSendTx(web3, {
+          case 13:
+            _context.next = 15;
+            return Web3Wrapper.contractSendTx(web3, {
               to: contractAddr,
               from: from,
               abi: factoryScJSON.abi,
@@ -97,30 +76,30 @@ function () {
               params: [relayHub]
             });
 
-          case 18:
+          case 15:
             txReceipt = _context.sent;
 
             if (txReceipt.status) {
-              _context.next = 23;
+              _context.next = 20;
               break;
             }
 
             throw new Error("ProfileFactory initialization failed");
 
-          case 23:
+          case 20:
             console.log("Activated GSN for ProfileFactory instance for RelayHub ".concat(relayHub, "..."));
 
-          case 24:
-            _context.next = 26;
-            return Web3.sendTransaction(web3, {
+          case 21:
+            _context.next = 23;
+            return Web3Wrapper.sendTransaction(web3, {
               from: from,
               to: contractAddr,
               valueInPht: factoryFundingInPht
             });
 
-          case 26:
+          case 23:
             console.log("Topped up ProfileFactory with ".concat(factoryFundingInPht, " PHTs..."));
-            _context.next = 29;
+            _context.next = 26;
             return fundRecipient(web3, {
               from: from,
               recipient: contractAddr,
@@ -128,11 +107,11 @@ function () {
               amountInPht: profileFundingInPht
             });
 
-          case 29:
+          case 26:
             console.log("Recipient ".concat(contractAddr, " is sponsored by relayHub with ").concat(profileFundingInPht, " PHTs..."));
             return _context.abrupt("return", contractAddr);
 
-          case 31:
+          case 28:
           case "end":
             return _context.stop();
         }
@@ -158,7 +137,7 @@ function () {
           case 0:
             from = _ref3.from, contractAddr = _ref3.contractAddr, useGSN = _ref3.useGSN;
             _context2.next = 3;
-            return Web3.contractSendTx(web3, {
+            return Web3Wrapper.contractSendTx(web3, {
               to: contractAddr,
               from: from,
               useGSN: useGSN || false,
@@ -196,7 +175,7 @@ function () {
         switch (_context3.prev = _context3.next) {
           case 0:
             from = _ref5.from, contractAddr = _ref5.contractAddr, useGSN = _ref5.useGSN, ownerAddr = _ref5.ownerAddr;
-            return _context3.abrupt("return", Web3.contractSendTx(web3, {
+            return _context3.abrupt("return", Web3Wrapper.contractSendTx(web3, {
               to: contractAddr,
               from: from,
               useGSN: useGSN || false,
@@ -239,7 +218,7 @@ function () {
             throw new Error("Missing mandatory call params");
 
           case 3:
-            return _context4.abrupt("return", Web3.contractSendTx(web3, {
+            return _context4.abrupt("return", Web3Wrapper.contractSendTx(web3, {
               to: contractAddr,
               from: from,
               useGSN: useGSN || false,
