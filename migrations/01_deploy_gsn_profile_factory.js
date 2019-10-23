@@ -4,8 +4,9 @@ const Web3 = require('../src/web3');
 const ProfileFactory = artifacts.require("GSNProfileFactory");
 
 module.exports = function(deployer) {
-  const profileFundingInPht = process.env.GSN_PROFILE_FUNDING || '20';
-  const factoryFundingInPht = process.env.GSN_PROFILE_FACTORY_FUNDING || '300';
+  const faucetFundingInPht = process.env.PROFILE_FACTORY_FAUCET || '100';
+  const factoryFundingInPht = process.env.GSN_PROFILE_FACTORY_FUNDING || '50';
+  const profileFundingInPht = process.env.GSN_PROFILE_FUNDING || '10';
   const profileFundingInWei = Web3.utils.toWei(profileFundingInPht);
   const relayHub = process.env.RELAY_HUB;
 
@@ -26,7 +27,7 @@ module.exports = function(deployer) {
       relayHub: relayHub,
       from: process.env.ACCOUNT,
       factoryFundingInPht: factoryFundingInPht,
-      profileFundingInPht: profileFundingInPht
+      faucetFundingInPht: faucetFundingInPht
     });
   })
 };

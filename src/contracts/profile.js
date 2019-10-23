@@ -9,7 +9,7 @@ const { fundRecipient, isRelayHubDeployed } = require('../gsn');
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
 
-module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub, from, factoryFundingInPht, profileFundingInPht }) => {
+module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub, from, factoryFundingInPht, faucetFundingInPht }) => {
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("relayHub", relayHub);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
@@ -18,8 +18,8 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
     throw new Error(`Invalid "factoryFundingInPht" value ${factoryFundingInPht}. Expected a float number`);
   }
 
-  if (isNaN(parseFloat(profileFundingInPht))) {
-    throw new Error(`Invalid "profileFundingInPht" value ${profileFundingInPht}. Expected a float number`);
+  if (isNaN(parseFloat(faucetFundingInPht))) {
+    throw new Error(`Invalid "profileFundingInPht" value ${faucetFundingInPht}. Expected a float number`);
   }
 
   const isRelayHub = await isRelayHubDeployed(web3, { relayHub });
@@ -41,18 +41,20 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
     console.log(`Activated GSN for ProfileFactory instance for RelayHub ${relayHub}...`);
   }
 
-  // Step 3: Top up factory contract
-  await Web3Wrapper.sendTransaction(web3, { from, to: contractAddr, valueInPht: factoryFundingInPht });
-  console.log(`Topped up ProfileFactory with ${factoryFundingInPht} PHTs...`);
-
+  // Step 3: Profile factory is funded via RelayHub
   await fundRecipient(web3, {
     from,
     recipient: contractAddr,
     relayHub: relayHub,
-    amountInPht: profileFundingInPht
+    amountInPht: factoryFundingInPht
   });
 
-  console.log(`Recipient ${contractAddr} is sponsored by relayHub with ${profileFundingInPht} PHTs...`);
+  console.log(`Recipient ${contractAddr} is sponsored by relayHub with ${factoryFundingInPht} PHTs...`);
+
+  // Step 4: Top up factory contract to fund new profile deployments
+  await Web3Wrapper.sendTransaction(web3, { from, to: contractAddr, valueInPht: faucetFundingInPht });
+  console.log(`Topped up ProfileFactory with ${faucetFundingInPht} PHTs...`);
+
   return contractAddr;
 };
 
