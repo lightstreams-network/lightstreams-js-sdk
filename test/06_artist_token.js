@@ -366,12 +366,11 @@ contract('ArtistToken', (accounts) => {
     const preBuyer1ArtistTokensBalance = await artistToken.balanceOf(buyer1);
     const preArtistTokenTotalSupply = await artistToken.totalSupply();
 
-    const reimbursementWPHT = await sellArtistTokens(web3, {
+    await sellArtistTokens(web3, {
       from: buyer1,
       artistTokenAddr: artistToken.address,
       amountBn: burnAmount,
     });
-    const reimbursementWPHTBn = new BN(reimbursementWPHT, 10);
 
     const postFundingPoolWPHTBalance = await wPHT.balanceOf(fundingPool.address);
     const postArtistTokenWPHTBalance = await wPHT.balanceOf(artistToken.address);
@@ -381,6 +380,9 @@ contract('ArtistToken', (accounts) => {
     const postBuyer1ArtistTokensBalanceExpected = postBuyer1ArtistTokensBalance.sub(burnAmount);
     const postBuyer1MinimumWPHTBalanceExpected = pht2wei(BUYER_WPHT_PURCHASE_COST_PHT / 10);
     postBuyer1ArtistTokensBalance = await artistToken.balanceOf(buyer1);
+    const reimbursement = await artistToken.calculateSaleReturn(preArtistTokenTotalSupply, preArtistTokenWPHTBalance, RESERVE_RATIO, burnAmount);
+    const fundingPoolWPHTFrictionExpected = reimbursement.mul(new BN(FRICTION, 10)).div(new BN(DENOMINATOR_PPM, 10));
+    const postFundingPoolWPHTBalanceExpected = preFundingPoolWPHTBalance.add(fundingPoolWPHTFrictionExpected);
 
     console.log(`Pre-burning:`);
     console.log(` - FundingPool balance: ${wei2pht(preFundingPoolWPHTBalance)} WPHT`);
@@ -401,38 +403,8 @@ contract('ArtistToken', (accounts) => {
     assert.equal(postArtistTokenTotalSupply.toString(), postArtistTokenTotalSupplyExpected.toString());
     assert.equal(postBuyer1ArtistTokensBalance.toString(), postBuyer1ArtistTokensBalanceExpected.toString());
 
-    // @TODO FIX THIS
-    // 339960883258061203781 new buyer balance
-    // 333161665592899979705 expected balance according to JS calc
-    // WHY???
-    //  @TODO The problem is bc solidity is rounding the decimal calculation and it's always 1 * reimbursement
-    //  @TODO Remember the funding pool balance should increase after this equation gets fixed (added assertion so this test is failing now)
-    //
-    // const reimbursement = await artistToken.calculateSaleReturn(preArtistTokenTotalSupply, preArtistTokenWPHTBalance, RESERVE_RATIO, burnAmount);
-    // const revenue = new BN((1 - (FRICTION / DENOMINATOR_PPM)) * 100, 10).mul(reimbursement).div(new BN(100, 10));
-    // const postBuyer1WPHTBalanceExpected = preBuyer1WPHTBalance.add(revenue);
-    // assert.equal(postBuyer1WPHTBalance.toString(), postBuyer1WPHTBalanceExpected.toString());
-
-    assert.isTrue(reimbursementWPHTBn.lt(postBuyer1MinimumWPHTBalanceExpected));
+    assert.equal(postFundingPoolWPHTBalance.toString(), postFundingPoolWPHTBalanceExpected.toString());
     assert.isTrue(postBuyer1MinimumWPHTBalanceExpected.lt(postBuyer1WPHTBalance, 'selling 33% of all buyer tokens should be worth at least 10% of his purchase cost'));
     assert.isTrue(postFundingPoolWPHTBalance.gt(preFundingPoolWPHTBalance), 'funding pool balance should increase when burning tokens');
   });
-
-  // TODO: Seems there is a bug in endHatching function as no artist tokens were allocated to the funding pool
-  // it('@TODO: should allocate funds from funding pool to hatchers', async () => {
-  // const tokensAmount = await artistToken.balanceOf(fundingPool.address);
-  // await fundingPool.allocateFunds(hatcher1, PER_HATCHER_CONTRIBUTION_WEI);
-  //
-  // console.log(`FundingPool balance: ${tokensAmount.toString()} AVL`);
-  //
-  // const contribution = await artistToken.initialContributions(hatcher1);
-  // const lockedInternal = contribution.lockedInternal;
-  // const paidExternal = contribution.paidExternal;
-  // const lockedInternalExpected = toPHTs(PER_HATCHER_CONTRIBUTION_PHT * P0);
-
-  // console.log(`FundingPool has: ${wei2pht(tokensAmount)} ${artistTokenSymbol}`);
-  // console.log(`Total unlocked internal artist tokens: ${unlockedInternal}`);
-  // console.log(`Hatcher1 contribution of internal locked artist tokens: ${lockedInternal} ${artistTokenSymbol}`);
-  // console.log(`Hatcher1 contribution of external paid tokens: ${paidExternal} WPHT`);
-  // });
 });
