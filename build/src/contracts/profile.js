@@ -25,12 +25,12 @@ function () {
   var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee(web3, _ref) {
-    var contractAddr, relayHub, from, factoryFundingInPht, profileFundingInPht, isRelayHub, txReceipt;
+    var contractAddr, relayHub, from, factoryFundingInPht, faucetFundingInPht, isRelayHub, txReceipt;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            contractAddr = _ref.contractAddr, relayHub = _ref.relayHub, from = _ref.from, factoryFundingInPht = _ref.factoryFundingInPht, profileFundingInPht = _ref.profileFundingInPht;
+            contractAddr = _ref.contractAddr, relayHub = _ref.relayHub, from = _ref.from, factoryFundingInPht = _ref.factoryFundingInPht, faucetFundingInPht = _ref.faucetFundingInPht;
             Web3Wrapper.validator.validateAddress("from", from);
             Web3Wrapper.validator.validateAddress("relayHub", relayHub);
             Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
@@ -43,12 +43,12 @@ function () {
             throw new Error("Invalid \"factoryFundingInPht\" value ".concat(factoryFundingInPht, ". Expected a float number"));
 
           case 6:
-            if (!isNaN(parseFloat(profileFundingInPht))) {
+            if (!isNaN(parseFloat(faucetFundingInPht))) {
               _context.next = 8;
               break;
             }
 
-            throw new Error("Invalid \"profileFundingInPht\" value ".concat(profileFundingInPht, ". Expected a float number"));
+            throw new Error("Invalid \"profileFundingInPht\" value ".concat(faucetFundingInPht, ". Expected a float number"));
 
           case 8:
             _context.next = 10;
@@ -91,24 +91,25 @@ function () {
 
           case 21:
             _context.next = 23;
-            return Web3Wrapper.sendTransaction(web3, {
-              from: from,
-              to: contractAddr,
-              valueInPht: factoryFundingInPht
-            });
-
-          case 23:
-            console.log("Topped up ProfileFactory with ".concat(factoryFundingInPht, " PHTs..."));
-            _context.next = 26;
             return fundRecipient(web3, {
               from: from,
               recipient: contractAddr,
               relayHub: relayHub,
-              amountInPht: profileFundingInPht
+              amountInPht: factoryFundingInPht
+            });
+
+          case 23:
+            console.log("Recipient ".concat(contractAddr, " is sponsored by relayHub with ").concat(factoryFundingInPht, " PHTs...")); // Step 4: Top up factory contract to fund new profile deployments
+
+            _context.next = 26;
+            return Web3Wrapper.sendTransaction(web3, {
+              from: from,
+              to: contractAddr,
+              valueInPht: faucetFundingInPht
             });
 
           case 26:
-            console.log("Recipient ".concat(contractAddr, " is sponsored by relayHub with ").concat(profileFundingInPht, " PHTs..."));
+            console.log("Topped up ProfileFactory with ".concat(faucetFundingInPht, " PHTs to fund new profile creations..."));
             return _context.abrupt("return", contractAddr);
 
           case 28:

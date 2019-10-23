@@ -53,7 +53,7 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
 
   // Step 4: Top up factory contract to fund new profile deployments
   await Web3Wrapper.sendTransaction(web3, { from, to: contractAddr, valueInPht: faucetFundingInPht });
-  console.log(`Topped up ProfileFactory with ${faucetFundingInPht} PHTs...`);
+  console.log(`Topped up ProfileFactory with ${faucetFundingInPht} PHTs to fund new profile creations...`);
 
   return contractAddr;
 };
