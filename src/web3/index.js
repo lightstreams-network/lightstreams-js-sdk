@@ -80,7 +80,7 @@ module.exports.contractCall = (web3, { to: contractAddr, abi, from, method, para
         throw new Error(`Method ${method} is not available`);
       }
 
-      const result = await contract.methods[method](...params).call({ from });
+      const result = await contract.methods[method](...(params || [])).call({ from });
       resolve(result);
     } catch ( err ) {
       reject(err);

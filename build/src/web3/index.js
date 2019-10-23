@@ -131,7 +131,7 @@ module.exports.contractCall = function (web3, _ref3) {
 
             case 5:
               _context.next = 7;
-              return (_contract$methods = contract.methods)[method].apply(_contract$methods, _toConsumableArray(params)).call({
+              return (_contract$methods = contract.methods)[method].apply(_contract$methods, _toConsumableArray(params || [])).call({
                 from: from
               });
 
