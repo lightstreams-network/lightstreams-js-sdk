@@ -39,3 +39,11 @@ module.exports.toBN = function (value) {
 module.exports.toHex = function (value) {
   return web3Utils.toHex(value);
 };
+
+module.exports.toAscii = function (value) {
+  return web3Utils.hexToAscii(value);
+};
+
+module.exports.toUtf8 = function (value) {
+  return web3Utils.hexToUtf8(value);
+};
