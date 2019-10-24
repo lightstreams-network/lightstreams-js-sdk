@@ -29,5 +29,8 @@ module.exports = function(deployer) {
       factoryFundingInPht: factoryFundingInPht,
       faucetFundingInPht: faucetFundingInPht
     });
+  }).catch(err => {
+    console.error(err);
+    throw err;
   })
 };

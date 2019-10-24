@@ -50,5 +50,8 @@ module.exports = function(deployer) {
         console.log(`Registration of domain "${domain}.${tld}" completed.`);
       });
     });
-  });
+  }).catch(err => {
+    console.error(err);
+    throw err;
+  })
 };
