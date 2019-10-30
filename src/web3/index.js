@@ -15,8 +15,8 @@ const defaultCfg = {
 };
 
 module.exports.newEngine = (provider, options = {}) => {
-  if(typeof provider === 'string') {
-    const Web3Provider = require('../web3-provider'); // @ISSUE when imported top due to recursive dependency
+  if(typeof provider === 'string' && !options.useRemoteKeystore) {
+    const Web3Provider = require('../web3-provider'); // @TODO Resolve recursive dependency if imported in headers
     provider = Web3Provider({
       ...options,
       rpcUrl: provider
