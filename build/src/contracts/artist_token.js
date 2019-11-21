@@ -13,7 +13,7 @@ var Web3Wrapper = require('../web3');
 
 var artistTokenSc = require('../../build/contracts/ArtistToken.json');
 
-var fundingPoolSc = require('../../build/contracts/FundingPoolMock.json');
+var fundingPoolSc = require('../../build/contracts/FundingPool.json');
 
 var wphtSc = require('../../build/contracts/WPHT.json');
 
@@ -63,12 +63,12 @@ function () {
   var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(web3, _ref3) {
-    var from, name, symbol, wphtAddr, fundingPoolAddr, reserveRatio, gasPrice, theta, p0, initialRaise, friction, durationSeconds, minExternalContribution, receipt;
+    var from, name, symbol, wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr, reserveRatio, gasPrice, theta, p0, initialRaise, friction, hatchDurationSeconds, hatchVestingDurationSeconds, minExternalContribution, receipt;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            from = _ref3.from, name = _ref3.name, symbol = _ref3.symbol, wphtAddr = _ref3.wphtAddr, fundingPoolAddr = _ref3.fundingPoolAddr, reserveRatio = _ref3.reserveRatio, gasPrice = _ref3.gasPrice, theta = _ref3.theta, p0 = _ref3.p0, initialRaise = _ref3.initialRaise, friction = _ref3.friction, durationSeconds = _ref3.durationSeconds, minExternalContribution = _ref3.minExternalContribution;
+            from = _ref3.from, name = _ref3.name, symbol = _ref3.symbol, wphtAddr = _ref3.wphtAddr, fundingPoolAddr = _ref3.fundingPoolAddr, feeRecipientAddr = _ref3.feeRecipientAddr, pauserAddr = _ref3.pauserAddr, reserveRatio = _ref3.reserveRatio, gasPrice = _ref3.gasPrice, theta = _ref3.theta, p0 = _ref3.p0, initialRaise = _ref3.initialRaise, friction = _ref3.friction, hatchDurationSeconds = _ref3.hatchDurationSeconds, hatchVestingDurationSeconds = _ref3.hatchVestingDurationSeconds, minExternalContribution = _ref3.minExternalContribution;
 
             if (!(name && !name.length > 1)) {
               _context2.next = 3;
@@ -89,86 +89,96 @@ function () {
             symbol = symbol.toUpperCase();
             Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
             Web3Wrapper.validator.validateAddress("fundingPoolAddr", fundingPoolAddr);
+            Web3Wrapper.validator.validateAddress("feeRecipientAddr", feeRecipientAddr);
+            Web3Wrapper.validator.validateAddress("pauserAddr", pauserAddr);
 
             if (!isNaN(parseInt(reserveRatio))) {
-              _context2.next = 10;
+              _context2.next = 12;
               break;
             }
 
             throw new Error("Invalid \"reserveRatio\" value \"".concat(reserveRatio, "\". Expected an integer number"));
 
-          case 10:
+          case 12:
             if (!isNaN(parseInt(gasPrice))) {
-              _context2.next = 12;
+              _context2.next = 14;
               break;
             }
 
             throw new Error("Invalid \"gasPrice\" value \"".concat(gasPrice, "\". Expected an integer number"));
 
-          case 12:
+          case 14:
             if (!isNaN(parseInt(theta))) {
-              _context2.next = 14;
+              _context2.next = 16;
               break;
             }
 
             throw new Error("Invalid \"theta\" value \"".concat(theta, "\". Expected an integer number"));
 
-          case 14:
+          case 16:
             if (!isNaN(parseInt(p0))) {
-              _context2.next = 16;
+              _context2.next = 18;
               break;
             }
 
             throw new Error("Invalid \"p0\" value \"".concat(p0, "\". Expected an integer number"));
 
-          case 16:
+          case 18:
             if (!isNaN(parseInt(initialRaise))) {
-              _context2.next = 18;
+              _context2.next = 20;
               break;
             }
 
             throw new Error("Invalid \"initialRaise\" value \"".concat(initialRaise, "\". Expected an integer number"));
 
-          case 18:
+          case 20:
             if (!isNaN(parseInt(friction))) {
-              _context2.next = 20;
+              _context2.next = 22;
               break;
             }
 
             throw new Error("Invalid \"friction\" value \"".concat(friction, "\". Expected an integer number"));
 
-          case 20:
-            if (!isNaN(parseInt(durationSeconds))) {
-              _context2.next = 22;
+          case 22:
+            if (!isNaN(parseInt(hatchDurationSeconds))) {
+              _context2.next = 24;
               break;
             }
 
-            throw new Error("Invalid \"duration\" value \"".concat(durationSeconds, "\". Expected an integer number"));
+            throw new Error("Invalid \"hatch duration\" value \"".concat(hatchDurationSeconds, "\". Expected an integer number"));
 
-          case 22:
+          case 24:
+            if (!isNaN(parseInt(hatchVestingDurationSeconds))) {
+              _context2.next = 26;
+              break;
+            }
+
+            throw new Error("Invalid \"hatch vesting duration\" value \"".concat(hatchVestingDurationSeconds, "\". Expected an integer number"));
+
+          case 26:
             if (!isNaN(parseInt(minExternalContribution))) {
-              _context2.next = 24;
+              _context2.next = 28;
               break;
             }
 
             throw new Error("Invalid \"minExternalContribution\" value \"".concat(minExternalContribution, "\". Expected an integer number"));
 
-          case 24:
-            _context2.next = 26;
+          case 28:
+            _context2.next = 30;
             return Web3Wrapper.deployContract(web3, {
               from: from,
               useGSN: false,
               abi: artistTokenSc.abi,
               bytecode: artistTokenSc.bytecode,
-              params: [name, symbol, wphtAddr, reserveRatio, gasPrice, theta, p0, initialRaise, fundingPoolAddr, friction, durationSeconds, minExternalContribution]
+              params: [name, symbol, [wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr], [gasPrice, theta, p0, initialRaise, friction, hatchDurationSeconds, hatchVestingDurationSeconds, minExternalContribution], reserveRatio]
             });
 
-          case 26:
+          case 30:
             receipt = _context2.sent;
             console.log("ArtistToken deployed at: ".concat(receipt.contractAddress));
             return _context2.abrupt("return", receipt);
 
-          case 29:
+          case 33:
           case "end":
             return _context2.stop();
         }
