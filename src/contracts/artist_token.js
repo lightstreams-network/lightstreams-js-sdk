@@ -7,7 +7,7 @@
 const Web3Wrapper = require('../web3');
 
 const artistTokenSc = require('../../build/contracts/ArtistToken.json');
-const fundingPoolSc = require('../../build/contracts/FundingPoolMock.json');
+const fundingPoolSc = require('../../build/contracts/FundingPool.json');
 const wphtSc        = require('../../build/contracts/WPHT.json');
 
 module.exports.deployFundingPool = async (web3, { from }) => {
@@ -37,13 +37,16 @@ module.exports.deployArtistToken = async (
     symbol,
     wphtAddr,
     fundingPoolAddr,
+    feeRecipientAddr,
+    pauserAddr,
     reserveRatio,
     gasPrice,
     theta,
     p0,
     initialRaise,
     friction,
-    durationSeconds: durationSeconds,
+    hatchDurationSeconds,
+    hatchVestingDurationSeconds,
     minExternalContribution
   }) => {
   if (name && !name.length > 1) {
@@ -57,6 +60,8 @@ module.exports.deployArtistToken = async (
 
   Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
   Web3Wrapper.validator.validateAddress("fundingPoolAddr", fundingPoolAddr);
+  Web3Wrapper.validator.validateAddress("feeRecipientAddr", feeRecipientAddr);
+  Web3Wrapper.validator.validateAddress("pauserAddr", pauserAddr);
 
   if (isNaN(parseInt(reserveRatio))) {
     throw new Error(`Invalid "reserveRatio" value "${reserveRatio}". Expected an integer number`);
@@ -82,8 +87,12 @@ module.exports.deployArtistToken = async (
     throw new Error(`Invalid "friction" value "${friction}". Expected an integer number`);
   }
 
-  if (isNaN(parseInt(durationSeconds))) {
-    throw new Error(`Invalid "duration" value "${durationSeconds}". Expected an integer number`);
+  if (isNaN(parseInt(hatchDurationSeconds))) {
+    throw new Error(`Invalid "hatch duration" value "${hatchDurationSeconds}". Expected an integer number`);
+  }
+
+  if (isNaN(parseInt(hatchVestingDurationSeconds))) {
+    throw new Error(`Invalid "hatch vesting duration" value "${hatchVestingDurationSeconds}". Expected an integer number`);
   }
 
   if (isNaN(parseInt(minExternalContribution))) {
@@ -100,16 +109,9 @@ module.exports.deployArtistToken = async (
         params: [
           name,
           symbol,
-          wphtAddr,
-          reserveRatio,
-          gasPrice,
-          theta,
-          p0,
-          initialRaise,
-          fundingPoolAddr,
-          friction,
-          durationSeconds,
-          minExternalContribution,
+          [wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr],
+          [gasPrice, theta, p0, initialRaise, friction, hatchDurationSeconds, hatchVestingDurationSeconds, minExternalContribution],
+          reserveRatio
         ]
       }
     );

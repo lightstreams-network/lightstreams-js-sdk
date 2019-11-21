@@ -1,7 +1,7 @@
 // ReserveTokenMock will be an existing smart contract (DAI)
 const WPHT = artifacts.require("WPHT");
 const ArtistToken = artifacts.require("ArtistToken");
-const FundingPoolMock = artifacts.require("FundingPoolMock");
+const FundingPool = artifacts.require("FundingPool");
 
 const { deployArtistToken, deployFundingPool } = require('../src/contracts/artist_token');
 
@@ -12,7 +12,8 @@ const p0 = 1;                 // Price of internal token in external tokens.
 const initialRaise = 300000;  // Raise amount in external tokens.
 const friction = 20000;       // 2% in ppm
 const gasPrice = 15000000000; // 15 gwei
-const durationSeconds = 3024000000000000; // ~5 weeks.
+const hatchDurationSeconds = 3024000; // 5 weeks
+const hatchVestingDurationSeconds = 7890000; // 3 months
 const minExternalContibution = 100000;
 
 module.exports = function(deployer) {
@@ -20,8 +21,8 @@ module.exports = function(deployer) {
 
   deployer.then(() => {
     return global.forceMigration('03')
-      ? deployer.deploy(FundingPoolMock)
-      : FundingPoolMock.deployed();
+      ? deployer.deploy(FundingPool)
+      : FundingPool.deployed();
   }).then((fundingPoolInstance) => {
     if (!global.forceMigration('03')) {
       console.log(`Contract already deployed ${fundingPoolInstance.address}. Skipped migration "03_deploy_artist_token.js`);
@@ -36,13 +37,16 @@ module.exports = function(deployer) {
             symbol: "AVL",
             wphtAddr: WPHTInstance.address,
             fundingPoolAddr: fundingPoolInstance.address,
+            feeRecipientAddr: fundingPoolInstance.address,
+            pauserAddr: fromAccount,
             reserveRatio: reserveRatio,
             gasPrice: gasPrice,
             theta: theta,
             p0: p0,
             initialRaise: initialRaise,
             friction: friction,
-            durationSeconds: durationSeconds,
+            hatchDurationSeconds: hatchDurationSeconds,
+            hatchVestingDurationSeconds: hatchVestingDurationSeconds,
             minExternalContribution: minExternalContibution
           }
         );

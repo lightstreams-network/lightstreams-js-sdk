@@ -1,6 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "./BondingCurveToken.sol";
+import "./vendor/lifecycle/Pausable.sol";
 
 /**
  * @title CommonsToken
@@ -9,30 +10,30 @@ import "./BondingCurveToken.sol";
  * @dev We use the BancorFormule to define the slope of the curve, an ERC20 to model the internal token (minted by the bonding curve) and an ERC20 to model the external (stable currency) token
  * @dev Source: https://github.com/commons-stack/genesis-contracts/tree/master/contracts/bondingcurve
  */
-contract CommonsToken is BondingCurveToken {
+contract CommonsToken is BondingCurveToken, Pausable {
+  /**
+    PreHatchContribution keeps track of the contribution of a hatcher during the hatchin phase:
+      - paidExternal: the amount contributed during the hatching phase, denominated in external currency
+      - lockedInternal: paidExternal / p0 = the amount of internal tokens represented by paidExternal
 
-  /**PreHatchContribution keeps track of the contribution of a hatcher during the hatchin phase:
-      paidExternal: the amount contributed during the hatching phase, denominated in external currency
-      lockedInternal: paidExternal / p0 = the amount of internal tokens represented by paidExternal.
-        These tokens are unlocked post-hatch according to a vesting policy. Post hatch, we decrease lockedInternal to 0
+    These tokens are unlocked post-hatch according to a vesting policy. Post hatch, we decrease lockedInternal to 0
   */
   struct PreHatchContribution {
     uint256 paidExternal;
     uint256 lockedInternal;
   }
 
-  // --- CONSTANTS: ---
-
   // Helper to represent fractions => 100% = 1000000, 1% = 10000
   uint256 constant DENOMINATOR_PPM = 1000000;
-
-  // --- STORAGE: ---
 
   // External token contract (Stablecurrency e.g. DAI).
   ERC20 public externalToken;
 
   // Address of the funding pool contract.
   address public fundingPool;
+
+  // Address of the account who will collect all fees from burning tokens.
+  address public feeRecipient;
 
   // Curve parameters:
   uint256 public theta; // fraction (in PPM) of the contributed amount that goes to the funding pool
@@ -52,13 +53,17 @@ contract CommonsToken is BondingCurveToken {
   // Curve state (has it been hatched?).
   bool public isHatched;
 
-  // Time (in seconds) by which the curve must be hatched since initialization.
+  // Timestamp by which the curve must be hatched since initialization.
   uint256 public hatchDeadline;
+
+  // Timestamp by which any hatcher won't be able to claim any tokens.
+  uint256 public hatchVestingDeadline;
+
+  // Time (in seconds) defining how long after hatching finishes a hatcher won't be able to claim any tokens.
+  uint256 public hatchVestingDurationSeconds;
 
   // Mapping of hatchers to contributions.
   mapping(address => PreHatchContribution) public initialContributions;
-
-  // --- MODIFIERS: ---
 
   modifier whileHatched(bool _hatched) {
     require(isHatched == _hatched, "Curve must be hatched");
@@ -99,56 +104,54 @@ contract CommonsToken is BondingCurveToken {
     require(expired, "Curve hatch time has expired");
     _;
   }
-  /*
-  * @notice initializes the contract
-  * @param _externalToken the address of the externalToken ERC20 smart contract
-  * @param _reserveRatio (in PPM) which get's used in the BancorFormula contract as the connectorWeight
-  * @param _gasPrice we need to set this such that everybody pays an equal amount of gas and we protect against front-running the bonding curve
-  * @param _theta (in PPM) which is the percentage of worth in internal tokens of the contribution in externalTokens that get's minted to the funding pool once the hatch phase ends
-  * @param _p0 the price denominated in external token of one internal token (i.e. if P0 is 10 => if you contribute 100 external tokens you get 10 internal tokens DURING the hatch phase)
-  * @param _initialRaise which is the amount of external tokens that must be contributed during the hatching phase to go post-hatching phase
-  * @param _fundingPool the address of the fundingPool (can be an organization of a DAO). The fundingPool get's access to the theta * ( internal tokens worth of external tokens ) when the hatch phase ends
-  * @param _friction the fraction (in PPM) that goes to the funding pool when internal tokens are burned (post-hatch)
-  * @param _duration time (in seconds) by which the curve must be hatched since calling this constructor.
-  * @param _minExternalContribution the minimum amount of external tokens that should be contributed by a hatcher
-  */
-  constructor(
-    address _externalToken,
-    uint32 _reserveRatio,
-    uint256 _gasPrice,
-    uint256 _theta,
-    uint256 _p0,
-    uint256 _initialRaise,
-    address _fundingPool,
-    uint256 _friction,
-    uint256 _duration,
-    uint256 _minExternalContribution
-  )
-    public
-    mustBeNonZeroAdr(_externalToken)
-    mustBeNonZeroAdr(_fundingPool)
-    mustBeInPPM(_reserveRatio)
-    mustBeInPPM(_theta)
-    mustBeInPPM(_friction)
-    BondingCurveToken(_reserveRatio, _gasPrice)
-  {
-    theta = _theta;
-    p0 = _p0;
-    initialRaise = _initialRaise;
-    fundingPool = _fundingPool;
-    friction = _friction;
 
-    hatchDeadline = now + _duration;
-    minExternalContribution = _minExternalContribution;
-
-    externalToken = ERC20(_externalToken);
+  modifier vestingFinished() {
+    require(now >= hatchVestingDeadline, "unable to claim any tokens because vesting is not over yet");
+    _;
   }
 
-  // --- PUBLIC FUNCTIONS: ---
+  /*
+  * @param _addresses [0] externalToken [1] fundingPool [2] feeRecipient [3] pauser
+  * @param _settings [0] _gasPrice [1] _theta [2] _p0 [3] _initialRaise [4] _friction [5] _hatchDurationSeconds [6] _hatchVestingDurationSeconds [7] _minExternalContribution
+  * @param _reserveRatio
+  */
+  constructor(
+    address[4] memory _addresses,
+    uint256[8] memory _settings,
+    uint32 _reserveRatio
+  )
+    public
+    mustBeNonZeroAdr(_addresses[0])
+    mustBeNonZeroAdr(_addresses[1])
+    mustBeNonZeroAdr(_addresses[2])
+    mustBeNonZeroAdr(_addresses[3])
+    mustBeInPPM(_reserveRatio)
+    mustBeInPPM(_settings[1])
+    mustBeInPPM(_settings[4])
+    BondingCurveToken(_reserveRatio, _settings[0])
+    Pausable(_addresses[3])
+  {
+    theta = _settings[1];
+    p0 = _settings[2];
+    initialRaise = _settings[3];
+    fundingPool = _addresses[1];
+    feeRecipient = _addresses[2];
+    friction = _settings[4];
+
+    hatchDeadline = now + _settings[5];
+    // Default value. Vesting deadline is set when hatching ends.
+    hatchVestingDeadline = 0;
+    hatchVestingDurationSeconds = _settings[6];
+
+    minExternalContribution = _settings[7];
+
+    externalToken = ERC20(_addresses[0]);
+  }
 
   function mint(uint256 _amount)
     public
     whileHatched(true)
+    whenNotPaused
   {
     _curvedMint(_amount);
   }
@@ -156,6 +159,7 @@ contract CommonsToken is BondingCurveToken {
   function burn(uint256 _amount)
     public
     whileHatched(true)
+    whenNotPaused
     returns (uint256)
   {
     return _curvedBurn(_amount);
@@ -166,6 +170,7 @@ contract CommonsToken is BondingCurveToken {
     mustBeLargeEnoughContribution(_value)
     whileHatched(false)
     expiredStatus(false)
+    whenNotPaused
   {
     uint256 contributed = _value;
 
@@ -179,13 +184,18 @@ contract CommonsToken is BondingCurveToken {
       _endHatchPhase();
     }
 
-    _mintInternalAndLock(msg.sender, contributed);
+    // Increase the amount paid in EXTERNAL tokens.
+    initialContributions[msg.sender].paidExternal += contributed;
+
+    // Lock the INTERNAL tokens, total is EXTERNAL amount * price of internal token during the raise.
+    initialContributions[msg.sender].lockedInternal += contributed * p0;
   }
 
   function fundsAllocated(uint256 _externalAllocated)
     public
     onlyFundingPool
     whileHatched(true)
+    whenNotPaused
   {
     // Currently, we unlock a 1/1 proportion of tokens.
     // We could set a different proportion:
@@ -203,6 +213,8 @@ contract CommonsToken is BondingCurveToken {
     public
     whileHatched(true)
     onlyHatcher
+    vestingFinished
+    whenNotPaused
   {
     require(initialContributions[msg.sender].lockedInternal > 0);
 
@@ -210,7 +222,7 @@ contract CommonsToken is BondingCurveToken {
     uint256 lockedInternal = initialContributions[msg.sender].lockedInternal;
 
     // The total amount of INTERNAL tokens that should have been unlocked.
-    uint256 shouldHaveUnlockedInternal = (paidExternal / initialRaise) * unlockedInternal;
+    uint256 shouldHaveUnlockedInternal = (paidExternal * unlockedInternal) / initialRaise;
     // The amount of INTERNAL tokens that was already unlocked.
     uint256 previouslyUnlockedInternal = (paidExternal / p0) - lockedInternal;
     // The amount that can be unlocked.
@@ -224,10 +236,23 @@ contract CommonsToken is BondingCurveToken {
     public
     whileHatched(false)
     expiredStatus(true)
+    whenNotPaused
   {
     // Refund the EXTERNAL tokens from the contibution.
     uint256 paidExternal = initialContributions[msg.sender].paidExternal;
     externalToken.transfer(msg.sender, paidExternal);
+  }
+
+  function transfer(address to, uint256 value) public whenNotPaused returns (bool) {
+    return super.transfer(to, value);
+  }
+
+  function approve(address spender, uint256 value) public whenNotPaused returns (bool) {
+    return super.approve(spender, value);
+  }
+
+  function transferFrom(address from, address to, uint256 value) public whenNotPaused returns (bool) {
+    return super.transferFrom(from, to, value);
   }
 
   function poolBalance()
@@ -237,8 +262,6 @@ contract CommonsToken is BondingCurveToken {
   {
     return externalToken.balanceOf(address(this));
   }
-
-  // --- INTERNAL FUNCTIONS: ---
 
   // Try and pull the given amount of reserve token into the contract balance.
   // Reverts if there is no approval.
@@ -255,7 +278,8 @@ contract CommonsToken is BondingCurveToken {
     internal
   {
     uint256 amountFundingPoolExternal = ((initialRaise) * theta ) / DENOMINATOR_PPM; // denominated in external
-    uint256 amountReserveInternal = (initialRaise / p0) * (DENOMINATOR_PPM - theta) / DENOMINATOR_PPM; // denominated in internal
+    // FIXES: https://github.com/commons-stack/genesis-contracts/issues/16
+    // uint256 amountReserveInternal = (initialRaise / p0) * (DENOMINATOR_PPM - theta) / DENOMINATOR_PPM; // denominated in internal
 
     // _transfer(address(this), fundingPool, amount);
 
@@ -263,27 +287,14 @@ contract CommonsToken is BondingCurveToken {
     externalToken.transfer(fundingPool, amountFundingPoolExternal);
 
     // Mint INTERNAL tokens to the reserve:
-    _mint(address(this), amountReserveInternal);
+    // FIXES: https://github.com/commons-stack/genesis-contracts/issues/16
+    // _mint(address(this), amountReserveInternal);
+    _mint(address(this), initialRaise * p0);
 
-    // End the hatching phase.
+    // End the hatching phase
     isHatched = true;
-  }
-
-  // We mint to contributor account and lock the tokens.
-  // Theoretically, the price is increasing (up to P1),
-  // but since we are in the hatching phase, the actual price will stay P0.
-  // The contract will hold the locked tokens.
-  function _mintInternalAndLock(
-    address _adr,
-    uint256 _amount
-  )
-    internal
-  {
-    // Increase the amount paid in EXTERNAL tokens.
-    initialContributions[_adr].paidExternal += _amount;
-
-    // Lock the INTERNAL tokens, total is EXTERNAL amount * price of internal token during the raise.
-    initialContributions[_adr].lockedInternal += _amount * p0;
+    // Start hatchers vesting
+    hatchVestingDeadline = now + hatchVestingDurationSeconds;
   }
 
   /**
@@ -305,7 +316,12 @@ contract CommonsToken is BondingCurveToken {
     uint256 reimbursement = super._curvedBurn(amount);
     uint256 frictionCost = friction * reimbursement / DENOMINATOR_PPM;
     externalToken.transfer(msg.sender, reimbursement - frictionCost);
-    externalToken.transfer(fundingPool, frictionCost);
+    externalToken.transfer(feeRecipient, frictionCost);
+
+    if (feeRecipient != fundingPool) {
+      unlockedInternal += frictionCost / p0;
+    }
+
     return reimbursement;
   }
 }
