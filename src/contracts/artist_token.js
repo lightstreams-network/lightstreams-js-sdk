@@ -116,7 +116,7 @@ module.exports.deployArtistToken = async (
       }
     );
 
-  console.log(`ArtistToken deployed at: ${receipt.contractAddress}`);
+  // console.log(`ArtistToken deployed at: ${receipt.contractAddress}`);
 
   return receipt;
 };
@@ -158,7 +158,7 @@ module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr
     }
   );
 
-  await Web3Wrapper.contractSendTx(
+  const receipt = await Web3Wrapper.contractSendTx(
     web3,
     {
       to: artistTokenAddr,
@@ -172,6 +172,7 @@ module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr
   );
 
   console.log(`Hatcher ${from} sent a hatch worth ${Web3Wrapper.utils.wei2pht(amountWeiBn)} PHT to ArtistToken ${artistTokenAddr}`);
+  return receipt;
 };
 
 module.exports.getArtistTokenTotalSupply = async (web3, { artistTokenAddr }) => {
@@ -191,6 +192,19 @@ module.exports.getArtistTokenTotalSupply = async (web3, { artistTokenAddr }) => 
   console.log(`ArtistToken ${artistTokenAddr} total supply is: ${Web3Wrapper.utils.wei2pht(totalSupply)} PHT`);
 
   return totalSupply;
+};
+
+module.exports.claimTokens = async(web3, { artistTokenAddr, from }) => {
+  return await Web3Wrapper.contractSendTx(
+    web3,
+    {
+      to: artistTokenAddr,
+      from: from,
+      useGSN: false,
+      method: 'claimTokens',
+      abi: artistTokenSc.abi,
+    }
+  );
 };
 
 const getArtistTokenName = async (web3, { artistTokenAddr }) => {

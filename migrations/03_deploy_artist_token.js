@@ -1,9 +1,8 @@
 // ReserveTokenMock will be an existing smart contract (DAI)
 const WPHT = artifacts.require("WPHT");
-const ArtistToken = artifacts.require("ArtistToken");
 const FundingPool = artifacts.require("FundingPool");
 
-const { deployArtistToken, deployFundingPool } = require('../src/contracts/artist_token');
+const { deployArtistToken } = require('../src/contracts/artist_token');
 
 // Curve parameters:
 const reserveRatio = 142857;  // Kappa (~ 6)
@@ -50,7 +49,9 @@ module.exports = function(deployer) {
             minExternalContribution: minExternalContibution
           }
         );
-      })
+      });
+  }).then(receipt => {
+    console.log(`ArtistToken deployed at: ${receipt.contractAddress}`);
   }).catch(err => {
     console.error(err);
     throw err;

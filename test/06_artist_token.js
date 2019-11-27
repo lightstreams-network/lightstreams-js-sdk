@@ -1,7 +1,8 @@
 require('dotenv').config({ path: `${__dirname}/.env` });
 
-const { BN, constants, expectEvent, shouldFail, ether } = require('openzeppelin-test-helpers');
+const { BN, shouldFail } = require('openzeppelin-test-helpers');
 const { panic } = require('./utils');
+const Web3 = require('../src/web3');
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));

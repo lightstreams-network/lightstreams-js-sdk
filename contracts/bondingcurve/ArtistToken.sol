@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "./CommonsToken.sol";
-import "./vendor/access/Ownable.sol";
+import "../utils/Ownable.sol";
 
 contract ArtistToken is CommonsToken, Ownable {
     string public name;   // e.g: Armin Van Lightstreams
