@@ -27,3 +27,18 @@ module.exports.getWPHTBalanceOf = async (web3, { wphtAddr, accountAddr }) => {
 
   return Web3Wrapper.utils.toBN(balance);
 };
+
+module.exports.deposit = async (web3, { from, wphtAddr, amountInPht }) => {
+  Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
+
+  return await Web3Wrapper.contractSendTx(
+    web3,
+    {
+      from,
+      to: wphtAddr,
+      method: 'deposit',
+      abi: wphtSc.abi,
+      value: Web3Wrapper.utils.toWei(amountInPht),
+    }
+  );
+};

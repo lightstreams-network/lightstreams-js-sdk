@@ -140,11 +140,27 @@ module.exports.isArtistTokenHatched = async (web3, { artistTokenAddr }) => {
   return isHatched;
 };
 
-module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr, amountWeiBn }) => {
+
+module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr, amountWeiBn }, runDepositFirst = false) => {
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
   Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
   Web3Wrapper.validator.validateWeiBn("amountWeiBn", amountWeiBn);
+
+  if (runDepositFirst) {
+    await Web3Wrapper.contractSendTx(
+      web3,
+      {
+        from: from,
+        to: wphtAddr,
+        value: amountWeiBn.toString(),
+        useGSN: false,
+        method: 'deposit',
+        abi: wphtSc.abi,
+        params: [],
+      }
+    );
+  }
 
   await Web3Wrapper.contractSendTx(
     web3,
@@ -202,6 +218,7 @@ module.exports.claimTokens = async(web3, { artistTokenAddr, from }) => {
       from: from,
       useGSN: false,
       method: 'claimTokens',
+      gas: 1000000,
       abi: artistTokenSc.abi,
     }
   );
@@ -261,7 +278,7 @@ module.exports.getArtistTokenBalanceOf = async (web3, { artistTokenAddr, account
   return Web3Wrapper.utils.toBN(balance);
 };
 
-module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr, amountWeiBn }) => {
+module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr, amountWeiBn }, runDepositFirst = false) => {
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
   Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
@@ -269,18 +286,20 @@ module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr,
 
   const symbol = await getArtistTokenSymbol(web3, { artistTokenAddr });
 
-  await Web3Wrapper.contractSendTx(
-    web3,
-    {
-      from: from,
-      to: wphtAddr,
-      value: amountWeiBn.toString(),
-      useGSN: false,
-      method: 'deposit',
-      abi: wphtSc.abi,
-      params: [],
-    }
-  );
+  if(runDepositFirst) {
+    await Web3Wrapper.contractSendTx(
+      web3,
+      {
+        from: from,
+        to: wphtAddr,
+        value: amountWeiBn.toString(),
+        useGSN: false,
+        method: 'deposit',
+        abi: wphtSc.abi,
+        params: [],
+      }
+    );
+  }
 
   await Web3Wrapper.contractSendTx(
     web3,

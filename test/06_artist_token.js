@@ -1,7 +1,8 @@
 require('dotenv').config({ path: `${__dirname}/.env` });
 
-const { BN, shouldFail, ether } = require('openzeppelin-test-helpers');
+const { BN, shouldFail } = require('openzeppelin-test-helpers');
 const { panic } = require('./utils');
+const Web3Wrapper = require('../src/web3');
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -12,11 +13,11 @@ const WPHTSc = artifacts.require("WPHT");
 const FundingPoolSc = artifacts.require("FundingPool");
 
 const pht2wei = (value) => {
-  return ether(value.toString());
+  return Web3Wrapper.utils.toBN(Web3Wrapper.utils.toWei(`${value}`));
 };
 
-function wei2pht (n) {
-  return web3.utils.fromWei(n, 'ether');
+function wei2pht (wei) {
+  return Web3Wrapper.utils.toPht(wei);
 }
 
 const {
@@ -376,7 +377,7 @@ contract('ArtistToken', (accounts) => {
       artistTokenAddr: artistToken.address,
       wphtAddr: wPHT.address,
       amountWeiBn: BUYER_WPHT_PURCHASE_COST_WEI,
-    });
+    }, true);
 
     const postFundingPoolWPHTBalance = await wPHT.balanceOf(fundingPool.address);
     const postArtistTokenWPHTBalance = await wPHT.balanceOf(artistToken.address);

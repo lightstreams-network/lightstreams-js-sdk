@@ -1,4 +1,4 @@
 module.exports.panic = (msg) => {
-  console.log(msg);
+  console.error(msg);
   process.exit(1);
 };
