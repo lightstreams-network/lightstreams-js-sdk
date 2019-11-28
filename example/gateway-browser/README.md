@@ -19,19 +19,19 @@ v8.8.1
 If you just freshly installed yarn/npm you are good to go, else you might need to upgrade, for npm I use `n`
 
 ```
-npm install -g n
+yarn i
 ```
 
 ## How to use
 
 To start dev server with hot reload, it's live on localhost:3001
 ```
-npm run start:dev
+yarn start:dev
 ```
 
 To build prod bundle, it includes both treeshaking and uglify to optimize the code as much as possible.
 ```
-npm run build
+yarn build
 ```
 
 ## Project structure

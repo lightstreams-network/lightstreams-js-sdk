@@ -26,11 +26,9 @@ export default class WalletPage extends Component {
   }
 
   componentDidMount() {
-    Web3.newEngine(window.process.env.WEB3_PROVIDER).then(web3 => {
-      this.setState({ web3 });
-      window.web3 = this.state.web3;
-      window.ethers = require('ethers');
-    });
+    const web3 = Web3.newEngine(window.process.env.WEB3_PROVIDER);
+    this.setState({ web3 });
+    window.web3 = this.state.web3;
   }
 
   randomizeSeedPhrase = () => {
@@ -40,10 +38,10 @@ export default class WalletPage extends Component {
 
   createAccount = async () => {
     const { web3 } = this.state;
-    const encryptedJson = await EW.Keystore.createWallet(this.state.seed, this.state.password);
-    const address= EW.Account.formatAddress(encryptedJson.address);
-    web3.currentProvider.importAccount(encryptedJson);
-    await web3.eth.personal.unlockAccount(address, this.state.password);
+    const decryptedWallet = await EW.Keystore.createWallet(this.state.seed);
+    const encryptedJson = await EW.Keystore.encryptWallet(decryptedWallet, this.state.password);
+    const address = EW.Account.formatAddress(encryptedJson.address);
+    web3.currentProvider.importAccount(encryptedJson, decryptedWallet);
     this.setState({ encryptedJson, address: address });
   };
 
