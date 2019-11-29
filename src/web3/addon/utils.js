@@ -62,3 +62,7 @@ module.exports.stripHexPrefix = (value) => {
 module.exports.toUtf8 = (value) => {
   return web3Utils.hexToUtf8(value);
 };
+
+module.exports.hexToBytes = (value) => {
+  return web3Utils.hexToBytes(value)
+}

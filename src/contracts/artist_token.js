@@ -224,6 +224,45 @@ module.exports.claimTokens = async(web3, { artistTokenAddr, from }) => {
   );
 };
 
+module.exports.transfer = async (web3, { artistTokenAddr, from, to, amountInBn }) => {
+  return await Web3Wrapper.contractSendTx(
+    web3,
+    {
+      to: artistTokenAddr,
+      from: from,
+      method: 'transfer',
+      gas: 1000000,
+      abi: artistTokenSc.abi,
+      params: [to, amountInBn.toString()]
+    }
+  );
+};
+
+module.exports.approve = async (web3, { artistTokenAddr, from, to, amountInBn }) => {
+  return await Web3Wrapper.contractSendTx(
+    web3,
+    {
+      from: from,
+      to: artistTokenAddr,
+      method: 'approve',
+      abi: wphtSc.abi,
+      params: [to, amountInBn.toString()],
+    }
+  );
+};
+
+module.exports.balanceOf = async (web3, { artistTokenAddr, accountAddr }) => {
+  return await Web3Wrapper.contractCall(
+    web3,
+    {
+      to: artistTokenAddr,
+      method: 'balanceOf',
+      abi: artistTokenSc.abi,
+      params: [accountAddr],
+    }
+  );
+};
+
 const getArtistTokenName = async (web3, { artistTokenAddr }) => {
   Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
 
@@ -293,7 +332,6 @@ module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr,
         from: from,
         to: wphtAddr,
         value: amountWeiBn.toString(),
-        useGSN: false,
         method: 'deposit',
         abi: wphtSc.abi,
         params: [],
@@ -306,7 +344,6 @@ module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr,
     {
       from: from,
       to: wphtAddr,
-      useGSN: false,
       method: 'approve',
       abi: wphtSc.abi,
       params: [artistTokenAddr, amountWeiBn.toString()],
@@ -318,7 +355,6 @@ module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr,
     {
       from: from,
       to: artistTokenAddr,
-      useGSN: false,
       method: 'mint',
       gas: 1000000,
       abi: artistTokenSc.abi,
@@ -328,7 +364,7 @@ module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr,
 
   const tokens = receipt.events['CurvedMint'].returnValues['amount'];
 
-  console.log(`Buyer ${from} purchased ${Web3Wrapper.utils.wei2pht(tokens.toString())} ${symbol} of ArtistToken ${artistTokenAddr}`);
+  console.log(`Buyer ${from} purchased ${tokens.toString()} ${symbol} of ArtistToken ${artistTokenAddr}`);
 
   return Web3Wrapper.utils.toBN(tokens);
 };
