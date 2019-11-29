@@ -168,6 +168,16 @@ module.exports.networkVersion = (web3) => {
   })
 };
 
+module.exports.getGasPrice = (web3) => {
+  return new Promise((resolve, reject) => {
+    web3.eth.getGasPrice().then(gasPrice => {
+      resolve(gasPrice)
+    }).catch(err => {
+      resolve(defaultCfg.gasPrice)
+    })
+  });
+};
+
 module.exports.keystore = require('./addon/keystore');
 
 module.exports.utils = require('./addon/utils');
