@@ -6,6 +6,7 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 var ADD_FILE_PATH = "/storage/add";
+var ADD_FILE_WITH_ACL_PATH = "/storage/add-with-acl";
 var FETCH_FILE_PATH = "/storage/fetch";
 
 var request = require('../http/request');
@@ -29,6 +30,26 @@ module.exports = function (gwDomain) {
       return request.postFile("".concat(gwDomain).concat(ADD_FILE_PATH), {
         owner: owner,
         password: password
+      }, file);
+    },
+
+    /**
+     * Uploaded new file into distributed storage
+     * @param owner {string} Address of the owner of the file
+     * @param acl {string} Address to acl contract
+     * @param file {ReadableStream|File} File to add
+     * @returns {StreamResponse<{ meta, acl }>} | {<{ meta, acl }>}
+     */
+    addWithAcl: function addWithAcl(owner, acl, file) {
+      if (typeof File !== 'undefined' && file instanceof File) {
+        var reader = new FileReader();
+        var fileBlob = file.slice(0, file.size);
+        reader.readAsBinaryString(fileBlob);
+      }
+
+      return request.postFile("".concat(gwDomain).concat(ADD_FILE_WITH_ACL_PATH), {
+        owner: owner,
+        acl: acl
       }, file);
     },
 

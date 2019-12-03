@@ -64,9 +64,13 @@ module.exports.toUtf8 = (value) => {
 };
 
 module.exports.hexToBytes = (value) => {
-  return web3Utils.hexToBytes(value)
-}
+  return web3Utils.hexToBytes(value);
+};
 
 module.exports.asciiToBytes = (value) => {
-  return ethUtil.toBuffer(value);
+  return web3Utils.hexToBytes(web3Utils.toHex(value));
+};
+
+module.exports.toBuffer = (value) => {
+  return ethUtil.toBuffer(value)
 };

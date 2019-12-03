@@ -5,6 +5,7 @@
  */
 
 const ADD_FILE_PATH = `/storage/add`;
+const ADD_FILE_WITH_ACL_PATH = `/storage/add-with-acl`;
 const FETCH_FILE_PATH = `/storage/fetch`;
 
 const request = require('../http/request');
@@ -26,6 +27,25 @@ module.exports = (gwDomain) => ({
     return request.postFile(`${gwDomain}${ADD_FILE_PATH}`, {
       owner,
       password,
+    }, file);
+  },
+
+  /**
+   * Uploaded new file into distributed storage
+   * @param owner {string} Address of the owner of the file
+   * @param acl {string} Address to acl contract
+   * @param file {ReadableStream|File} File to add
+   * @returns {StreamResponse<{ meta, acl }>} | {<{ meta, acl }>}
+   */
+  addWithAcl: (owner, acl, file) => {
+    if (typeof File !== 'undefined' && file instanceof File) {
+      const reader = new FileReader();
+      const fileBlob = file.slice(0, file.size);
+      reader.readAsBinaryString(fileBlob)
+    }
+    return request.postFile(`${gwDomain}${ADD_FILE_WITH_ACL_PATH}`, {
+      owner,
+      acl,
     }, file);
   },
 

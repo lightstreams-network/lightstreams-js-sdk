@@ -7,6 +7,8 @@
  */
 var web3Utils = require('web3-utils');
 
+var ethUtil = require('ethereumjs-util');
+
 module.exports.toWei = function (pht) {
   var unit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'ether';
   return web3Utils.toWei(pht, unit);
@@ -46,4 +48,16 @@ module.exports.toAscii = function (value) {
 
 module.exports.toUtf8 = function (value) {
   return web3Utils.hexToUtf8(value);
+};
+
+module.exports.hexToBytes = function (value) {
+  return web3Utils.hexToBytes(value);
+};
+
+module.exports.asciiToBytes = function (value) {
+  return web3Utils.hexToBytes(web3Utils.toHex(value));
+};
+
+module.exports.toBuffer = function (value) {
+  return ethUtil.toBuffer(value);
 };

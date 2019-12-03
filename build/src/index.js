@@ -22,7 +22,9 @@ module.exports.MetaMask = require('./metamask');
 module.exports.Web3 = require('./web3');
 module.exports.Web3Provider = require('./web3-provider');
 module.exports.Contract = {
-  Profile: require('./contracts/profile')
+  Profile: require('./contracts/profile'),
+  ArtistToken: require('./contracts/artist_token'),
+  WPHT: require('./contracts/wpht')
 };
 module.exports.ENS = {
   FIFSRegistrar: require('./ens/FIFSRegistrar'),
