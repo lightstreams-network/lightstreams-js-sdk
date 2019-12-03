@@ -4,10 +4,14 @@
  * Copyright 2019 (c) Lightstreams, Granada
  */
 const Web3Wrapper = require('../web3');
+const CID = require('cids');
 const { fundRecipient, isRelayHubDeployed } = require('../gsn');
 
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
+
+const cidPrefix = 'Qm';
+const cidLength = 46;
 
 module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub, from, factoryFundingInPht, faucetFundingInPht }) => {
   Web3Wrapper.validator.validateAddress("from", from);
@@ -95,4 +99,48 @@ module.exports.recover = async (web3, contractAddr, { from, newOwner, useGSN }) 
     abi: profileScJSON.abi,
     params: [newOwner],
   })
+};
+
+module.exports.getFiles = (web3, { contractAddr }) => {
+  return Web3Wrapper.contractCall(web3, {
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'getFiles',
+  }).then((files) => {
+    return files.map(f => {
+      // [18,32] Correspond to the removed cidPrefix 'Qm'
+      const arrayBuffer = [...[18, 32], ...Web3Wrapper.utils.hexToBytes(f)];
+      const cidObj = new CID(Web3Wrapper.utils.toBuffer(arrayBuffer));
+      return cidObj.toString();
+    })
+  });
+};
+
+module.exports.getFileAcl = (web3, { contractAddr, cid }) => {
+  if(cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
+    throw new Error('Invalid cid value');
+  }
+
+  const cidObj = new CID(cid);
+  return Web3Wrapper.contractCall(web3, {
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'getFileAcl',
+    params: [cidObj.multihash.slice(2)]
+  });
+};
+
+module.exports.addFile = (web3, { from, contractAddr, cid, acl }) => {
+  if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
+    throw new Error('Invalid cid value');
+  }
+
+  const cidObj = new CID(cid);
+  return Web3Wrapper.contractSendTx(web3, {
+    from: from,
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'addFile',
+    params: [cidObj.multihash.slice(2), acl]
+  });
 };

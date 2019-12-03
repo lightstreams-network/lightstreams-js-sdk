@@ -1,8 +1,12 @@
 "use strict";
 
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 /**
  * User: ggarrido
@@ -10,6 +14,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
  * Copyright 2019 (c) Lightstreams, Granada
  */
 var Web3Wrapper = require('../web3');
+
+var CID = require('cids');
 
 var _require = require('../gsn'),
     fundRecipient = _require.fundRecipient,
@@ -19,224 +25,240 @@ var factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 
 var profileScJSON = require('../../build/contracts/GSNProfile.json');
 
-module.exports.initializeProfileFactory =
-/*#__PURE__*/
-function () {
-  var _ref2 = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(web3, _ref) {
-    var contractAddr, relayHub, from, factoryFundingInPht, faucetFundingInPht, isRelayHub, txReceipt;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            contractAddr = _ref.contractAddr, relayHub = _ref.relayHub, from = _ref.from, factoryFundingInPht = _ref.factoryFundingInPht, faucetFundingInPht = _ref.faucetFundingInPht;
-            Web3Wrapper.validator.validateAddress("from", from);
-            Web3Wrapper.validator.validateAddress("relayHub", relayHub);
-            Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
+var cidPrefix = 'Qm';
+var cidLength = 46;
 
-            if (!isNaN(parseFloat(factoryFundingInPht))) {
-              _context.next = 6;
-              break;
-            }
+module.exports.initializeProfileFactory = function _callee(web3, _ref) {
+  var contractAddr, relayHub, from, factoryFundingInPht, faucetFundingInPht, isRelayHub, txReceipt;
+  return regeneratorRuntime.async(function _callee$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          contractAddr = _ref.contractAddr, relayHub = _ref.relayHub, from = _ref.from, factoryFundingInPht = _ref.factoryFundingInPht, faucetFundingInPht = _ref.faucetFundingInPht;
+          Web3Wrapper.validator.validateAddress("from", from);
+          Web3Wrapper.validator.validateAddress("relayHub", relayHub);
+          Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
 
-            throw new Error("Invalid \"factoryFundingInPht\" value ".concat(factoryFundingInPht, ". Expected a float number"));
+          if (!isNaN(parseFloat(factoryFundingInPht))) {
+            _context.next = 6;
+            break;
+          }
 
-          case 6:
-            if (!isNaN(parseFloat(faucetFundingInPht))) {
-              _context.next = 8;
-              break;
-            }
+          throw new Error("Invalid \"factoryFundingInPht\" value ".concat(factoryFundingInPht, ". Expected a float number"));
 
-            throw new Error("Invalid \"profileFundingInPht\" value ".concat(faucetFundingInPht, ". Expected a float number"));
+        case 6:
+          if (!isNaN(parseFloat(faucetFundingInPht))) {
+            _context.next = 8;
+            break;
+          }
 
-          case 8:
-            _context.next = 10;
-            return isRelayHubDeployed(web3, {
-              relayHub: relayHub
-            });
+          throw new Error("Invalid \"profileFundingInPht\" value ".concat(faucetFundingInPht, ". Expected a float number"));
 
-          case 10:
-            isRelayHub = _context.sent;
+        case 8:
+          _context.next = 10;
+          return regeneratorRuntime.awrap(isRelayHubDeployed(web3, {
+            relayHub: relayHub
+          }));
 
-            if (isRelayHub) {
-              _context.next = 13;
-              break;
-            }
+        case 10:
+          isRelayHub = _context.sent;
 
-            throw new Error("RelayHub is not found at ".concat(relayHub));
+          if (isRelayHub) {
+            _context.next = 13;
+            break;
+          }
 
-          case 13:
-            _context.next = 15;
-            return Web3Wrapper.contractSendTx(web3, {
-              to: contractAddr,
-              from: from,
-              abi: factoryScJSON.abi,
-              method: 'initialize',
-              params: [relayHub]
-            });
+          throw new Error("RelayHub is not found at ".concat(relayHub));
 
-          case 15:
-            txReceipt = _context.sent;
+        case 13:
+          _context.next = 15;
+          return regeneratorRuntime.awrap(Web3Wrapper.contractSendTx(web3, {
+            to: contractAddr,
+            from: from,
+            abi: factoryScJSON.abi,
+            method: 'initialize',
+            params: [relayHub]
+          }));
 
-            if (txReceipt.status) {
-              _context.next = 20;
-              break;
-            }
+        case 15:
+          txReceipt = _context.sent;
 
-            throw new Error("ProfileFactory initialization failed");
+          if (txReceipt.status) {
+            _context.next = 20;
+            break;
+          }
 
-          case 20:
-            console.log("Activated GSN for ProfileFactory instance for RelayHub ".concat(relayHub, "..."));
+          throw new Error("ProfileFactory initialization failed");
 
-          case 21:
-            _context.next = 23;
-            return fundRecipient(web3, {
-              from: from,
-              recipient: contractAddr,
-              relayHub: relayHub,
-              amountInPht: factoryFundingInPht
-            });
+        case 20:
+          console.log("Activated GSN for ProfileFactory instance for RelayHub ".concat(relayHub, "..."));
 
-          case 23:
-            console.log("Recipient ".concat(contractAddr, " is sponsored by relayHub with ").concat(factoryFundingInPht, " PHTs...")); // Step 4: Top up factory contract to fund new profile deployments
+        case 21:
+          _context.next = 23;
+          return regeneratorRuntime.awrap(fundRecipient(web3, {
+            from: from,
+            recipient: contractAddr,
+            relayHub: relayHub,
+            amountInPht: factoryFundingInPht
+          }));
 
-            _context.next = 26;
-            return Web3Wrapper.sendTransaction(web3, {
-              from: from,
-              to: contractAddr,
-              valueInPht: faucetFundingInPht
-            });
+        case 23:
+          console.log("Recipient ".concat(contractAddr, " is sponsored by relayHub with ").concat(factoryFundingInPht, " PHTs...")); // Step 4: Top up factory contract to fund new profile deployments
 
-          case 26:
-            console.log("Topped up ProfileFactory with ".concat(faucetFundingInPht, " PHTs to fund new profile creations..."));
-            return _context.abrupt("return", contractAddr);
+          _context.next = 26;
+          return regeneratorRuntime.awrap(Web3Wrapper.sendTransaction(web3, {
+            from: from,
+            to: contractAddr,
+            valueInPht: faucetFundingInPht
+          }));
 
-          case 28:
-          case "end":
-            return _context.stop();
-        }
+        case 26:
+          console.log("Topped up ProfileFactory with ".concat(faucetFundingInPht, " PHTs to fund new profile creations..."));
+          return _context.abrupt("return", contractAddr);
+
+        case 28:
+        case "end":
+          return _context.stop();
       }
-    }, _callee);
-  }));
+    }
+  });
+};
 
-  return function (_x, _x2) {
-    return _ref2.apply(this, arguments);
-  };
-}();
+module.exports.deployProfileByFactory = function _callee2(web3, _ref2) {
+  var from, contractAddr, useGSN, txReceipt;
+  return regeneratorRuntime.async(function _callee2$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          from = _ref2.from, contractAddr = _ref2.contractAddr, useGSN = _ref2.useGSN;
+          _context2.next = 3;
+          return regeneratorRuntime.awrap(Web3Wrapper.contractSendTx(web3, {
+            to: contractAddr,
+            from: from,
+            useGSN: useGSN || false,
+            abi: factoryScJSON.abi,
+            method: 'newProfile',
+            params: [from]
+          }));
 
-module.exports.deployProfileByFactory =
-/*#__PURE__*/
-function () {
-  var _ref4 = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(web3, _ref3) {
-    var from, contractAddr, useGSN, txReceipt;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            from = _ref3.from, contractAddr = _ref3.contractAddr, useGSN = _ref3.useGSN;
-            _context2.next = 3;
-            return Web3Wrapper.contractSendTx(web3, {
-              to: contractAddr,
-              from: from,
-              useGSN: useGSN || false,
-              abi: factoryScJSON.abi,
-              method: 'newProfile',
-              params: [from]
-            });
+        case 3:
+          txReceipt = _context2.sent;
+          return _context2.abrupt("return", txReceipt.events['NewProfile'].returnValues['addr']);
 
-          case 3:
-            txReceipt = _context2.sent;
-            return _context2.abrupt("return", txReceipt.events['NewProfile'].returnValues['addr']);
-
-          case 5:
-          case "end":
-            return _context2.stop();
-        }
+        case 5:
+        case "end":
+          return _context2.stop();
       }
-    }, _callee2);
-  }));
+    }
+  });
+};
 
-  return function (_x3, _x4) {
-    return _ref4.apply(this, arguments);
-  };
-}();
+module.exports.addOwner = function _callee3(web3, _ref3) {
+  var from, contractAddr, useGSN, ownerAddr;
+  return regeneratorRuntime.async(function _callee3$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          from = _ref3.from, contractAddr = _ref3.contractAddr, useGSN = _ref3.useGSN, ownerAddr = _ref3.ownerAddr;
+          return _context3.abrupt("return", Web3Wrapper.contractSendTx(web3, {
+            to: contractAddr,
+            from: from,
+            useGSN: useGSN || false,
+            abi: profileScJSON.abi,
+            method: 'addOwner',
+            params: [ownerAddr]
+          }));
 
-module.exports.addOwner =
-/*#__PURE__*/
-function () {
-  var _ref6 = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3(web3, _ref5) {
-    var from, contractAddr, useGSN, ownerAddr;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            from = _ref5.from, contractAddr = _ref5.contractAddr, useGSN = _ref5.useGSN, ownerAddr = _ref5.ownerAddr;
-            return _context3.abrupt("return", Web3Wrapper.contractSendTx(web3, {
-              to: contractAddr,
-              from: from,
-              useGSN: useGSN || false,
-              abi: profileScJSON.abi,
-              method: 'addOwner',
-              params: [ownerAddr]
-            }));
-
-          case 2:
-          case "end":
-            return _context3.stop();
-        }
+        case 2:
+        case "end":
+          return _context3.stop();
       }
-    }, _callee3);
-  }));
+    }
+  });
+};
 
-  return function (_x5, _x6) {
-    return _ref6.apply(this, arguments);
-  };
-}();
+module.exports.recover = function _callee4(web3, contractAddr, _ref4) {
+  var from, newOwner, useGSN;
+  return regeneratorRuntime.async(function _callee4$(_context4) {
+    while (1) {
+      switch (_context4.prev = _context4.next) {
+        case 0:
+          from = _ref4.from, newOwner = _ref4.newOwner, useGSN = _ref4.useGSN;
 
-module.exports.recover =
-/*#__PURE__*/
-function () {
-  var _ref8 = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee4(web3, contractAddr, _ref7) {
-    var from, newOwner, useGSN;
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            from = _ref7.from, newOwner = _ref7.newOwner, useGSN = _ref7.useGSN;
+          if (!(!newOwner && !from)) {
+            _context4.next = 3;
+            break;
+          }
 
-            if (!(!newOwner && !from)) {
-              _context4.next = 3;
-              break;
-            }
+          throw new Error("Missing mandatory call params");
 
-            throw new Error("Missing mandatory call params");
+        case 3:
+          return _context4.abrupt("return", Web3Wrapper.contractSendTx(web3, {
+            to: contractAddr,
+            from: from,
+            useGSN: useGSN || false,
+            method: 'recover',
+            abi: profileScJSON.abi,
+            params: [newOwner]
+          }));
 
-          case 3:
-            return _context4.abrupt("return", Web3Wrapper.contractSendTx(web3, {
-              to: contractAddr,
-              from: from,
-              useGSN: useGSN || false,
-              method: 'recover',
-              abi: profileScJSON.abi,
-              params: [newOwner]
-            }));
-
-          case 4:
-          case "end":
-            return _context4.stop();
-        }
+        case 4:
+        case "end":
+          return _context4.stop();
       }
-    }, _callee4);
-  }));
+    }
+  });
+};
 
-  return function (_x7, _x8, _x9) {
-    return _ref8.apply(this, arguments);
-  };
-}();
+module.exports.getFiles = function (web3, _ref5) {
+  var contractAddr = _ref5.contractAddr;
+  return Web3Wrapper.contractCall(web3, {
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'getFiles'
+  }).then(function (files) {
+    return files.map(function (f) {
+      // [18,32] Correspond to the removed cidPrefix 'Qm'
+      var arrayBuffer = [18, 32].concat(_toConsumableArray(Web3Wrapper.utils.hexToBytes(f)));
+      var cidObj = new CID(Web3Wrapper.utils.toBuffer(arrayBuffer));
+      return cidObj.toString();
+    });
+  });
+};
+
+module.exports.getFileAcl = function (web3, _ref6) {
+  var contractAddr = _ref6.contractAddr,
+      cid = _ref6.cid;
+
+  if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
+    throw new Error('Invalid cid value');
+  }
+
+  var cidObj = new CID(cid);
+  return Web3Wrapper.contractCall(web3, {
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'getFileAcl',
+    params: [cidObj.multihash.slice(2)]
+  });
+};
+
+module.exports.addFile = function (web3, _ref7) {
+  var from = _ref7.from,
+      contractAddr = _ref7.contractAddr,
+      cid = _ref7.cid,
+      acl = _ref7.acl;
+
+  if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
+    throw new Error('Invalid cid value');
+  }
+
+  var cidObj = new CID(cid);
+  return Web3Wrapper.contractSendTx(web3, {
+    from: from,
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'addFile',
+    params: [cidObj.multihash.slice(2), acl]
+  });
+};
