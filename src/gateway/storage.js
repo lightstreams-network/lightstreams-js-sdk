@@ -7,6 +7,7 @@
 const ADD_FILE_PATH = `/storage/add`;
 const ADD_FILE_WITH_ACL_PATH = `/storage/add-with-acl`;
 const FETCH_FILE_PATH = `/storage/fetch`;
+const META_PATH = `/storage/meta`;
 
 const request = require('../http/request');
 
@@ -50,6 +51,23 @@ module.exports = (gwDomain) => ({
   },
 
   /**
+   * Update distributed file content and link it to previous version
+   * @param owner {string} Address of the owner of the file
+   * @param file {ReadableStream|File} File to add
+   * @returns {StreamResponse<{ meta, acl }>} | {<{ meta, acl }>}
+   */
+  update: (owner, file) => {
+    if (typeof File !== 'undefined' && file instanceof File) {
+      const reader = new FileReader();
+      const fileBlob = file.slice(0, file.size);
+      reader.readAsBinaryString(fileBlob)
+    }
+    return request.postFile(`${gwDomain}${ADD_FILE_PATH}`, {
+      owner,
+    }, file);
+  },
+
+  /**
    * Fetch file from distributed storage
    * @param meta {string} Unique identifier of stored file
    * @param token {string} Account authentication token
@@ -61,6 +79,21 @@ module.exports = (gwDomain) => ({
       token
     }, {
       stream,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+  },
+
+  /**
+   * Fetch metadata information about distributed file
+   * @param meta {string} Unique identifier of stored file
+   * @returns {Promise<{ filename, owner, ext, hash, acl, acl, prev_meta_hash }>}
+   */
+  meta: (meta) => {
+    return request.get(`${gwDomain}${META_PATH}`, {
+      meta
+    }, {
       headers: {
         'Content-Type': 'application/json'
       }
