@@ -119,6 +119,14 @@ module.exports.recover = async (web3, contractAddr, { from, newOwner, useGSN }) 
   })
 };
 
+module.exports.getOwners = (web3, { contractAddr }) => {
+  return Web3Wrapper.contractCall(web3, {
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'getOwners',
+  });
+};
+
 module.exports.getFiles = (web3, { contractAddr }) => {
   return Web3Wrapper.contractCall(web3, {
     to: contractAddr,
