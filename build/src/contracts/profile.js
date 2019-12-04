@@ -28,6 +28,25 @@ var profileScJSON = require('../../build/contracts/GSNProfile.json');
 var cidPrefix = 'Qm';
 var cidLength = 46;
 
+function convertHexToCid(hexValue) {
+  // [18,32] Correspond to the removed cidPrefix 'Qm'
+  var arrayBuffer = [18, 32].concat(_toConsumableArray(Web3Wrapper.utils.hexToBytes(hexValue)));
+  var cidObj = new CID(Web3Wrapper.utils.toBuffer(arrayBuffer));
+  return cidObj.toString();
+}
+
+function convertCidToBytes32(cid) {
+  if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
+    throw new Error('Invalid cid value');
+  }
+
+  var cidObj = new CID(cid);
+  return cidObj.multihash.slice(2).toJSON().data;
+}
+
+module.exports.convertHexToCid = convertHexToCid;
+module.exports.convertCidToBytes32 = convertCidToBytes32;
+
 module.exports.initializeProfileFactory = function _callee(web3, _ref) {
   var contractAddr, relayHub, from, factoryFundingInPht, faucetFundingInPht, isRelayHub, txReceipt;
   return regeneratorRuntime.async(function _callee$(_context) {
@@ -210,55 +229,74 @@ module.exports.recover = function _callee4(web3, contractAddr, _ref4) {
   });
 };
 
-module.exports.getFiles = function (web3, _ref5) {
+module.exports.getOwners = function (web3, _ref5) {
   var contractAddr = _ref5.contractAddr;
+  return Web3Wrapper.contractCall(web3, {
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'getOwners'
+  }).then(function (owners) {
+    return owners.map(function (addr) {
+      return addr.toLowerCase();
+    });
+  });
+};
+
+module.exports.getFiles = function (web3, _ref6) {
+  var contractAddr = _ref6.contractAddr;
   return Web3Wrapper.contractCall(web3, {
     to: contractAddr,
     abi: profileScJSON.abi,
     method: 'getFiles'
   }).then(function (files) {
-    return files.map(function (f) {
-      // [18,32] Correspond to the removed cidPrefix 'Qm'
-      var arrayBuffer = [18, 32].concat(_toConsumableArray(Web3Wrapper.utils.hexToBytes(f)));
-      var cidObj = new CID(Web3Wrapper.utils.toBuffer(arrayBuffer));
-      return cidObj.toString();
-    });
+    return files.map(convertHexToCid);
   });
 };
 
-module.exports.getFileAcl = function (web3, _ref6) {
-  var contractAddr = _ref6.contractAddr,
-      cid = _ref6.cid;
-
-  if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
-    throw new Error('Invalid cid value');
-  }
-
-  var cidObj = new CID(cid);
+module.exports.getFileAcl = function (web3, _ref7) {
+  var contractAddr = _ref7.contractAddr,
+      cid = _ref7.cid;
   return Web3Wrapper.contractCall(web3, {
     to: contractAddr,
     abi: profileScJSON.abi,
     method: 'getFileAcl',
-    params: [cidObj.multihash.slice(2)]
+    params: [convertCidToBytes32(cid)]
   });
 };
 
-module.exports.addFile = function (web3, _ref7) {
-  var from = _ref7.from,
-      contractAddr = _ref7.contractAddr,
-      cid = _ref7.cid,
-      acl = _ref7.acl;
+module.exports.addFile = function (web3, _ref8) {
+  var from = _ref8.from,
+      contractAddr = _ref8.contractAddr,
+      cid = _ref8.cid,
+      acl = _ref8.acl;
 
   if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
     throw new Error('Invalid cid value');
   }
 
-  var cidObj = new CID(cid);
   return Web3Wrapper.contractSendTx(web3, {
     from: from,
     to: contractAddr,
     abi: profileScJSON.abi,
     method: 'addFile',
-    params: [cidObj.multihash.slice(2), acl]
+    params: [convertCidToBytes32(cid), acl]
+  });
+};
+
+module.exports.removeFile = function (web3, _ref9) {
+  var from = _ref9.from,
+      contractAddr = _ref9.contractAddr,
+      cid = _ref9.cid;
+
+  if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
+    throw new Error('Invalid cid value');
+  }
+
+  return Web3Wrapper.contractSendTx(web3, {
+    from: from,
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'removeFile',
+    params: [convertCidToBytes32(cid)]
   });
 };
