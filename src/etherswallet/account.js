@@ -70,6 +70,18 @@ module.exports.newAccount = (encryptedJson, decryptedWallet = null) => {
       const signedMsg = ethUtil.bufferToHex(concatSig(sig.v, sig.r, sig.s));
       cb(null, signedMsg);
     },
+    sign: ({ msg, chainId }, cb) => {
+      if (!wallet) throw new Error(`Account ${encryptedJson.address} is locked`);
+
+      const msgHash = ethUtil.keccak256(msg);
+      const msgHashBuffer = ethUtil.toBuffer(msgHash);
+
+      const sig = ethUtil.ecsign(msgHashBuffer, ethUtil.toBuffer(wallet.privateKey));
+      const sigHash = ethUtil.toRpcSig(sig.v, sig.r, sig.s, chainId).toString('hex');
+
+      cb(null, sigHash);
+    },
+
     address: ethUtil.addHexPrefix(encryptedJson.address).toLowerCase()
   }
 };

@@ -68,6 +68,16 @@ module.exports.isAccountLocked = (web3, { address }) => {
   return web3.currentProvider.isAccountLocked(address);
 };
 
+module.exports.sign = (web3, { msg, chainId, address }, cb) => {
+  if (typeof web3.currentProvider._getAccount !== 'function') {
+    throw new Error(`Not supported method`)
+  }
+
+  const account = web3.currentProvider._getAccount(address);
+
+  return account.sign({ msg, chainId }, cb)
+};
+
 module.exports.exportMnemonic = (web3, { address }) => {
   if (typeof web3.currentProvider._getAccount !== 'function') {
     throw new Error(`Not supported method`)

@@ -157,6 +157,19 @@ module.exports.getBalance = (web3, { address }) => {
   })
 };
 
+module.exports.getBlockNumber = (web3) => {
+  return new Promise(async (resolve, reject) => {
+    if (!isLatest(web3)) reject(new Error('Web3 version is not valid'));
+
+    try {
+      const number = await web3.eth.getBlockNumber();
+      resolve(number);
+    } catch (err) {
+      reject(err)
+    }
+  });
+};
+
 module.exports.networkVersion = (web3) => {
   return new Promise((resolve, reject) => {
     if (!isLatest(web3)) reject(new Error('Web3 version is not valid'));

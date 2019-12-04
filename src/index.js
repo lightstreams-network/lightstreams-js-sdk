@@ -34,6 +34,8 @@ module.exports.ENS = {
 
 module.exports.GSN = require('./gsn');
 
+module.exports.Token = require('./token');
+
 module.exports.EthersWallet = {
   Keystore: require('./etherswallet/keystore'),
   Account: require('./etherswallet/account'),
