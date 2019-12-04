@@ -13,6 +13,24 @@ const profileScJSON = require('../../build/contracts/GSNProfile.json');
 const cidPrefix = 'Qm';
 const cidLength = 46;
 
+function convertHexToCid(hexValue) {
+  // [18,32] Correspond to the removed cidPrefix 'Qm'
+  const arrayBuffer = [...[18, 32], ...Web3Wrapper.utils.hexToBytes(hexValue)];
+  const cidObj = new CID(Web3Wrapper.utils.toBuffer(arrayBuffer));
+  return cidObj.toString();
+}
+
+function convertCidToBytes32(cid) {
+  if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
+    throw new Error('Invalid cid value');
+  }
+  const cidObj = new CID(cid);
+  return cidObj.multihash.slice(2).toJSON().data;
+}
+
+module.exports.convertHexToCid = convertHexToCid;
+module.exports.convertCidToBytes32 = convertCidToBytes32;
+
 module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub, from, factoryFundingInPht, faucetFundingInPht }) => {
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("relayHub", relayHub);
@@ -107,26 +125,16 @@ module.exports.getFiles = (web3, { contractAddr }) => {
     abi: profileScJSON.abi,
     method: 'getFiles',
   }).then((files) => {
-    return files.map(f => {
-      // [18,32] Correspond to the removed cidPrefix 'Qm'
-      const arrayBuffer = [...[18, 32], ...Web3Wrapper.utils.hexToBytes(f)];
-      const cidObj = new CID(Web3Wrapper.utils.toBuffer(arrayBuffer));
-      return cidObj.toString();
-    })
+    return files.map(convertHexToCid);
   });
 };
 
 module.exports.getFileAcl = (web3, { contractAddr, cid }) => {
-  if(cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
-    throw new Error('Invalid cid value');
-  }
-
-  const cidObj = new CID(cid);
   return Web3Wrapper.contractCall(web3, {
     to: contractAddr,
     abi: profileScJSON.abi,
     method: 'getFileAcl',
-    params: [cidObj.multihash.slice(2)]
+    params: [convertCidToBytes32(cid)]
   });
 };
 
@@ -135,12 +143,11 @@ module.exports.addFile = (web3, { from, contractAddr, cid, acl }) => {
     throw new Error('Invalid cid value');
   }
 
-  const cidObj = new CID(cid);
   return Web3Wrapper.contractSendTx(web3, {
     from: from,
     to: contractAddr,
     abi: profileScJSON.abi,
     method: 'addFile',
-    params: [cidObj.multihash.slice(2), acl]
+    params: [convertCidToBytes32(cid), acl]
   });
 };
