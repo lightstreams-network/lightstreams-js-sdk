@@ -124,6 +124,8 @@ module.exports.getOwners = (web3, { contractAddr }) => {
     to: contractAddr,
     abi: profileScJSON.abi,
     method: 'getOwners',
+  }).then(owners => {
+    return owners.map(addr => addr.toLowerCase())
   });
 };
 
@@ -157,5 +159,19 @@ module.exports.addFile = (web3, { from, contractAddr, cid, acl }) => {
     abi: profileScJSON.abi,
     method: 'addFile',
     params: [convertCidToBytes32(cid), acl]
+  });
+};
+
+module.exports.removeFile = (web3, { from, contractAddr, cid }) => {
+  if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
+    throw new Error('Invalid cid value');
+  }
+
+  return Web3Wrapper.contractSendTx(web3, {
+    from: from,
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'removeFile',
+    params: [convertCidToBytes32(cid)]
   });
 };
