@@ -17,8 +17,6 @@ var inherits = require('util').inherits;
 
 var Subprovider = require('web3-provider-engine/subproviders/subprovider');
 
-var RelayClient = require('@openzeppelin/gsn-provider/src/tabookey-gasless/RelayClient');
-
 var _require = require('@openzeppelin/gsn-provider/src/utils'),
     callAsJsonRpc = _require.callAsJsonRpc,
     fixTransactionReceiptResponse = _require.fixTransactionReceiptResponse;
@@ -27,6 +25,9 @@ var Web3 = require('../../web3');
 
 function GsnSubprovider(provider, opts) {
   var web3 = Web3.newEngine(provider);
+
+  var RelayClient = require('@openzeppelin/gsn-provider/src/tabookey-gasless/RelayClient');
+
   this.relayClient = new RelayClient(web3, _objectSpread({}, opts));
   this.jsonRpcSend = opts.jsonRpcSend ? opts.jsonRpcSend : mustProvideInConstructor('jsonRpcSend');
   this.options = opts;
