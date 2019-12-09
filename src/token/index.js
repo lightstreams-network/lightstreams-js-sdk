@@ -21,7 +21,7 @@ module.exports.generateAuthToken = async (web3, { address, tokenBlocksLifespan }
 
       const marshalledClaims = JSON.stringify(claims);
 
-      Web3Wrapper.keystore.sign(web3, { msg: marshalledClaims, address }, (err, signedMsg) => {
+      Web3Wrapper.keystore.signAuthToken(web3, { msg: marshalledClaims, address }, (err, signedMsg) => {
         let marshalledClaimsHexBuffer = new Buffer(marshalledClaims, 'ascii');
         let encodedClaimsBase64 = marshalledClaimsHexBuffer.toString('base64');
 
