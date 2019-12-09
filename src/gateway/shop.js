@@ -17,7 +17,7 @@ module.exports = (gwDomain) => ({
    * @param password The password that unlocks the from account
    * @returns {Promise<{ shop }>} Shop contract address
    */
-  initialize: (from, password) => {
+  create: (from, password) => {
     return request.post(`${gwDomain}${CREATE_SHOP_PATH}`, {
       from,
       password,
