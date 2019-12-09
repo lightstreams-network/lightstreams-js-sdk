@@ -21,7 +21,7 @@ module.exports = (gwApi) => {
 
     try {
       const attrs = extractRequestAttrs(req, query);
-      const { shop } = await gwApi.shop.initialize(attrs.from, attrs.password);
+      const { shop } = await gwApi.shop.create(attrs.from, attrs.password);
       res.send(JsonResponse({ shop }));
     } catch ( err ) {
       next(err);
