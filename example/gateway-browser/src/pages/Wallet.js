@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 
-import { Web3, EthersWallet as EW, ENS, Web3Provider } from 'lightstreams-js-sdk';
+import { Web3, EthersWallet as EW, ENS, Web3Provider, Token } from 'lightstreams-js-sdk';
 
 export default class WalletPage extends Component {
 
@@ -21,7 +21,9 @@ export default class WalletPage extends Component {
       address: null,
       web3: null,
       ensAddress: '',
-      resolverAddress: ''
+      resolverAddress: '',
+      authToken: '',
+      error: ''
     };
   }
 
@@ -56,10 +58,28 @@ export default class WalletPage extends Component {
     }
   };
 
+  generateAuthToken = async () => {
+    const { web3, address } = this.state;
+    try {
+      const token = await Token.generateAuthToken(web3, { address, tokenBlocksLifespan: 10000 });
+
+      this.setState({ authToken: token });
+    } catch (err) {
+      console.log(err)
+      this.displayError(err);
+    }
+  };
+
+  displayError = (error) => {
+    this.setState({ error: error });
+  };
+
   render() {
     const { seed, password, tld } = this.state;
     return (
       <div>
+        <h2 style={{color: "red"}}>{this.state.error}</h2>
+
         <h2>ENS Test</h2>
         <h3>Step 1: Create account</h3>
         <label>Seed:
@@ -95,6 +115,14 @@ export default class WalletPage extends Component {
         </label>
         <br/>
         <button onClick={() => this.registryTld(this.state.tld)}>Registry TLD</button>
+
+        <br/>
+        <h3>Step 3: Generate Leth auth token</h3>
+        <textarea value={this.state.authToken} rows="12" cols="50"/>
+        <br/>
+        <button onClick={() => this.generateAuthToken()}>Generate</button>
+
+        <br/>
       </div>
     )
   }
