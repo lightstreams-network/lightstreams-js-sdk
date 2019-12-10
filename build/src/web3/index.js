@@ -303,6 +303,38 @@ module.exports.getBalance = function (web3, _ref6) {
   });
 };
 
+module.exports.getBlockNumber = function (web3) {
+  return new Promise(function _callee5(resolve, reject) {
+    var number;
+    return regeneratorRuntime.async(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            if (!isLatest(web3)) reject(new Error('Web3 version is not valid'));
+            _context5.prev = 1;
+            _context5.next = 4;
+            return regeneratorRuntime.awrap(web3.eth.getBlockNumber());
+
+          case 4:
+            number = _context5.sent;
+            resolve(number);
+            _context5.next = 11;
+            break;
+
+          case 8:
+            _context5.prev = 8;
+            _context5.t0 = _context5["catch"](1);
+            reject(_context5.t0);
+
+          case 11:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, null, null, [[1, 8]]);
+  });
+};
+
 module.exports.networkVersion = function (web3) {
   return new Promise(function (resolve, reject) {
     if (!isLatest(web3)) reject(new Error('Web3 version is not valid'));

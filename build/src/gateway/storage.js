@@ -6,11 +6,10 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 var ADD_FILE_PATH = "/storage/add";
+var UPDATE_FILE_PATH = "/storage/update";
 var ADD_FILE_WITH_ACL_PATH = "/storage/add-with-acl";
 var FETCH_FILE_PATH = "/storage/fetch";
 var META_PATH = "/storage/meta";
-
-var request = require('../http/request');
 
 module.exports = function (gwDomain) {
   return {
@@ -57,17 +56,19 @@ module.exports = function (gwDomain) {
     /**
      * Update distributed file content and link it to previous version
      * @param owner {string} Address of the owner of the file
+     * @param meta {string} Unique identifier of stored file
      * @param file {ReadableStream|File} File to add
      * @returns {StreamResponse<{ meta, acl }>} | {<{ meta, acl }>}
      */
-    update: function update(owner, file) {
+    update: function update(owner, meta, file) {
       if (typeof File !== 'undefined' && file instanceof File) {
         var reader = new FileReader();
         var fileBlob = file.slice(0, file.size);
         reader.readAsBinaryString(fileBlob);
       }
 
-      return request.postFile("".concat(gwDomain).concat(ADD_FILE_PATH), {
+      return request.postFile("".concat(gwDomain).concat(UPDATE_FILE_PATH), {
+        meta: meta,
         owner: owner
       }, file);
     },
@@ -76,6 +77,7 @@ module.exports = function (gwDomain) {
      * Fetch file from distributed storage
      * @param meta {string} Unique identifier of stored file
      * @param token {string} Account authentication token
+     * @param stream {boolean} Response to be streamed or not
      * @returns {StreamResponse<**CONTENT_FILE**>} || <**CONTENT_FILE**>
      */
     fetch: function fetch(meta, token, stream) {

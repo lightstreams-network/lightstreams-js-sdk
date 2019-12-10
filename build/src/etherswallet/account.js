@@ -69,6 +69,15 @@ module.exports.newAccount = function (encryptedJson) {
       var signedMsg = ethUtil.bufferToHex(concatSig(sig.v, sig.r, sig.s));
       cb(null, signedMsg);
     },
+    signAuthToken: function signAuthToken(_ref2, cb) {
+      var msg = _ref2.msg;
+      if (!wallet) throw new Error("Account ".concat(encryptedJson.address, " is locked"));
+      var msgHash = ethUtil.keccak256(msg);
+      var msgHashBuffer = ethUtil.toBuffer(msgHash);
+      var sig = ethUtil.ecsign(msgHashBuffer, ethUtil.toBuffer(wallet.privateKey));
+      var sigHash = ethUtil.toRpcSig(sig.v, sig.r, sig.s).toString('hex');
+      cb(null, sigHash);
+    },
     address: ethUtil.addHexPrefix(encryptedJson.address).toLowerCase()
   };
 };

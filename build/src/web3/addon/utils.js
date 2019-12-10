@@ -22,6 +22,18 @@ module.exports.sha3 = function (text) {
   return web3Utils.sha3(text);
 };
 
+module.exports.keccak256 = function (text) {
+  return web3Utils.keccak256(text);
+};
+
+module.exports.ecsign = function (text) {
+  return web3Utils.ecsign(text);
+};
+
+module.exports.hexToBytes = function (value) {
+  return web3Utils.hexToBytes(value);
+};
+
 module.exports.toPht = function (wei) {
   return web3Utils.fromWei(wei, 'ether');
 };
@@ -44,6 +56,10 @@ module.exports.toHex = function (value) {
 
 module.exports.toAscii = function (value) {
   return web3Utils.hexToAscii(value);
+};
+
+module.exports.stripHexPrefix = function (value) {
+  return ethUtil.stripHexPrefix(value);
 };
 
 module.exports.toUtf8 = function (value) {
