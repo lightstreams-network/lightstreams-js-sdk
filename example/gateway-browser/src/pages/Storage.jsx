@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import { Web3, Gateway as useGateway, Storage } from 'lightstreams-js-sdk'
+import { Web3, Gateway as useGateway, Leth } from 'lightstreams-js-sdk'
 
 class SimpleReactFileUpload extends Component {
   constructor(props) {
@@ -31,7 +31,7 @@ class SimpleReactFileUpload extends Component {
 
     const { web3, owner, file } = this.state;
 
-    Storage.add(web3, this.gateway.storage, {from: owner, owner, file, isPublic: false})
+    Leth.Storage.add(web3, this.gateway.storage, {from: owner, owner, file, isPublic: false})
       .then((res) => {
         this.setState({ meta: res.meta, acl: res.acl });
       })
