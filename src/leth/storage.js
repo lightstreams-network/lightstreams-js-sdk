@@ -7,6 +7,7 @@
 const Web3Wrapper = require('../web3');
 
 const aclSc = require('../../build/contracts/ACL.json');
+const acl = require('./acl');
 
 /**
  * Uploads a new file into Smart Vault.
@@ -22,16 +23,7 @@ module.exports.add = async (web3, gatewayStorage, { from, owner, file, isPublic 
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("owner", owner);
 
-  const receipt = await Web3Wrapper.deployContract(
-    web3,
-    {
-      from,
-      useGSN: false,
-      abi: aclSc.abi,
-      bytecode: aclSc.bytecode,
-      params: [owner, isPublic]
-    }
-  );
+  const receipt = await acl.create(web3, {from, owner, isPublic});
 
   return await gatewayStorage.addWithAcl(owner, receipt.contractAddress, file);
 };

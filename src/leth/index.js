@@ -2,5 +2,6 @@
 
 module.exports.Leth = {
   token: require('./token'),
-  storage: require('./storage')
+  storage: require('./storage'),
+  acl: require('./acl')
 };
