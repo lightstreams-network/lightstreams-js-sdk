@@ -11,6 +11,8 @@ var ADD_FILE_WITH_ACL_PATH = "/storage/add-with-acl";
 var FETCH_FILE_PATH = "/storage/fetch";
 var META_PATH = "/storage/meta";
 
+var request = require('../http/request');
+
 module.exports = function (gwDomain) {
   return {
     /**

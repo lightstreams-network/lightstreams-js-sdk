@@ -10,6 +10,8 @@ const ADD_FILE_WITH_ACL_PATH = `/storage/add-with-acl`;
 const FETCH_FILE_PATH = `/storage/fetch`;
 const META_PATH = `/storage/meta`;
 
+const request = require('../http/request');
+
 module.exports = (gwDomain) => ({
   /**
    * Uploaded new file into distributed storage
