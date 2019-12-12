@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 
-import { Web3, EthersWallet as EW, ENS, Web3Provider, Token } from 'lightstreams-js-sdk';
+import { Web3, EthersWallet as EW, ENS, Web3Provider, Leth } from 'lightstreams-js-sdk';
 
 export default class WalletPage extends Component {
 
@@ -61,7 +61,7 @@ export default class WalletPage extends Component {
   generateAuthToken = async () => {
     const { web3, address } = this.state;
     try {
-      const token = await Token.generateAuthToken(web3, { address, tokenBlocksLifespan: 10000 });
+      const token = await Leth.Token.generateAuthToken(web3, { address, tokenBlocksLifespan: 10000 });
 
       this.setState({ authToken: token });
     } catch (err) {
