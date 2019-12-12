@@ -185,7 +185,7 @@ class SimpleReactFileUpload extends Component {
             <button type="submit" onClick={this.onACLGrantRead}>Grant read</button>
             <button type="submit" onClick={this.onACLGrantWrite}>Grant write</button>
             <button type="submit" onClick={this.onACLGrantAdmin}>Grant admin</button>
-            <button type="submit" onClick={this.onACLRevokeAccess}>Revoke read</button>
+            <button type="submit" onClick={this.onACLRevokeAccess}>Revoke access</button>
             <button type="submit" onClick={this.onACLGrantPublicAccess}>Grant public access</button>
             <button type="submit" onClick={this.onACLRevokePublicAccess}>Revoke public access</button>
             <button type="submit" onClick={this.onHasRead}>Has account Read Access?</button>
