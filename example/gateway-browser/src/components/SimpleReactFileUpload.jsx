@@ -13,8 +13,8 @@ class SimpleReactFileUpload extends Component {
     super(props);
     this.state = { file: null, owner: '', password: '' };
     this.gateway = useGateway(process.env.GATEWAY_DOMAIN || 'https://gateway.sirius.lightstreams.io');
-    this.onFormSubmit = this.onFormSubmit.bind(this);
-    this.onChange = this.onChange.bind(this)
+    this.onStorageFormSubmit = this.onFormSubmit.bind(this);
+    this.onStorageFormFileChange = this.onChange.bind(this)
   }
 
   onFormSubmit(e) {
