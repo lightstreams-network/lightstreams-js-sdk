@@ -6,8 +6,10 @@
  * Copyright 2019 (c) Lightstreams, Palma
  */
 var ADD_FILE_PATH = "/storage/add";
+var ADD_RAW_PATH = "/storage/add-raw";
 var UPDATE_FILE_PATH = "/storage/update";
 var ADD_FILE_WITH_ACL_PATH = "/storage/add-with-acl";
+var ADD_RAW_WITH_ACL_PATH = "/storage/add-raw-with-acl";
 var FETCH_FILE_PATH = "/storage/fetch";
 var META_PATH = "/storage/meta";
 
@@ -38,6 +40,29 @@ module.exports = function (gwDomain) {
     /**
      * Uploaded new file into distributed storage
      * @param owner {string} Address of the owner of the file
+     * @param password {string} The password that unlocks the owner
+     * @param data {Blob} File content in blob object
+     * @param ext {string} Content extension format. For example: '.json', '.png'..
+     * @returns { meta, acl }
+     */
+    addRaw: function addRaw(owner, password, data, ext) {
+      if (!data instanceof Blob) {
+        throw new Exception("Argument \"data\" must be a Blob");
+      }
+
+      return data.text().then(function (rawData) {
+        return request.post("".concat(gwDomain).concat(ADD_RAW_PATH), {
+          owner: owner,
+          password: password,
+          data: rawData,
+          ext: ext
+        });
+      });
+    },
+
+    /**
+     * Uploaded new file into distributed storage
+     * @param owner {string} Address of the owner of the file
      * @param acl {string} Address to acl contract
      * @param file {ReadableStream|File} File to add
      * @returns {StreamResponse<{ meta, acl }>} | {<{ meta, acl }>}
@@ -53,6 +78,29 @@ module.exports = function (gwDomain) {
         owner: owner,
         acl: acl
       }, file);
+    },
+
+    /**
+     * Uploaded new file into distributed storage
+     * @param owner {string} Address of the owner of the file
+     * @param acl {string} {string} Address to acl contract
+     * @param data {Blob} File content in blob object
+     * @param ext {string} Content extension format. For example: '.json', '.png'..
+     * @returns { meta, acl }
+     */
+    addRawWithAcl: function addRawWithAcl(owner, acl, data, ext) {
+      if (!data instanceof Blob) {
+        throw new Exception("Argument \"data\" must be a Blob");
+      }
+
+      return data.text().then(function (rawData) {
+        return request.post("".concat(gwDomain).concat(ADD_RAW_WITH_ACL_PATH), {
+          owner: owner,
+          acl: acl,
+          data: rawData,
+          ext: ext
+        });
+      });
     },
 
     /**
@@ -92,6 +140,19 @@ module.exports = function (gwDomain) {
           'Content-Type': 'application/json'
         }
       });
+    },
+
+    /**
+     * Fetch file from distributed storage
+     * @param meta {string} Unique identifier of stored file
+     * @param token {string} Account authentication token
+     */
+    fetchUrl: function fetchUrl(meta, token) {
+      if (!token) {
+        return "".concat(gwDomain).concat(FETCH_FILE_PATH, "?meta=").concat(meta);
+      }
+
+      return "".concat(gwDomain).concat(FETCH_FILE_PATH, "?meta=").concat(meta, "&token=").concat(encodeURI(token));
     },
 
     /**

@@ -5,8 +5,10 @@
  */
 
 const ADD_FILE_PATH = `/storage/add`;
+const ADD_RAW_PATH = `/storage/add-raw`;
 const UPDATE_FILE_PATH = `/storage/update`;
 const ADD_FILE_WITH_ACL_PATH = `/storage/add-with-acl`;
+const ADD_RAW_WITH_ACL_PATH = `/storage/add-raw-with-acl`;
 const FETCH_FILE_PATH = `/storage/fetch`;
 const META_PATH = `/storage/meta`;
 
@@ -35,6 +37,29 @@ module.exports = (gwDomain) => ({
   /**
    * Uploaded new file into distributed storage
    * @param owner {string} Address of the owner of the file
+   * @param password {string} The password that unlocks the owner
+   * @param data {Blob} File content in blob object
+   * @param ext {string} Content extension format. For example: '.json', '.png'..
+   * @returns { meta, acl }
+   */
+  addRaw: (owner, password, data, ext) => {
+    if(!data instanceof Blob) {
+      throw new Exception(`Argument "data" must be a Blob`);
+    }
+
+    return data.text().then(rawData => {
+      return request.post(`${gwDomain}${ADD_RAW_PATH}`, {
+        owner,
+        password,
+        data: rawData,
+        ext: ext
+      });
+    });
+  },
+
+  /**
+   * Uploaded new file into distributed storage
+   * @param owner {string} Address of the owner of the file
    * @param acl {string} Address to acl contract
    * @param file {ReadableStream|File} File to add
    * @returns {StreamResponse<{ meta, acl }>} | {<{ meta, acl }>}
@@ -49,6 +74,29 @@ module.exports = (gwDomain) => ({
       owner,
       acl,
     }, file);
+  },
+
+  /**
+   * Uploaded new file into distributed storage
+   * @param owner {string} Address of the owner of the file
+   * @param acl {string} {string} Address to acl contract
+   * @param data {Blob} File content in blob object
+   * @param ext {string} Content extension format. For example: '.json', '.png'..
+   * @returns { meta, acl }
+   */
+  addRawWithAcl: (owner, acl, data, ext) => {
+    if (!data instanceof Blob) {
+      throw new Exception(`Argument "data" must be a Blob`);
+    }
+
+    return data.text().then(rawData => {
+      return request.post(`${gwDomain}${ADD_RAW_WITH_ACL_PATH}`, {
+        owner,
+        acl,
+        data: rawData,
+        ext: ext
+      });
+    });
   },
 
   /**
@@ -87,6 +135,18 @@ module.exports = (gwDomain) => ({
         'Content-Type': 'application/json'
       }
     });
+  },
+
+  /**
+   * Fetch file from distributed storage
+   * @param meta {string} Unique identifier of stored file
+   * @param token {string} Account authentication token
+   */
+  fetchUrl: (meta, token) => {
+    if(!token) {
+      return `${gwDomain}${FETCH_FILE_PATH}?meta=${meta}`
+    }
+    return `${gwDomain}${FETCH_FILE_PATH}?meta=${meta}&token=${encodeURI(token)}`;
   },
 
   /**
