@@ -22,13 +22,15 @@ module.exports.generateAuthToken = async (web3, { address, tokenBlocksLifespan }
       const marshalledClaims = JSON.stringify(claims);
 
       Web3Wrapper.keystore.signAuthToken(web3, { msg: marshalledClaims, address }, (err, signedMsg) => {
-        let marshalledClaimsHexBuffer = new Buffer(marshalledClaims, 'ascii');
-        let encodedClaimsBase64 = marshalledClaimsHexBuffer.toString('base64');
+        const marshalledClaimsHexBuffer = new Buffer(marshalledClaims, 'ascii');
+        const encodedClaimsBase64 = marshalledClaimsHexBuffer.toString('base64');
+        const encodedClaimsBase64URLSafe = encodedClaimsBase64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 
-        let sigHexBuffer = new Buffer(Web3Wrapper.utils.stripHexPrefix(signedMsg), 'hex');
-        let encodedSigBase64 = sigHexBuffer.toString('base64');
+        const sigHexBuffer = new Buffer(Web3Wrapper.utils.stripHexPrefix(signedMsg), 'hex');
+        const encodedSigBase64 = sigHexBuffer.toString('base64');
+        const encodedSigBase64URLSafe = encodedSigBase64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 
-        const token = encodedClaimsBase64 + "." + encodedSigBase64;
+        const token = encodedClaimsBase64URLSafe + "." + encodedSigBase64URLSafe;
 
         resolve(token);
       });

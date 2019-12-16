@@ -9,9 +9,10 @@ class SimpleReactFileUpload extends Component {
     this.state = {
       file: null,
       owner: '',
-      account: '',
+      account: '0xc916cfe5c83dd4fc3c3b0bf2ec2d4e401782875e',
       grantReadMsg: '',
-      gatewayUrl: process.env.GATEWAY_DOMAIN || 'https://gateway.sirius.lightstreams.io'
+      gatewayUrl: process.env.GATEWAY_DOMAIN || 'http://localhost:9091',
+      web3Provider: process.env.WEB3_PROVIDER || 'http://localhost:8545'
     };
 
     this.gateway = useGateway(this.state.gatewayUrl);
@@ -34,15 +35,26 @@ class SimpleReactFileUpload extends Component {
   }
 
   componentDidMount() {
-    const web3 = Web3.newEngine(window.process.env.WEB3_PROVIDER);
+    const web3 = Web3.newEngine(this.state.web3Provider, {useRemoteKeystore: true});
     const pwd = "notsosecret";
 
-    window.web3 = this.state.web3;
+    window.web3 = web3;
 
-    web3.eth.personal.newAccount(pwd).then((acc) => {
-      web3.eth.personal.unlockAccount(acc, pwd).then(() => {
-        this.setState({ web3, owner: acc });
-      });
+    this.gateway.user.signUp(pwd).then((res) => {
+      setTimeout(() => {
+        web3.eth.personal.getAccounts().then((accounts) => {
+          const acc = res.account.toLowerCase()
+
+          console.log(accounts);
+          console.log(res.account);
+
+          this.gateway.wallet.transfer("0xc916cfe5c83dd4fc3c3b0bf2ec2d4e401782875e", "WelcomeToSirius", acc, "5000000000000000000").then(() => {
+            web3.eth.personal.unlockAccount(acc, pwd).then(() => {
+              this.setState({ web3, owner: acc });
+            });
+          });
+        });
+      }, 2000);
     });
   }
 
@@ -166,7 +178,7 @@ class SimpleReactFileUpload extends Component {
           <input type="text" value={owner} />
           <br />
           <label>Leth Gateway where content is stored in IPFS </label>
-          <input type="text" value={gatewayUrl} onChange={(e) => this.setState({ gatewayUrl: e.target.value })} />
+          <input type="text" disabled value={gatewayUrl} disabled onChange={(e) => this.setState({ gatewayUrl: e.target.value })} />
           <br />
           <label>File </label>
           <input type="file" onChange={this.onStorageFormFileChange} />
