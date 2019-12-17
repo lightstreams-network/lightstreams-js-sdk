@@ -8,6 +8,7 @@
 var ADD_FILE_PATH = "/storage/add";
 var ADD_RAW_PATH = "/storage/add-raw";
 var UPDATE_FILE_PATH = "/storage/update";
+var UPDATE_RAW_PATH = "/storage/update-raw";
 var ADD_FILE_WITH_ACL_PATH = "/storage/add-with-acl";
 var ADD_RAW_WITH_ACL_PATH = "/storage/add-raw-with-acl";
 var FETCH_FILE_PATH = "/storage/fetch";
@@ -38,7 +39,7 @@ module.exports = function (gwDomain) {
     },
 
     /**
-     * Uploaded new file into distributed storage
+     * Uploaded new file into distributed storage using raw data and fixed file type
      * @param owner {string} Address of the owner of the file
      * @param password {string} The password that unlocks the owner
      * @param data {Blob} File content in blob object
@@ -61,7 +62,7 @@ module.exports = function (gwDomain) {
     },
 
     /**
-     * Uploaded new file into distributed storage
+     * Uploaded new file into distributed storage using an already deployed acl
      * @param owner {string} Address of the owner of the file
      * @param acl {string} Address to acl contract
      * @param file {ReadableStream|File} File to add
@@ -81,7 +82,7 @@ module.exports = function (gwDomain) {
     },
 
     /**
-     * Uploaded new file into distributed storage
+     * Uploaded new file into distributed storage using raw data and fixed file extension and using an already deployed acl
      * @param owner {string} Address of the owner of the file
      * @param acl {string} {string} Address to acl contract
      * @param data {Blob} File content in blob object
@@ -124,6 +125,29 @@ module.exports = function (gwDomain) {
     },
 
     /**
+     * Uploaded new file into distributed storage using raw data and fixed file extension
+     * @param owner {string} Address of the owner of the file
+     * @param password {string} The password that unlocks the owner
+     * @param data {Blob} File content in blob object
+     * @param ext {string} Content extension format. For example: '.json', '.png'..
+     * @returns { meta, acl }
+     */
+    updateRaw: function updateRaw(owner, password, data, ext) {
+      if (!data instanceof Blob) {
+        throw new Exception("Argument \"data\" must be a Blob");
+      }
+
+      return data.text().then(function (rawData) {
+        return request.post("".concat(gwDomain).concat(UPDATE_RAW_PATH), {
+          owner: owner,
+          password: password,
+          data: rawData,
+          ext: ext
+        });
+      });
+    },
+
+    /**
      * Fetch file from distributed storage
      * @param meta {string} Unique identifier of stored file
      * @param token {string} Account authentication token
@@ -143,7 +167,7 @@ module.exports = function (gwDomain) {
     },
 
     /**
-     * Fetch file from distributed storage
+     * Return an string with the GET url to fetch content from distributed storage
      * @param meta {string} Unique identifier of stored file
      * @param token {string} Account authentication token
      */
