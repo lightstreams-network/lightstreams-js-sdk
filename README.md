@@ -235,8 +235,9 @@ FORCE_MIGRATION='false' npx truffle test ./test/{filename} --network standalone
 ```
 
 ## Sample project
-- [Gateway Proxy Server](https://github.com/lightstreams-network/lightstreams-js-sdk/tree/master/example/gateway-proxy)
-- [Gateway Browser](https://github.com/lightstreams-network/lightstreams-js-sdk/tree/master/example/gateway-proxy) (Veryyy drafted)
+- [Lighstreams Smart Vault Dashboard](https://github.com/lightstreams-network/example-dashboard)
+- [e-commerce distributed shop](https://github.com/lightstreams-network/example-eshop)
+- [Distributed browser storage](https://github.com/lightstreams-network/example-browser/commits/master)
 
 ## Bugs, Issues, Questions
 If you find any bugs or simply have a question, please [write an issue](https://github.com/lightstreams-network/lightstreams-js-sdk/issues) and we'll try and help as best we can.
