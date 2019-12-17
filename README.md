@@ -9,7 +9,7 @@ includes a set of wrappers around libraries and protocol such as:
  - Bonding Curve: Set of contracts to issue new ERC20 tokens using the [bonding curve](https://medium.com/coinmonks/token-bonding-curves-explained-7a9332198e0e).
  - [Local private key management](#local-private-key-management): Generate, encrypt and decrypt your private keys all within your favorite storage: memory, browser or disk.
  - [Lightstreams Web3 engine](#lightstreams-web3-engine): Extended version of web3 engine with useful addons such as private keys in a memory storage management, metamask integration and gsn proxy calls.
- - Web3 wrapper: Functional library to wrap [web3js](https://web3js.readthedocs.io/en/v1.2.0/web3-utils.html) methods into simple high level calls.
+ - [Web3 wrapper](web3-wrapper): Functional library to wrap [web3js](https://web3js.readthedocs.io/en/v1.2.0/web3-utils.html) methods into simple high level calls.
 
 ## Requirements
 - Node >= 10
@@ -191,6 +191,48 @@ web3.currentProvider.importAccount(encryptedJson);
 ```
 const encryptedJson = web3.currentProvider.exportAccount(address);
 ```
+
+### Web3 Wrapper
+
+Lightstreams has implemented a functional wrapper class onto [web3js](https://web3js.readthedocs.io/en/1.0/web3-utils.html)
+library to encapsulate some of the most common functionalities of web3 into simple high level api.
+
+Firtly, we instantiate a new web3 engine (although this wrapper can be used with other versions of web3)
+```js
+const web3 = Web3.newEngine('https://localhost:8545');
+```
+
+We could deploy a new contract as follow:
+```js
+const txReceipt = await Web3.deployContract(web3, {
+    from: fromAcc,
+    abi: contract.abi,
+    bytecode: contract.bytecode,
+    params: [param1, param2]
+});
+```
+
+then, send a transaction to it:
+```js
+const txReceipt = await Web3.contractSendTx(web3, {
+  to: contractAddress,
+  abi: contract.abi,
+  from: fromAcc,,
+  method: 'methodName',
+  params: [Web3.utils.toWei('1')...]
+});
+```
+
+or do a read-only call to the contract:
+```js
+const outputValue = await Web3.contractCall(web3, {
+    to: contractAddress,
+    abi: contract.abi,
+    method: 'methodName|public attribute',
+    params: [...],
+  });
+```
+
 
 ### Gas Station Network
 
