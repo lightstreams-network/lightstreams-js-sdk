@@ -9,7 +9,7 @@ includes a set of wrappers around libraries and protocol such as:
  - Bonding Curve: Set of contracts to issue new ERC20 tokens using the [bonding curve](https://medium.com/coinmonks/token-bonding-curves-explained-7a9332198e0e).
  - [Local private key management](#local-private-key-management): Generate, encrypt and decrypt your private keys all within your favorite storage: memory, browser or disk.
  - [Lightstreams Web3 engine](#lightstreams-web3-engine): Extended version of web3 engine with useful addons such as private keys in a memory storage management, metamask integration and gsn proxy calls.
- - [Web3 wrapper](web3-wrapper): Functional library to wrap [web3js](https://web3js.readthedocs.io/en/v1.2.0/web3-utils.html) methods into simple high level calls.
+ - [Web3 wrapper](#web3-wrapper): Functional library to wrap [web3js](https://web3js.readthedocs.io/en/v1.2.0/web3-utils.html) methods into simple high level calls.
 
 ## Requirements
 - Node >= 10
