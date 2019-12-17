@@ -6,7 +6,7 @@ includes a set of wrappers around libraries and protocol such as:
  - [Lightstreams Smart Vault Wrappers](/#lightstreams-smart-vault-wrappers): Decentralized data storage with privacy controls for sharing data within private groups and for selling content
  - [Lightstreams name service (LSN)](/#lightstreams-name-service): Secure & decentralised way to address resources both on and off the blockchain using simple, human-readable names in Lightstreams network.
  - Gas Station Network: Set of contracts implementing GSN pattern.
- - Bonding Curve: Set of contracts to allow you to issue new tokens using the popular [bonding curve](https://medium.com/coinmonks/token-bonding-curves-explained-7a9332198e0e)
+ - Bonding Curve: Set of contracts to issue new ERC20 tokens using the [bonding curve](https://medium.com/coinmonks/token-bonding-curves-explained-7a9332198e0e).
  - [Local private key management](#local-private-key-management): Generate, encrypt and decrypt your private keys all within your favorite storage: memory, browser or disk.
  - [Lightstreams Web3 engine](#lightstreams-web3-engine): Extended version of web3 engine with useful addons such as private keys in a memory storage management, metamask integration and gsn proxy calls.
  - Web3 wrapper: Functional library to wrap [web3js](https://web3js.readthedocs.io/en/v1.2.0/web3-utils.html) methods into simple high level calls.
@@ -238,6 +238,7 @@ FORCE_MIGRATION='false' npx truffle test ./test/{filename} --network standalone
 - [Lighstreams Smart Vault Dashboard](https://github.com/lightstreams-network/example-dashboard)
 - [e-commerce distributed shop](https://github.com/lightstreams-network/example-eshop)
 - [Distributed browser storage](https://github.com/lightstreams-network/example-browser/commits/master)
+- [Fanbase](https://fanbase.live) (Coming very soon :) )
 
 ## Bugs, Issues, Questions
 If you find any bugs or simply have a question, please [write an issue](https://github.com/lightstreams-network/lightstreams-js-sdk/issues) and we'll try and help as best we can.
