@@ -3,8 +3,8 @@
 Lightstreams Javascript(JS) SDK is a project implemented to bring utilities to dapp developers. This project
 includes a set of wrappers around libraries and protocol such as:
 
- - [Lightstreams Smart Vault Wrappers](/#lightstreams-smart-vault-wrappers): Decentralized data storage with privacy controls for sharing data within private groups and for selling content
- - [Lightstreams name service (LSN)](/#lightstreams-name-service): Secure & decentralised way to address resources both on and off the blockchain using simple, human-readable names in Lightstreams network.
+ - [Lightstreams Smart Vault Wrappers](#lightstreams-smart-vault-wrappers): Decentralized data storage with privacy controls for sharing data within private groups and for selling content
+ - [Lightstreams name service (LSN)](#lightstreams-name-service): Secure & decentralised way to address resources both on and off the blockchain using simple, human-readable names in Lightstreams network.
  - [Gas Station Network](#gas-station-network): Set of contracts to implement your our gasless contracts.
  - Bonding Curve: Set of contracts to issue new ERC20 tokens using the [bonding curve](https://medium.com/coinmonks/token-bonding-curves-explained-7a9332198e0e).
  - [Local private key management](#local-private-key-management): Generate, encrypt and decrypt your private keys all within your favorite storage: memory, browser or disk.
