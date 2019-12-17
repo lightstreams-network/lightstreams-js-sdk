@@ -5,7 +5,7 @@ includes a set of wrappers around libraries and protocol such as:
 
  - [Lightstreams Smart Vault Wrappers](/#lightstreams-smart-vault-wrappers): Decentralized data storage with privacy controls for sharing data within private groups and for selling content
  - [Lightstreams name service (LSN)](/#lightstreams-name-service): Secure & decentralised way to address resources both on and off the blockchain using simple, human-readable names in Lightstreams network.
- - Gas Station Network: Set of contracts implementing GSN pattern.
+ - [Gas Station Network](#gas-station-network): Set of contracts to implement your our gasless contracts.
  - Bonding Curve: Set of contracts to issue new ERC20 tokens using the [bonding curve](https://medium.com/coinmonks/token-bonding-curves-explained-7a9332198e0e).
  - [Local private key management](#local-private-key-management): Generate, encrypt and decrypt your private keys all within your favorite storage: memory, browser or disk.
  - [Lightstreams Web3 engine](#lightstreams-web3-engine): Extended version of web3 engine with useful addons such as private keys in a memory storage management, metamask integration and gsn proxy calls.
@@ -192,6 +192,75 @@ web3.currentProvider.importAccount(encryptedJson);
 const encryptedJson = web3.currentProvider.exportAccount(address);
 ```
 
+### Gas Station Network
+
+**Run your own gas station**
+
+First you need to run your own gas station along with a relayer account who is going to stake some
+tokens to fund the transactions in behalf the users of your apps, then those tokens will be paid back
+from the staked amount staked on the contract itself. If you want to know [read this article](https://medium.com/lightstreams/no-gas-needed-to-interact-with-lightstreams-dapps-41aea98d1089?source=collection_home---4------3-----------------------)
+
+Lightstreams team has forked [tabookey-gasless](https://github.com/lightstreams-network/tabookey-gasless) and
+modify it to make it work on Lightstreams network. Please, follow [README.md](https://github.com/lightstreams-network/tabookey-gasless/blob/master/README.md)
+to compile and run your local instance of the gas station.
+
+Once you got your local GSN running you can start writing your gasless contract, next you can see few samples of it:
+- [GSNProfile](https://github.com/lightstreams-network/lightstreams-js-sdk/blob/master/contracts/GSNProfile.sol): Smart contract to handle user profile data using smart vault distributed storage
+- [GSNAcl](https://github.com/lightstreams-network/lightstreams-js-sdk/blob/master/contracts/GSNAcl.sol): Smart contract implementing access control list of files in smart vault
+
+Once the contract is written you will need to deploy it and stake some tokens to fund users transactions:
+```js
+const { Web3, GSN } = require('lighstreams-js-sdk');
+
+// Load compiled version of our GSNAcl.sol contract
+const contract = require('@contract/build/GSNAcl.json');
+
+// Initiliaze a new web3 engine enabling GSN by default
+const web3 = Web3.newEngine('https://localhost:8545', { useGSN: true });
+
+// Init env process variable to point to our gas station server
+process.env.RELAY_URL="http://localhost:8090"
+
+// Account used to deploy and fund the contract
+const account = "0xa981f8ca77d069d79b609ca0069b052db79e7e30"
+
+// Deploy GSNContract using Web3 wrapper
+const txNewContractReceipt = await Web3.deployContract(web3, {
+    from: account,
+    abi: contract.abi,
+    bytecode: contract.bytecode,
+    params: [account, false]
+});
+
+// Relayer wallet address
+const relayHubAddr = '0x2cfb0a0388f429318E0D12b12980c13ccad15189'
+
+// Stake tokens into the contract
+await GSN.fundRecipient(web3, {
+    from: account,
+    recipient: txNewContractReceipt.contractAddress,
+    relayHub: relayerHubAddr,
+    amountInPht: 100 // Amount of tokens to stake in the contract to fund user txs
+  });
+```
+
+Now we deployed and funded the contract we can test out how to a user with balance 0 is capable to do a call
+to that contract
+
+```js
+const newAccount = await web3.eth.personal.newAccount("password");
+
+const txReceipt = await Web3.contractSendTx(web3ls, {
+  to: aclContractAddress,
+  abi: contract.abi,
+  from: newAccount,
+  method: 'addOwner',
+  useGSN: true, // Force the usage of the gasless tx
+  params: [newAccount]
+});
+```
+
+You can see more sample code at this [test suite file](https://github.com/lightstreams-network/lightstreams-js-sdk/blob/master/test/05_gsn_profile_factory.js)
 
 ## Development
 
