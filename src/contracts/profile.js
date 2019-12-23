@@ -5,7 +5,11 @@
  */
 const Web3Wrapper = require('../web3');
 const CID = require('cids');
-const { fundRecipient, isRelayHubDeployed } = require('../gsn');
+const {
+  fundRecipient,
+  isRelayHubDeployed,
+  getRecipientFunds
+} = require('../gsn');
 
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
@@ -78,6 +82,29 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
   console.log(`Topped up ProfileFactory with ${faucetFundingInPht} PHTs to fund new profile creations...`);
 
   return contractAddr;
+};
+
+module.exports.validateHasEnoughFundToDeployProfile = async(web3, { contractAddr }) => {
+  const recipientFundsInWei = await getRecipientFunds(web3, { recipient: contractAddr });
+  const recipientFundsInPht = Web3Wrapper.utils.toPht(`${recipientFundsInWei}`);
+  console.log(`GSNProfileFactory recipient has ${recipientFundsInPht} PHT for GSN`);
+  if (parseFloat(recipientFundsInPht) < 1.0) {
+    throw new Error(`Not enough recipient funds: ${recipientFundsInPht} PHT`);
+  }
+
+  const balanceInWei = await Web3Wrapper.getBalance(web3, { address: contractAddr });
+  const balanceInPht = Web3Wrapper.utils.toPht(balanceInWei);
+  console.log(`GSNProfileFactory contract has ${balanceInPht} PHT in balance`);
+  const newProfileFundingInWei = await Web3Wrapper.contractCall(web3, {
+    to: contractAddr,
+    abi: factoryScJSON.abi,
+    method: 'profileFunding'
+  });
+
+  const newProfileFundingInPht = Web3Wrapper.utils.toPht(newProfileFundingInWei);
+  if(balanceInPht < newProfileFundingInPht) {
+    throw new Error(`Not enough funds in factory contract. Requires ${newProfileFundingInPht} PHT, has ${balanceInPht} PHT`);
+  }
 };
 
 module.exports.deployProfileByFactory = async (web3, { from, contractAddr, useGSN }) => {

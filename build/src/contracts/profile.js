@@ -19,7 +19,8 @@ var CID = require('cids');
 
 var _require = require('../gsn'),
     fundRecipient = _require.fundRecipient,
-    isRelayHubDeployed = _require.isRelayHubDeployed;
+    isRelayHubDeployed = _require.isRelayHubDeployed,
+    getRecipientFunds = _require.getRecipientFunds;
 
 var factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 
@@ -143,14 +144,74 @@ module.exports.initializeProfileFactory = function _callee(web3, _ref) {
   });
 };
 
-module.exports.deployProfileByFactory = function _callee2(web3, _ref2) {
-  var from, contractAddr, useGSN, txReceipt;
+module.exports.validateHasEnoughFundToDeployProfile = function _callee2(web3, _ref2) {
+  var contractAddr, recipientFundsInWei, recipientFundsInPht, balanceInWei, balanceInPht, newProfileFundingInWei, newProfileFundingInPht;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          from = _ref2.from, contractAddr = _ref2.contractAddr, useGSN = _ref2.useGSN;
+          contractAddr = _ref2.contractAddr;
           _context2.next = 3;
+          return regeneratorRuntime.awrap(getRecipientFunds(web3, {
+            recipient: contractAddr
+          }));
+
+        case 3:
+          recipientFundsInWei = _context2.sent;
+          recipientFundsInPht = Web3Wrapper.utils.toPht("".concat(recipientFundsInWei));
+          console.log("GSNProfileFactory recipient has ".concat(recipientFundsInPht, " PHT for GSN"));
+
+          if (!(parseFloat(recipientFundsInPht) < 1.0)) {
+            _context2.next = 8;
+            break;
+          }
+
+          throw new Error("Not enough recipient funds: ".concat(recipientFundsInPht, " PHT"));
+
+        case 8:
+          _context2.next = 10;
+          return regeneratorRuntime.awrap(Web3Wrapper.getBalance(web3, {
+            address: contractAddr
+          }));
+
+        case 10:
+          balanceInWei = _context2.sent;
+          balanceInPht = Web3Wrapper.utils.toPht(balanceInWei);
+          console.log("GSNProfileFactory contract has ".concat(balanceInPht, " PHT in balance"));
+          _context2.next = 15;
+          return regeneratorRuntime.awrap(Web3Wrapper.contractCall(web3, {
+            to: contractAddr,
+            abi: factoryScJSON.abi,
+            method: 'profileFunding'
+          }));
+
+        case 15:
+          newProfileFundingInWei = _context2.sent;
+          newProfileFundingInPht = Web3Wrapper.utils.toPht(newProfileFundingInWei);
+
+          if (!(balanceInPht < newProfileFundingInPht)) {
+            _context2.next = 19;
+            break;
+          }
+
+          throw new Error("Not enough funds in factory contract. Requires ".concat(newProfileFundingInPht, " PHT, has ").concat(balanceInPht, " PHT"));
+
+        case 19:
+        case "end":
+          return _context2.stop();
+      }
+    }
+  });
+};
+
+module.exports.deployProfileByFactory = function _callee3(web3, _ref3) {
+  var from, contractAddr, useGSN, txReceipt;
+  return regeneratorRuntime.async(function _callee3$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          from = _ref3.from, contractAddr = _ref3.contractAddr, useGSN = _ref3.useGSN;
+          _context3.next = 3;
           return regeneratorRuntime.awrap(Web3Wrapper.contractSendTx(web3, {
             to: contractAddr,
             from: from,
@@ -161,25 +222,25 @@ module.exports.deployProfileByFactory = function _callee2(web3, _ref2) {
           }));
 
         case 3:
-          txReceipt = _context2.sent;
-          return _context2.abrupt("return", txReceipt.events['NewProfile'].returnValues['addr']);
+          txReceipt = _context3.sent;
+          return _context3.abrupt("return", txReceipt.events['NewProfile'].returnValues['addr']);
 
         case 5:
         case "end":
-          return _context2.stop();
+          return _context3.stop();
       }
     }
   });
 };
 
-module.exports.addOwner = function _callee3(web3, _ref3) {
+module.exports.addOwner = function _callee4(web3, _ref4) {
   var from, contractAddr, useGSN, ownerAddr;
-  return regeneratorRuntime.async(function _callee3$(_context3) {
+  return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
-      switch (_context3.prev = _context3.next) {
+      switch (_context4.prev = _context4.next) {
         case 0:
-          from = _ref3.from, contractAddr = _ref3.contractAddr, useGSN = _ref3.useGSN, ownerAddr = _ref3.ownerAddr;
-          return _context3.abrupt("return", Web3Wrapper.contractSendTx(web3, {
+          from = _ref4.from, contractAddr = _ref4.contractAddr, useGSN = _ref4.useGSN, ownerAddr = _ref4.ownerAddr;
+          return _context4.abrupt("return", Web3Wrapper.contractSendTx(web3, {
             to: contractAddr,
             from: from,
             useGSN: useGSN || false,
@@ -190,29 +251,29 @@ module.exports.addOwner = function _callee3(web3, _ref3) {
 
         case 2:
         case "end":
-          return _context3.stop();
+          return _context4.stop();
       }
     }
   });
 };
 
-module.exports.recover = function _callee4(web3, contractAddr, _ref4) {
+module.exports.recover = function _callee5(web3, contractAddr, _ref5) {
   var from, newOwner, useGSN;
-  return regeneratorRuntime.async(function _callee4$(_context4) {
+  return regeneratorRuntime.async(function _callee5$(_context5) {
     while (1) {
-      switch (_context4.prev = _context4.next) {
+      switch (_context5.prev = _context5.next) {
         case 0:
-          from = _ref4.from, newOwner = _ref4.newOwner, useGSN = _ref4.useGSN;
+          from = _ref5.from, newOwner = _ref5.newOwner, useGSN = _ref5.useGSN;
 
           if (!(!newOwner && !from)) {
-            _context4.next = 3;
+            _context5.next = 3;
             break;
           }
 
           throw new Error("Missing mandatory call params");
 
         case 3:
-          return _context4.abrupt("return", Web3Wrapper.contractSendTx(web3, {
+          return _context5.abrupt("return", Web3Wrapper.contractSendTx(web3, {
             to: contractAddr,
             from: from,
             useGSN: useGSN || false,
@@ -223,14 +284,14 @@ module.exports.recover = function _callee4(web3, contractAddr, _ref4) {
 
         case 4:
         case "end":
-          return _context4.stop();
+          return _context5.stop();
       }
     }
   });
 };
 
-module.exports.getOwners = function (web3, _ref5) {
-  var contractAddr = _ref5.contractAddr;
+module.exports.getOwners = function (web3, _ref6) {
+  var contractAddr = _ref6.contractAddr;
   return Web3Wrapper.contractCall(web3, {
     to: contractAddr,
     abi: profileScJSON.abi,
@@ -242,8 +303,8 @@ module.exports.getOwners = function (web3, _ref5) {
   });
 };
 
-module.exports.getFiles = function (web3, _ref6) {
-  var contractAddr = _ref6.contractAddr;
+module.exports.getFiles = function (web3, _ref7) {
+  var contractAddr = _ref7.contractAddr;
   return Web3Wrapper.contractCall(web3, {
     to: contractAddr,
     abi: profileScJSON.abi,
@@ -253,9 +314,9 @@ module.exports.getFiles = function (web3, _ref6) {
   });
 };
 
-module.exports.getFileAcl = function (web3, _ref7) {
-  var contractAddr = _ref7.contractAddr,
-      cid = _ref7.cid;
+module.exports.getFileAcl = function (web3, _ref8) {
+  var contractAddr = _ref8.contractAddr,
+      cid = _ref8.cid;
   return Web3Wrapper.contractCall(web3, {
     to: contractAddr,
     abi: profileScJSON.abi,
@@ -264,11 +325,11 @@ module.exports.getFileAcl = function (web3, _ref7) {
   });
 };
 
-module.exports.addFile = function (web3, _ref8) {
-  var from = _ref8.from,
-      contractAddr = _ref8.contractAddr,
-      cid = _ref8.cid,
-      acl = _ref8.acl;
+module.exports.addFile = function (web3, _ref9) {
+  var from = _ref9.from,
+      contractAddr = _ref9.contractAddr,
+      cid = _ref9.cid,
+      acl = _ref9.acl;
 
   if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
     throw new Error('Invalid cid value');
@@ -283,10 +344,10 @@ module.exports.addFile = function (web3, _ref8) {
   });
 };
 
-module.exports.removeFile = function (web3, _ref9) {
-  var from = _ref9.from,
-      contractAddr = _ref9.contractAddr,
-      cid = _ref9.cid;
+module.exports.removeFile = function (web3, _ref10) {
+  var from = _ref10.from,
+      contractAddr = _ref10.contractAddr,
+      cid = _ref10.cid;
 
   if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
     throw new Error('Invalid cid value');
