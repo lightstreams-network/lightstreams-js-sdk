@@ -500,14 +500,41 @@ module.exports.getWPHTHatchContributionOf = function _callee12(web3, _ref12) {
   });
 };
 
-var expectedArtistTokenOfHatchContribution = function expectedArtistTokenOfHatchContribution(web3, _ref13) {
-  var artistTokenAddr, contributionInWPHT, p0, theta, DENOMINATOR_PPM;
-  return regeneratorRuntime.async(function expectedArtistTokenOfHatchContribution$(_context13) {
+module.exports.getInitialRaiseInWPHT = function _callee13(web3, _ref13) {
+  var artistTokenAddr, initialRaise;
+  return regeneratorRuntime.async(function _callee13$(_context13) {
     while (1) {
       switch (_context13.prev = _context13.next) {
         case 0:
-          artistTokenAddr = _ref13.artistTokenAddr, contributionInWPHT = _ref13.contributionInWPHT;
+          artistTokenAddr = _ref13.artistTokenAddr;
           _context13.next = 3;
+          return regeneratorRuntime.awrap(Web3Wrapper.contractCall(web3, {
+            to: artistTokenAddr,
+            abi: artistTokenSc.abi,
+            method: 'initialRaise',
+            params: []
+          }));
+
+        case 3:
+          initialRaise = _context13.sent;
+          return _context13.abrupt("return", Web3Wrapper.utils.toPht(initialRaise));
+
+        case 5:
+        case "end":
+          return _context13.stop();
+      }
+    }
+  });
+};
+
+var expectedArtistTokenOfHatchContribution = function expectedArtistTokenOfHatchContribution(web3, _ref14) {
+  var artistTokenAddr, contributionInWPHT, p0, theta, DENOMINATOR_PPM;
+  return regeneratorRuntime.async(function expectedArtistTokenOfHatchContribution$(_context14) {
+    while (1) {
+      switch (_context14.prev = _context14.next) {
+        case 0:
+          artistTokenAddr = _ref14.artistTokenAddr, contributionInWPHT = _ref14.contributionInWPHT;
+          _context14.next = 3;
           return regeneratorRuntime.awrap(Web3Wrapper.contractCall(web3, {
             to: artistTokenAddr,
             abi: artistTokenSc.abi,
@@ -516,8 +543,8 @@ var expectedArtistTokenOfHatchContribution = function expectedArtistTokenOfHatch
           }));
 
         case 3:
-          p0 = _context13.sent;
-          _context13.next = 6;
+          p0 = _context14.sent;
+          _context14.next = 6;
           return regeneratorRuntime.awrap(Web3Wrapper.contractCall(web3, {
             to: artistTokenAddr,
             abi: artistTokenSc.abi,
@@ -526,41 +553,11 @@ var expectedArtistTokenOfHatchContribution = function expectedArtistTokenOfHatch
           }));
 
         case 6:
-          theta = _context13.sent;
+          theta = _context14.sent;
           DENOMINATOR_PPM = 1000000;
-          return _context13.abrupt("return", parseFloat(contributionInWPHT) * parseFloat(p0) * (1.0 - parseInt(theta) / DENOMINATOR_PPM));
+          return _context14.abrupt("return", parseFloat(contributionInWPHT) * parseFloat(p0) * (1.0 - parseInt(theta) / DENOMINATOR_PPM));
 
         case 9:
-        case "end":
-          return _context13.stop();
-      }
-    }
-  });
-};
-
-module.exports.expectedArtistTokenOfHatchContribution = expectedArtistTokenOfHatchContribution;
-
-var getArtistTokenName = function getArtistTokenName(web3, _ref14) {
-  var artistTokenAddr;
-  return regeneratorRuntime.async(function getArtistTokenName$(_context14) {
-    while (1) {
-      switch (_context14.prev = _context14.next) {
-        case 0:
-          artistTokenAddr = _ref14.artistTokenAddr;
-          Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
-          _context14.next = 4;
-          return regeneratorRuntime.awrap(Web3Wrapper.contractCall(web3, {
-            to: artistTokenAddr,
-            useGSN: false,
-            method: 'name',
-            abi: artistTokenSc.abi,
-            params: []
-          }));
-
-        case 4:
-          return _context14.abrupt("return", _context14.sent);
-
-        case 5:
         case "end":
           return _context14.stop();
       }
@@ -568,11 +565,11 @@ var getArtistTokenName = function getArtistTokenName(web3, _ref14) {
   });
 };
 
-module.exports.getArtistTokenSymbol = getArtistTokenName;
+module.exports.expectedArtistTokenOfHatchContribution = expectedArtistTokenOfHatchContribution;
 
-var getArtistTokenSymbol = function getArtistTokenSymbol(web3, _ref15) {
+var getArtistTokenName = function getArtistTokenName(web3, _ref15) {
   var artistTokenAddr;
-  return regeneratorRuntime.async(function getArtistTokenSymbol$(_context15) {
+  return regeneratorRuntime.async(function getArtistTokenName$(_context15) {
     while (1) {
       switch (_context15.prev = _context15.next) {
         case 0:
@@ -582,7 +579,7 @@ var getArtistTokenSymbol = function getArtistTokenSymbol(web3, _ref15) {
           return regeneratorRuntime.awrap(Web3Wrapper.contractCall(web3, {
             to: artistTokenAddr,
             useGSN: false,
-            method: 'symbol',
+            method: 'name',
             abi: artistTokenSc.abi,
             params: []
           }));
@@ -598,25 +595,55 @@ var getArtistTokenSymbol = function getArtistTokenSymbol(web3, _ref15) {
   });
 };
 
-module.exports.getArtistTokenSymbol = getArtistTokenSymbol;
+module.exports.getArtistTokenSymbol = getArtistTokenName;
 
-module.exports.getArtistTokenBalanceOf = function _callee13(web3, _ref16) {
-  var artistTokenAddr, accountAddr, symbol, balance;
-  return regeneratorRuntime.async(function _callee13$(_context16) {
+var getArtistTokenSymbol = function getArtistTokenSymbol(web3, _ref16) {
+  var artistTokenAddr;
+  return regeneratorRuntime.async(function getArtistTokenSymbol$(_context16) {
     while (1) {
       switch (_context16.prev = _context16.next) {
         case 0:
-          artistTokenAddr = _ref16.artistTokenAddr, accountAddr = _ref16.accountAddr;
+          artistTokenAddr = _ref16.artistTokenAddr;
+          Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
+          _context16.next = 4;
+          return regeneratorRuntime.awrap(Web3Wrapper.contractCall(web3, {
+            to: artistTokenAddr,
+            useGSN: false,
+            method: 'symbol',
+            abi: artistTokenSc.abi,
+            params: []
+          }));
+
+        case 4:
+          return _context16.abrupt("return", _context16.sent);
+
+        case 5:
+        case "end":
+          return _context16.stop();
+      }
+    }
+  });
+};
+
+module.exports.getArtistTokenSymbol = getArtistTokenSymbol;
+
+module.exports.getArtistTokenBalanceOf = function _callee14(web3, _ref17) {
+  var artistTokenAddr, accountAddr, symbol, balance;
+  return regeneratorRuntime.async(function _callee14$(_context17) {
+    while (1) {
+      switch (_context17.prev = _context17.next) {
+        case 0:
+          artistTokenAddr = _ref17.artistTokenAddr, accountAddr = _ref17.accountAddr;
           Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
           Web3Wrapper.validator.validateAddress("accountAddr", accountAddr);
-          _context16.next = 5;
+          _context17.next = 5;
           return regeneratorRuntime.awrap(getArtistTokenSymbol(web3, {
             artistTokenAddr: artistTokenAddr
           }));
 
         case 5:
-          symbol = _context16.sent;
-          _context16.next = 8;
+          symbol = _context17.sent;
+          _context17.next = 8;
           return regeneratorRuntime.awrap(Web3Wrapper.contractCall(web3, {
             to: artistTokenAddr,
             useGSN: false,
@@ -626,19 +653,19 @@ module.exports.getArtistTokenBalanceOf = function _callee13(web3, _ref16) {
           }));
 
         case 8:
-          balance = _context16.sent;
+          balance = _context17.sent;
           console.log("Account ".concat(accountAddr, " has ").concat(Web3Wrapper.utils.wei2pht(balance.toString()), " ").concat(symbol, " of ArtistToken ").concat(artistTokenAddr));
-          return _context16.abrupt("return", Web3Wrapper.utils.toBN(balance));
+          return _context17.abrupt("return", Web3Wrapper.utils.toBN(balance));
 
         case 11:
         case "end":
-          return _context16.stop();
+          return _context17.stop();
       }
     }
   });
 };
 
-module.exports.buyArtistTokens = function _callee14(web3, _ref17) {
+module.exports.buyArtistTokens = function _callee15(web3, _ref18) {
   var from,
       artistTokenAddr,
       wphtAddr,
@@ -647,31 +674,31 @@ module.exports.buyArtistTokens = function _callee14(web3, _ref17) {
       symbol,
       receipt,
       tokens,
-      _args17 = arguments;
-  return regeneratorRuntime.async(function _callee14$(_context17) {
+      _args18 = arguments;
+  return regeneratorRuntime.async(function _callee15$(_context18) {
     while (1) {
-      switch (_context17.prev = _context17.next) {
+      switch (_context18.prev = _context18.next) {
         case 0:
-          from = _ref17.from, artistTokenAddr = _ref17.artistTokenAddr, wphtAddr = _ref17.wphtAddr, amountWeiBn = _ref17.amountWeiBn;
-          runDepositFirst = _args17.length > 2 && _args17[2] !== undefined ? _args17[2] : false;
+          from = _ref18.from, artistTokenAddr = _ref18.artistTokenAddr, wphtAddr = _ref18.wphtAddr, amountWeiBn = _ref18.amountWeiBn;
+          runDepositFirst = _args18.length > 2 && _args18[2] !== undefined ? _args18[2] : false;
           Web3Wrapper.validator.validateAddress("from", from);
           Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
           Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
           Web3Wrapper.validator.validateWeiBn("amountWeiBn", amountWeiBn);
-          _context17.next = 8;
+          _context18.next = 8;
           return regeneratorRuntime.awrap(getArtistTokenSymbol(web3, {
             artistTokenAddr: artistTokenAddr
           }));
 
         case 8:
-          symbol = _context17.sent;
+          symbol = _context18.sent;
 
           if (!runDepositFirst) {
-            _context17.next = 12;
+            _context18.next = 12;
             break;
           }
 
-          _context17.next = 12;
+          _context18.next = 12;
           return regeneratorRuntime.awrap(Web3Wrapper.contractSendTx(web3, {
             from: from,
             to: wphtAddr,
@@ -682,7 +709,7 @@ module.exports.buyArtistTokens = function _callee14(web3, _ref17) {
           }));
 
         case 12:
-          _context17.next = 14;
+          _context18.next = 14;
           return regeneratorRuntime.awrap(Web3Wrapper.contractSendTx(web3, {
             from: from,
             to: wphtAddr,
@@ -692,7 +719,7 @@ module.exports.buyArtistTokens = function _callee14(web3, _ref17) {
           }));
 
         case 14:
-          _context17.next = 16;
+          _context18.next = 16;
           return regeneratorRuntime.awrap(Web3Wrapper.contractSendTx(web3, {
             from: from,
             to: artistTokenAddr,
@@ -703,37 +730,37 @@ module.exports.buyArtistTokens = function _callee14(web3, _ref17) {
           }));
 
         case 16:
-          receipt = _context17.sent;
+          receipt = _context18.sent;
           tokens = receipt.events['CurvedMint'].returnValues['amount'];
           console.log("Buyer ".concat(from, " purchased ").concat(tokens.toString(), " ").concat(symbol, " of ArtistToken ").concat(artistTokenAddr));
-          return _context17.abrupt("return", Web3Wrapper.utils.toBN(tokens));
+          return _context18.abrupt("return", Web3Wrapper.utils.toBN(tokens));
 
         case 20:
         case "end":
-          return _context17.stop();
+          return _context18.stop();
       }
     }
   });
 };
 
-module.exports.sellArtistTokens = function _callee15(web3, _ref18) {
+module.exports.sellArtistTokens = function _callee16(web3, _ref19) {
   var from, artistTokenAddr, amountBn, symbol, receipt, wphtReimbursement;
-  return regeneratorRuntime.async(function _callee15$(_context18) {
+  return regeneratorRuntime.async(function _callee16$(_context19) {
     while (1) {
-      switch (_context18.prev = _context18.next) {
+      switch (_context19.prev = _context19.next) {
         case 0:
-          from = _ref18.from, artistTokenAddr = _ref18.artistTokenAddr, amountBn = _ref18.amountBn;
+          from = _ref19.from, artistTokenAddr = _ref19.artistTokenAddr, amountBn = _ref19.amountBn;
           Web3Wrapper.validator.validateAddress("from", from);
           Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
           Web3Wrapper.validator.validateWeiBn("amountBn", amountBn);
-          _context18.next = 6;
+          _context19.next = 6;
           return regeneratorRuntime.awrap(getArtistTokenSymbol(web3, {
             artistTokenAddr: artistTokenAddr
           }));
 
         case 6:
-          symbol = _context18.sent;
-          _context18.next = 9;
+          symbol = _context19.sent;
+          _context19.next = 9;
           return regeneratorRuntime.awrap(Web3Wrapper.contractSendTx(web3, {
             from: from,
             to: artistTokenAddr,
@@ -745,14 +772,14 @@ module.exports.sellArtistTokens = function _callee15(web3, _ref18) {
           }));
 
         case 9:
-          receipt = _context18.sent;
+          receipt = _context19.sent;
           wphtReimbursement = receipt.events['CurvedBurn'].returnValues['reimbursement'];
           console.log("Account ".concat(from, " sold ").concat(Web3Wrapper.utils.wei2pht(amountBn.toString()), " ").concat(symbol, " of ArtistToken ").concat(artistTokenAddr, " for ").concat(Web3Wrapper.utils.wei2pht(wphtReimbursement.toString()), " WPHT"));
-          return _context18.abrupt("return", wphtReimbursement);
+          return _context19.abrupt("return", wphtReimbursement);
 
         case 13:
         case "end":
-          return _context18.stop();
+          return _context19.stop();
       }
     }
   });

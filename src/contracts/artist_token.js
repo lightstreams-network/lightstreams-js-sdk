@@ -305,6 +305,17 @@ module.exports.getWPHTHatchContributionOf = async (web3, { artistTokenAddr, acco
   return Web3Wrapper.utils.toPht(preHatchContribution.paidExternal);
 };
 
+module.exports.getInitialRaiseInWPHT = async (web3, { artistTokenAddr }) => {
+  const initialRaise = await Web3Wrapper.contractCall(web3, {
+    to: artistTokenAddr,
+    abi: artistTokenSc.abi,
+    method: 'initialRaise',
+    params: []
+  });
+
+  return Web3Wrapper.utils.toPht(initialRaise);
+};
+
 const expectedArtistTokenOfHatchContribution = async (web3, { artistTokenAddr, contributionInWPHT }) => {
   const p0 = await Web3Wrapper.contractCall(web3, {
     to: artistTokenAddr,
