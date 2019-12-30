@@ -7,6 +7,7 @@
 const Web3Wrapper = require('../web3');
 
 const wphtSc = require('../../build/contracts/WPHT.json');
+const fundingPoolSc = require('../../build/contracts/FundingPool.json');
 
 module.exports.getWPHTBalanceOf = async (web3, { wphtAddr, accountAddr }) => {
   Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
@@ -31,9 +32,7 @@ module.exports.getWPHTBalanceOf = async (web3, { wphtAddr, accountAddr }) => {
 module.exports.deposit = async (web3, { from, wphtAddr, amountInPht }) => {
   Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
 
-  return await Web3Wrapper.contractSendTx(
-    web3,
-    {
+  return await Web3Wrapper.contractSendTx(web3, {
       from,
       to: wphtAddr,
       method: 'deposit',
@@ -41,4 +40,15 @@ module.exports.deposit = async (web3, { from, wphtAddr, amountInPht }) => {
       value: Web3Wrapper.utils.toWei(amountInPht),
     }
   );
+};
+
+module.exports.deployFundingPool = async(web3, { from, wphtAddr, owner }) => {
+  Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
+
+  return await Web3Wrapper.deployContract(web3, {
+    from,
+    abi: fundingPoolSc.abi,
+    bytecode: fundingPoolSc.bytecode,
+    params: [wphtAddr, owner || from]
+  });
 };

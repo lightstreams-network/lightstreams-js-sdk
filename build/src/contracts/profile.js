@@ -189,7 +189,7 @@ module.exports.validateHasEnoughFundToDeployProfile = function _callee2(web3, _r
           newProfileFundingInWei = _context2.sent;
           newProfileFundingInPht = Web3Wrapper.utils.toPht(newProfileFundingInWei);
 
-          if (!(balanceInPht < newProfileFundingInPht)) {
+          if (!(parseFloat(balanceInPht) < parseFloat(newProfileFundingInPht))) {
             _context2.next = 19;
             break;
           }

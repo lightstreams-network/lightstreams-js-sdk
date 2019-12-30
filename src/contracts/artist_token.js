@@ -8,7 +8,7 @@ const Web3Wrapper = require('../web3');
 
 const artistTokenSc = require('../../build/contracts/ArtistToken.json');
 const fundingPoolSc = require('../../build/contracts/FundingPool.json');
-const wphtSc        = require('../../build/contracts/WPHT.json');
+const wphtSc = require('../../build/contracts/WPHT.json');
 
 module.exports.deployFundingPool = async (web3, { from }) => {
   Web3Wrapper.validator.validateAddress("from", from);
@@ -100,24 +100,26 @@ module.exports.deployArtistToken = async (
   }
 
   const receipt = await Web3Wrapper.deployContract(
-      web3,
-      {
-        from,
-        useGSN: false,
-        abi: artistTokenSc.abi,
-        bytecode: artistTokenSc.bytecode,
-        params: [
-          name,
-          symbol,
-          [wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr],
-          [gasPrice, theta, p0, initialRaise, friction, hatchDurationSeconds, hatchVestingDurationSeconds, minExternalContribution],
-          reserveRatio
-        ]
-      }
-    );
+    web3,
+    {
+      from,
+      useGSN: false,
+      abi: artistTokenSc.abi,
+      bytecode: artistTokenSc.bytecode,
+      params: [
+        name,
+        symbol,
+        [wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr],
+        [
+          gasPrice, theta, p0, Web3Wrapper.utils.toWei(`${initialRaise}`),
+          friction, hatchDurationSeconds, hatchVestingDurationSeconds, minExternalContribution
+        ],
+        reserveRatio
+      ]
+    }
+  );
 
-  // console.log(`ArtistToken deployed at: ${receipt.contractAddress}`);
-
+  console.log(`ArtistToken deployed at: ${receipt.contractAddress}`);
   return receipt;
 };
 
@@ -140,13 +142,14 @@ module.exports.isArtistTokenHatched = async (web3, { artistTokenAddr }) => {
   return isHatched;
 };
 
-
 module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr, amountWeiBn }, runDepositFirst = false) => {
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
   Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
   Web3Wrapper.validator.validateWeiBn("amountWeiBn", amountWeiBn);
 
+  const hatchingAmountInPHT = Web3Wrapper.utils.toPht(amountWeiBn);
+  console.log(`Hatcher ${from} sent a hatch worth of ${hatchingAmountInPHT} PHT to artist token ${artistTokenAddr}`);
   if (runDepositFirst) {
     await Web3Wrapper.contractSendTx(
       web3,
@@ -187,7 +190,12 @@ module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr
     }
   );
 
-  console.log(`Hatcher ${from} sent a hatch worth ${Web3Wrapper.utils.wei2pht(amountWeiBn)} PHT to ArtistToken ${artistTokenAddr}`);
+  const expectedArtistTokens = await expectedArtistTokenOfHatchContribution(web3, {
+    artistTokenAddr,
+    contributionInWPHT: hatchingAmountInPHT
+  });
+
+  console.log(`Hatched completed, expected ${expectedArtistTokens} ArtistTokens`);
   return receipt;
 };
 
@@ -210,7 +218,7 @@ module.exports.getArtistTokenTotalSupply = async (web3, { artistTokenAddr }) => 
   return totalSupply;
 };
 
-module.exports.claimTokens = async(web3, { artistTokenAddr, from }) => {
+module.exports.claimTokens = async (web3, { artistTokenAddr, from }) => {
   return await Web3Wrapper.contractSendTx(
     web3,
     {
@@ -251,7 +259,7 @@ module.exports.approve = async (web3, { artistTokenAddr, from, to, amountInBn })
   );
 };
 
-module.exports.balanceOf = async (web3, { artistTokenAddr, accountAddr }) => {
+module.exports.getBalanceOf = async (web3, { artistTokenAddr, accountAddr }) => {
   return await Web3Wrapper.contractCall(
     web3,
     {
@@ -262,6 +270,53 @@ module.exports.balanceOf = async (web3, { artistTokenAddr, accountAddr }) => {
     }
   );
 };
+
+module.exports.getPoolBalance = async (web3, { artistTokenAddr }) => {
+  return await Web3Wrapper.contractCall(
+    web3,
+    {
+      to: artistTokenAddr,
+      method: 'poolBalance',
+      abi: artistTokenSc.abi,
+      params: [],
+    }
+  );
+};
+
+module.exports.getRaisedExternalInWPHT = async (web3, { artistTokenAddr }) => {
+  return await Web3Wrapper.contractCall(web3, {
+      to: artistTokenAddr,
+      method: 'raisedExternal',
+      abi: artistTokenSc.abi,
+      params: [],
+  }).then(amountInWei => {
+    return Web3Wrapper.utils.toPht(amountInWei);
+  });
+};
+
+module.exports.getWPHTHatchContributionOf = async (web3, { artistTokenAddr, accountAddr }) => {
+  const preHatchContribution = await Web3Wrapper.contractCall(web3, {
+    to: artistTokenAddr,
+    abi: artistTokenSc.abi,
+    method: 'initialContributions',
+    params: [accountAddr]
+  });
+
+  return Web3Wrapper.utils.toPht(preHatchContribution.paidExternal);
+};
+
+const expectedArtistTokenOfHatchContribution = async (web3, { artistTokenAddr, contributionInWPHT }) => {
+  const p0 = await Web3Wrapper.contractCall(web3, {
+    to: artistTokenAddr,
+    abi: artistTokenSc.abi,
+    method: 'p0',
+    params: []
+  });
+
+  return parseFloat(contributionInWPHT) * parseFloat(p0);
+};
+
+module.exports.expectedArtistTokenOfHatchContribution = expectedArtistTokenOfHatchContribution;
 
 const getArtistTokenName = async (web3, { artistTokenAddr }) => {
   Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
@@ -325,7 +380,7 @@ module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr,
 
   const symbol = await getArtistTokenSymbol(web3, { artistTokenAddr });
 
-  if(runDepositFirst) {
+  if (runDepositFirst) {
     await Web3Wrapper.contractSendTx(
       web3,
       {
