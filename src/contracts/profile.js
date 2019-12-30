@@ -102,7 +102,7 @@ module.exports.validateHasEnoughFundToDeployProfile = async(web3, { contractAddr
   });
 
   const newProfileFundingInPht = Web3Wrapper.utils.toPht(newProfileFundingInWei);
-  if(balanceInPht < newProfileFundingInPht) {
+  if(parseFloat(balanceInPht) < parseFloat(newProfileFundingInPht)) {
     throw new Error(`Not enough funds in factory contract. Requires ${newProfileFundingInPht} PHT, has ${balanceInPht} PHT`);
   }
 };
