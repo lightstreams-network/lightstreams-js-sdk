@@ -501,7 +501,7 @@ module.exports.getWPHTHatchContributionOf = function _callee12(web3, _ref12) {
 };
 
 var expectedArtistTokenOfHatchContribution = function expectedArtistTokenOfHatchContribution(web3, _ref13) {
-  var artistTokenAddr, contributionInWPHT, p0;
+  var artistTokenAddr, contributionInWPHT, p0, theta, DENOMINATOR_PPM;
   return regeneratorRuntime.async(function expectedArtistTokenOfHatchContribution$(_context13) {
     while (1) {
       switch (_context13.prev = _context13.next) {
@@ -517,9 +517,20 @@ var expectedArtistTokenOfHatchContribution = function expectedArtistTokenOfHatch
 
         case 3:
           p0 = _context13.sent;
-          return _context13.abrupt("return", parseFloat(contributionInWPHT) * parseFloat(p0));
+          _context13.next = 6;
+          return regeneratorRuntime.awrap(Web3Wrapper.contractCall(web3, {
+            to: artistTokenAddr,
+            abi: artistTokenSc.abi,
+            method: 'theta',
+            params: []
+          }));
 
-        case 5:
+        case 6:
+          theta = _context13.sent;
+          DENOMINATOR_PPM = 1000000;
+          return _context13.abrupt("return", parseFloat(contributionInWPHT) * parseFloat(p0) * (1.0 - parseInt(theta) / DENOMINATOR_PPM));
+
+        case 9:
         case "end":
           return _context13.stop();
       }

@@ -313,7 +313,15 @@ const expectedArtistTokenOfHatchContribution = async (web3, { artistTokenAddr, c
     params: []
   });
 
-  return parseFloat(contributionInWPHT) * parseFloat(p0);
+  const theta = await Web3Wrapper.contractCall(web3, {
+    to: artistTokenAddr,
+    abi: artistTokenSc.abi,
+    method: 'theta',
+    params: []
+  });
+
+  const DENOMINATOR_PPM = 1000000;
+  return parseFloat(contributionInWPHT) * parseFloat(p0) * (1.0 - (parseInt(theta) / DENOMINATOR_PPM));
 };
 
 module.exports.expectedArtistTokenOfHatchContribution = expectedArtistTokenOfHatchContribution;
