@@ -1,5 +1,6 @@
 const { initializeProfileFactory } = require('../src/contracts/profile');
 const Web3 = require('../src/web3');
+const {forceMigration} = require('./00_unlock_account');
 
 const ProfileFactory = artifacts.require("GSNProfileFactory");
 
@@ -13,17 +14,17 @@ module.exports = function(deployer) {
   // Factory is funded with 300 PHT and 20 PHT for every new profile created.
   // Therefore the total amount of pre-funded profiles will be of 300/20 = 15 profiles
   deployer.then(() => {
-    return global.forceMigration('01')
+    return forceMigration('01')
     ? deployer.deploy(ProfileFactory, profileFundingInWei)
       : ProfileFactory.deployed();
-  }).then((instance) => {
-    if (!global.forceMigration('01')) {
-      console.log(`Contract already deployed ${instance.address}. Skipped migration "01_deploy_gsn_profile_factory.js`);
+  }).then((profileFactoryInstance) => {
+    if (!forceMigration('01') && profileFactoryInstance) {
+      console.log(`Contract already deployed ${profileFactoryInstance.address}. Skipped migration "01_deploy_gsn_profile_factory.js`);
       return;
     }
 
     return initializeProfileFactory(web3, {
-      contractAddr: instance.address,
+      contractAddr: profileFactoryInstance.address,
       relayHub: relayHub,
       from: process.env.ACCOUNT,
       factoryFundingInPht: factoryFundingInPht,

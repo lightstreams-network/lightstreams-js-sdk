@@ -5,6 +5,7 @@
  */
 
 const ensSdk = require('../src/ens/sdk');
+const {forceMigration} = require('./00_unlock_account');
 
 const ENSRegistry = artifacts.require("ENSRegistry");
 
@@ -15,16 +16,16 @@ module.exports = function(deployer) {
   let ensAddress;
 
   deployer.then(() => {
-    return global.forceMigration('02')
+    return forceMigration('02')
       ? deployer.deploy(ENSRegistry)
       : ENSRegistry.deployed()
-  }).then((instance) => {
-    if (!global.forceMigration('02')) {
-      console.log(`Contract already deployed ${instance.address}. Skipped migration "02_deploy_ens.js`);
+  }).then((ensInstance) => {
+    if (!forceMigration('02') && ensInstance) {
+      console.log(`Contract already deployed ${ensInstance.address}. Skipped migration "02_deploy_ens.js`);
       return null;
     }
 
-    ensAddress = instance.address;
+    ensAddress = ensInstance.address;
     return ensSdk.initializeNewRegistry(web3, {
       ensAddress,
       from: fromAccount

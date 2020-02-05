@@ -177,7 +177,7 @@ contract('ArtistToken', (accounts) => {
   it('should deploy a ArtistToken', async () => {
     artistToken = await ArtistTokenSc.new(
       ARTIST_NAME,
-      ARTIST_SYMBOL,
+      Web3Wrapper.utils.asciiToBytes(ARTIST_SYMBOL),
       [wPHT.address, fundingPool.address, feeRecipient, lightstreams],
       [GAS_PRICE_WEI, THETA, P0, AMOUNT_TO_RAISE_WEI, FRICTION, HATCH_DURATION_SECONDS, HATCH_VESTING_DURATION_SECONDS, MIN_REQUIRED_HATCHER_CONTRIBUTION_WEI],
       RESERVE_RATIO,

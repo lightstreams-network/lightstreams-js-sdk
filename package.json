@@ -1,6 +1,6 @@
 {
   "name": "lightstreams-js-sdk",
-  "version": "0.14.3",
+  "version": "0.15.0",
   "description": "Lightstreams JS SDK for building mainstream DApps with support for Programmable Decentralized Private Storage.",
   "author": "Gabriel Garrido",
   "contributors": [
@@ -18,7 +18,7 @@
     "build-single": "babel src --out-file ./build/src/index.js",
     "compile": "rm -rf ./build/contracts/*; truffle compile --all --reset",
     "test": "truffle test --reset --network",
-    "deploy": "truffle migrate --reset --network"
+    "deploy": "FORCE_MIGRATION=true truffle migrate --reset --network"
   },
   "repository": {
     "type": "git",

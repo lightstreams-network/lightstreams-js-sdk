@@ -53,8 +53,8 @@ module.exports.deployArtistToken = async (
     throw new Error(`Invalid argument "name": "${name}". Expected a valid artist name`);
   }
 
-  if (symbol && !symbol.length === 3) {
-    throw new Error(`Invalid argument "symbol": "${symbol}". Expected a 3 char artist symbol`);
+  if (symbol && !(symbol.length === 3 || symbol.length === 4)) {
+    throw new Error(`Invalid argument "symbol": "${symbol}". Expected a 3-4 char artist symbol`);
   }
   symbol = symbol.toUpperCase();
 
@@ -108,7 +108,7 @@ module.exports.deployArtistToken = async (
       bytecode: artistTokenSc.bytecode,
       params: [
         name,
-        symbol,
+        Web3Wrapper.utils.asciiToBytes(symbol),
         [wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr],
         [
           gasPrice, theta, p0, Web3Wrapper.utils.toWei(`${initialRaise}`),

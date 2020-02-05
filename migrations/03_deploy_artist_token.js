@@ -3,6 +3,7 @@ const WPHT = artifacts.require("WPHT");
 const FundingPool = artifacts.require("FundingPool");
 
 const { deployArtistToken } = require('../src/contracts/artist_token');
+const {forceMigration} = require('./00_unlock_account');
 
 // Curve parameters:
 const reserveRatio = 142857;  // Kappa (~ 6)
@@ -19,11 +20,11 @@ module.exports = function(deployer) {
   const fromAccount = process.env.ACCOUNT;
 
   deployer.then(() => {
-    return global.forceMigration('03')
+    return forceMigration('03')
       ? deployer.deploy(FundingPool)
       : FundingPool.deployed();
   }).then((fundingPoolInstance) => {
-    if (!global.forceMigration('03')) {
+    if (!forceMigration('03') && fundingPoolInstance) {
       console.log(`Contract already deployed ${fundingPoolInstance.address}. Skipped migration "03_deploy_artist_token.js`);
       return null;
     }
@@ -49,9 +50,9 @@ module.exports = function(deployer) {
             minExternalContribution: minExternalContibution
           }
         );
-      });
-  }).then(receipt => {
-    console.log(`ArtistToken deployed at: ${receipt.contractAddress}`);
+      }).then(receipt => {
+        console.log(`ArtistToken deployed at: ${receipt.contractAddress}`);
+      })
   }).catch(err => {
     console.error(err);
     throw err;
