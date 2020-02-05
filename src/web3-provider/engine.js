@@ -12,7 +12,7 @@ class ProviderEngine extends Web3ProviderEngine {
   constructor(opts = {}) {
     super(opts);
     this.wallets = {};
-    this.network = opts.network || { name: 'mainnet', networkId: 163, chainId: 163 }
+    this.network = opts.network || { name: 'mainnet', networkId: 163, chainId: 163, hardfork: 'byzantium' }
   }
 
   importAccount(encryptedJson, decryptedWallet = null) {

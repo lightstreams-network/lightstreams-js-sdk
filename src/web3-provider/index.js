@@ -25,13 +25,13 @@ module.exports = (opts = {}, walletSubprovider = null) => {
     chainId = parseInt(version);
     switch ( chainId ) {
       case 161:
-        lsProviderEngine.setNetwork({ name: 'standalone', networkId: chainId, chainId: chainId });
+        lsProviderEngine.setNetwork({ name: 'standalone', networkId: chainId, chainId: chainId, hardfork: 'constantinople' });
         break;
       case 162:
-        lsProviderEngine.setNetwork({ name: 'sirius', networkId: chainId, chainId: chainId });
+        lsProviderEngine.setNetwork({ name: 'sirius', networkId: chainId, chainId: chainId, hardfork: 'petersburg' });
         break;
       case 163:
-        lsProviderEngine.setNetwork({ name: 'mainnet', networkId: chainId, chainId: chainId });
+        lsProviderEngine.setNetwork({ name: 'mainnet', networkId: chainId, chainId: chainId, hardfork: 'petersburg' });
         break;
       default:
         lsProviderEngine.setNetwork({ name: 'unknown', networkId: chainId, chainId: chainId });
