@@ -11,6 +11,11 @@ const {
   getRecipientFunds
 } = require('../gsn');
 
+const {
+  buyArtistTokens,
+  transfer: transferArtistToken
+} = require('./artist_token');
+
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
 
@@ -201,4 +206,60 @@ module.exports.removeFile = (web3, { from, contractAddr, cid }) => {
     method: 'removeFile',
     params: [convertCidToBytes32(cid)]
   });
+};
+
+module.exports.withdraw = (web3, {from, beneficiary, contractAddr, amountInPht}) => {
+  Web3Wrapper.validator.validateAddress("from", from);
+  Web3Wrapper.validator.validateAddress("beneficiary", beneficiary);
+  Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
+
+  return Web3Wrapper.contractSendTx(web3, {
+    from: from,
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'withdraw',
+    params: [beneficiary, Web3Wrapper.utils.toWei(amountInPht)]
+  });
+};
+
+module.exports.withdrawArtistTokens = (web3, {from, beneficiary, contractAddr, artistToken, amount}) => {
+  Web3Wrapper.validator.validateAddress("from", from);
+  Web3Wrapper.validator.validateAddress("beneficiary", beneficiary);
+  Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
+  Web3Wrapper.validator.validateAddress("artistToken", artistToken);
+
+  return Web3Wrapper.contractSendTx(web3, {
+    from: from,
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'withdrawArtistTokens',
+    params: [artistToken, beneficiary, amount]
+  });
+};
+
+module.exports.buyArtistTokens = async(web3, {from, contractAddr, artistTokenAddr, wphtAddr, amountInPht}) => {
+  // Firstly we withdraw from profile contract enough PHT to buy artist token
+  await withdraw(web3, {
+    from,
+    beneficiary: from,
+    contractAddr,
+    amountInPht
+  });
+
+  // Then we proceed buying the tokens
+
+  const boughtAmountInBN = await buyArtistTokens(web3, {
+    from,
+    artistTokenAddr,
+    wphtAddr,
+    amountWeiBn: Web3Wrapper.utils.toBN(Web3Wrapper.utils.toWei(amountInPht))
+  });
+
+  // At last we transfer tokens back to our profile contract
+  await transferArtistToken(web3, {
+    artistTokenAddr,
+    amountInBn: boughtAmountInBN
+  });
+
+  return boughtAmountInBN;
 };

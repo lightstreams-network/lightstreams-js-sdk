@@ -108,7 +108,7 @@ module.exports.deployArtistToken = async (
       bytecode: artistTokenSc.bytecode,
       params: [
         name,
-        Web3Wrapper.utils.asciiToBytes(symbol),
+        symbol,
         [wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr],
         [
           gasPrice, theta, p0, Web3Wrapper.utils.toWei(`${initialRaise}`),

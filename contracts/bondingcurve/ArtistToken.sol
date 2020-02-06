@@ -5,7 +5,7 @@ import "../utils/Ownable.sol";
 
 contract ArtistToken is CommonsToken, Ownable {
     string public name;   // e.g: Armin Van Lightstreams
-    bytes4 public symbol; // e.g: AVL
+    string public symbol; // e.g: AVL
 
     /*
     * @param _addresses [0] externalToken [1] fundingPool [2] feeRecipient [3] pauser
@@ -14,7 +14,7 @@ contract ArtistToken is CommonsToken, Ownable {
     */
     constructor (
         string memory _name,
-        bytes4 _symbol,
+        string memory _symbol,
         address[4] memory _addresses,
         uint256[8] memory _settings,
         uint32 _reserveRatio

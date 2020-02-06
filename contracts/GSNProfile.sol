@@ -1,7 +1,9 @@
 pragma solidity ^0.5.0;
 
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
+
 import "./utils/GSNMultiOwnableRecipient.sol";
+import "./bondingcurve/ArtistToken.sol";
 import "./Acl.sol";
 
 /**
@@ -17,6 +19,9 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
     event FileRemoved(address owner, bytes32 cid, address acl);
     event FileRecovered(bytes32 cid, address acl, address newOwner, address byOwner);
     event OwnerRecovered(address newOwner, address byOwner);
+
+    event Withdraw(address beneficiary, uint256 withdrawn);
+    event WithdrawToken(address tokenAddr, address beneficiary, uint256 withdrawn);
 
     modifier fileExists(bytes32 _cid) {
         require(hasFile(_cid) == true);
@@ -54,6 +59,49 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
         emit FileRemoved(_msgSender(), _cid, acl);
     }
 
+    function recover(address _newOwner) public isOwner(_msgSender()) {
+        addOwner(_newOwner);
+
+        if (acls.length > 0) {
+            for (uint i = 0; i <= acls.length - 1; i++) {
+                ACL(acls[i]).grantAdmin(_newOwner);
+                emit FileRecovered(files[i], acls[i], _newOwner, _msgSender());
+            }
+        }
+
+        emit OwnerRecovered(_newOwner, _msgSender());
+    }
+
+    function withdraw(address payable _beneficiary, uint256 _amount) public isOwner(_msgSender()) {
+        require(_beneficiary != address(0), "Invalid beneficiary address");
+
+//        uint256 _withdrawable = address(this).balance;
+//        if (_amount > _withdrawable) {
+//            revert("There is not sufficient funds");
+//        }
+
+        _beneficiary.transfer(_amount);
+        emit Withdraw(_beneficiary, _amount);
+    }
+
+    function withdrawArtistTokens(address _tokenAddr, address payable _beneficiary, uint256 _amount) public isOwner(_msgSender()) {
+        require(_beneficiary != address(0), "Invalid beneficiary address");
+        require(_tokenAddr != address(0), "Token was not added");
+
+        ArtistToken tokenInstance = ArtistToken(_tokenAddr);
+//        uint256 _withdrawable = tokenInstance.balanceOf(address(this));
+//        if (_amount > _withdrawable) {
+//            revert("There is not sufficient funds");
+//        }
+
+        tokenInstance.transfer(_beneficiary, _amount);
+        emit WithdrawToken(_tokenAddr, _beneficiary, _amount);
+    }
+
+    /*
+     * READ-ONLY METHODS
+     */
+
     function hasFile(bytes32 _cid) view public returns (bool) {
         (, bool exists) = getFileIndex(_cid);
 
@@ -69,19 +117,6 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
         require(exists == true);
 
         return acls[fileIndex];
-    }
-
-    function recover(address _newOwner) public isOwner(_msgSender()) {
-        addOwner(_newOwner);
-
-        if (acls.length > 0) {
-            for (uint i = 0; i <= acls.length - 1; i++) {
-                ACL(acls[i]).grantAdmin(_newOwner);
-                emit FileRecovered(files[i], acls[i], _newOwner, _msgSender());
-            }
-        }
-
-        emit OwnerRecovered(_newOwner, _msgSender());
     }
 
     function getFileIndex(bytes32 _cid) internal view returns (uint256 index, bool exists) {

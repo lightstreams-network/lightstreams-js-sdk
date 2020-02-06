@@ -1,60 +1,81 @@
 // ReserveTokenMock will be an existing smart contract (DAI)
-const WPHT = artifacts.require("WPHT");
-const FundingPool = artifacts.require("FundingPool");
+const WPHT = artifacts.require('WPHT');
+const FundingPool = artifacts.require('FundingPool');
+const ArtistToken = artifacts.require('ArtistToken');
 
-const { deployArtistToken } = require('../src/contracts/artist_token');
+const {deployArtistToken, hatchArtistToken, isArtistTokenHatched} = require('../src/contracts/artist_token');
 const {forceMigration} = require('./00_unlock_account');
+const Web3Wrapper = require('../src/web3');
 
 // Curve parameters:
 const reserveRatio = 142857;  // Kappa (~ 6)
 const theta = 350000;         // 35% in ppm
 const p0 = 1;                 // Price of internal token in external tokens.
-const initialRaise = 300000;  // Raise amount in external tokens.
+const initialRaise = 300;     // Raise amount in external tokens.
 const friction = 20000;       // 2% in ppm
 const gasPrice = 15000000000; // 15 gwei
 const hatchDurationSeconds = 3024000; // 5 weeks
 const hatchVestingDurationSeconds = 7890000; // 3 months
-const minExternalContibution = 100000;
+const minExternalContribution = 100000;
 
 module.exports = function(deployer) {
   const fromAccount = process.env.ACCOUNT;
 
-  deployer.then(() => {
-    return forceMigration('03')
-      ? deployer.deploy(FundingPool)
-      : FundingPool.deployed();
-  }).then((fundingPoolInstance) => {
-    if (!forceMigration('03') && fundingPoolInstance) {
-      console.log(`Contract already deployed ${fundingPoolInstance.address}. Skipped migration "03_deploy_artist_token.js`);
-      return null;
-    }
+  if (!forceMigration('03')) {
+    console.log(`Skipped migration "03_deploy_artist_token.js"`);
+    return null;
+  }
 
-    return deployer.deploy(WPHT, fromAccount)
-      .then(WPHTInstance => {
-        return deployArtistToken(web3, {
+  let fundingPoolAddr;
+  let feeRecipientAddr;
+  let artistTokenAddr;
+  let wphtAddr;
+
+  deployer.then(() => {
+    return deployer.deploy(FundingPool)
+        .then((fundingPoolInstance) => {
+          console.log(`FundingPoolInstance deployed at: ${fundingPoolInstance.address}`);
+          fundingPoolAddr = fundingPoolInstance.address;
+          feeRecipientAddr = fundingPoolInstance.address;
+          return deployer.deploy(WPHT, fromAccount);
+        })
+        .then(WPHTInstance => {
+          console.log(`WPHTInstance deployed at: ${WPHTInstance.address}`);
+          wphtAddr = WPHTInstance.address;
+          const name = 'Armin Van Lightstreams';
+          const symbol = 'AVL';
+          const initialRaiseInWeiBN = Web3Wrapper.utils.toBN(Web3Wrapper.utils.toWei(`${initialRaise}`));
+          return deployer.deploy(ArtistToken,
+              name,
+              symbol,
+              [wphtAddr, fundingPoolAddr, feeRecipientAddr, fromAccount],
+              [
+                gasPrice, theta, p0, initialRaiseInWeiBN,
+                friction, hatchDurationSeconds, hatchVestingDurationSeconds, minExternalContribution,
+              ],
+              reserveRatio, {
+                from: fromAccount,
+                gas: 10000000,
+              });
+        })
+        .then(artistTokenInstance => {
+          console.log(`ArtistTokenInstance deployed at: ${artistTokenInstance.address}`);
+          artistTokenAddr = artistTokenInstance.address;
+          return hatchArtistToken(web3, {
             from: fromAccount,
-            name: "Armin Van Lightstreams",
-            symbol: "AVL",
-            wphtAddr: WPHTInstance.address,
-            fundingPoolAddr: fundingPoolInstance.address,
-            feeRecipientAddr: fundingPoolInstance.address,
-            pauserAddr: fromAccount,
-            reserveRatio: reserveRatio,
-            gasPrice: gasPrice,
-            theta: theta,
-            p0: p0,
-            initialRaise: initialRaise,
-            friction: friction,
-            hatchDurationSeconds: hatchDurationSeconds,
-            hatchVestingDurationSeconds: hatchVestingDurationSeconds,
-            minExternalContribution: minExternalContibution
-          }
-        );
-      }).then(receipt => {
-        console.log(`ArtistToken deployed at: ${receipt.contractAddress}`);
-      })
+            artistTokenAddr,
+            wphtAddr: wphtAddr,
+            amountWeiBn: Web3Wrapper.utils.toBN(Web3Wrapper.utils.toWei(`${initialRaise}`)),
+          }, true);
+        })
+        .then(() => {
+          return isArtistTokenHatched(web3, {artistTokenAddr});
+        })
+        .then((isHatched) => {
+          console.log(`ArtistToken ${artistTokenAddr} is hatched: ${isHatched}`);
+        });
   }).catch(err => {
     console.error(err);
     throw err;
-  })
+  });
 };
