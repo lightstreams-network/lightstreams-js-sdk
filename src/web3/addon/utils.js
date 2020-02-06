@@ -9,7 +9,7 @@ const web3Utils = require('web3-utils');
 const ethUtil = require('ethereumjs-util');
 
 module.exports.toWei = (pht, unit = 'ether') => {
-  return web3Utils.toWei(pht, unit)
+  return web3Utils.toWei(`${pht}`, unit)
 };
 
 module.exports.wei2pht = (n) => {

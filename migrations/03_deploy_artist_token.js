@@ -13,10 +13,10 @@ const theta = 350000;         // 35% in ppm
 const p0 = 1;                 // Price of internal token in external tokens.
 const initialRaise = 300;     // Raise amount in external tokens.
 const friction = 20000;       // 2% in ppm
-const gasPrice = 15000000000; // 15 gwei
+const gasPrice = 500000000000; // 500 gwei
 const hatchDurationSeconds = 3024000; // 5 weeks
-const hatchVestingDurationSeconds = 7890000; // 3 months
-const minExternalContribution = 100000;
+const hatchVestingDurationSeconds = 0; // 3 months
+const minExternalContribution = 10;
 
 module.exports = function(deployer) {
   const fromAccount = process.env.ACCOUNT;

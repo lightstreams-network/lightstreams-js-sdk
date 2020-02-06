@@ -13,7 +13,8 @@ const {
 
 const {
   buyArtistTokens,
-  transfer: transferArtistToken
+  transfer: transferArtistToken,
+  getBalanceOf
 } = require('./artist_token');
 
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
@@ -208,7 +209,7 @@ module.exports.removeFile = (web3, { from, contractAddr, cid }) => {
   });
 };
 
-module.exports.withdraw = (web3, {from, beneficiary, contractAddr, amountInPht}) => {
+const withdraw = module.exports.withdraw = (web3, {from, beneficiary, contractAddr, amountInPht}) => {
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("beneficiary", beneficiary);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
@@ -239,6 +240,7 @@ module.exports.withdrawArtistTokens = (web3, {from, beneficiary, contractAddr, a
 
 module.exports.buyArtistTokens = async(web3, {from, contractAddr, artistTokenAddr, wphtAddr, amountInPht}) => {
   // Firstly we withdraw from profile contract enough PHT to buy artist token
+  console.log(`Withdrawing ${amountInPht} from profile contract ${contractAddr}`);
   await withdraw(web3, {
     from,
     beneficiary: from,
@@ -247,16 +249,19 @@ module.exports.buyArtistTokens = async(web3, {from, contractAddr, artistTokenAdd
   });
 
   // Then we proceed buying the tokens
-
+  console.log(`Buying ${amountInPht} of artist tokens`);
   const boughtAmountInBN = await buyArtistTokens(web3, {
     from,
     artistTokenAddr,
     wphtAddr,
     amountWeiBn: Web3Wrapper.utils.toBN(Web3Wrapper.utils.toWei(amountInPht))
-  });
+  }, true);
 
   // At last we transfer tokens back to our profile contract
+  console.log(`Transfer purchased artist tokens ${Web3Wrapper.utils.toPht(boughtAmountInBN)} back to profile contract ${contractAddr}`);
   await transferArtistToken(web3, {
+    from,
+    to: contractAddr,
     artistTokenAddr,
     amountInBn: boughtAmountInBN
   });

@@ -36,6 +36,8 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
     constructor(address _owner) public GSNMultiOwnableRecipient(_owner) {
     }
 
+    function() payable external {}
+
     function addFile(bytes32 _cid, address _acl) public isOwner(_msgSender()) fileNotExists(_cid) {
         require(ACL(_acl).hasAdmin(address(this)));
 
