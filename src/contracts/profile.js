@@ -238,7 +238,7 @@ module.exports.withdrawArtistTokens = (web3, {from, beneficiary, contractAddr, a
   });
 };
 
-module.exports.buyArtistTokens = async(web3, {from, contractAddr, artistTokenAddr, wphtAddr, amountInPht}) => {
+module.exports.buyArtistTokenWrapper = async(web3, {from, contractAddr, artistTokenAddr, wphtAddr, amountInPht}) => {
   // Firstly we withdraw from profile contract enough PHT to buy artist token
   console.log(`Withdrawing ${amountInPht} from profile contract ${contractAddr}`);
   await withdraw(web3, {

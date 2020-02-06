@@ -17,7 +17,8 @@ const ACL = artifacts.require("ACL");
 
 const Web3 = require('../src/web3');
 const {
-  buyArtistTokens,
+  buyArtistTokenWrapper,
+  withdrawArtistTokens
 } = require('../src/contracts/profile');
 
 const {
@@ -98,7 +99,7 @@ contract('Profile', (accounts) => {
     });
 
     console.log(`Buying ${amountInPht} artist tokens`);
-    const bougthAmount = await buyArtistTokens(web3, {
+    const bougthAmount = await buyArtistTokenWrapper(web3, {
       from: FAN_ACCOUNT,
       contractAddr: fanProfileInstance.address,
       artistTokenAddr: artistTokenInstance.address,
@@ -106,11 +107,27 @@ contract('Profile', (accounts) => {
       amountInPht
     });
 
-    const balanceOf = await getBalanceOf(web3, {
+    const balanceOfContract = await getBalanceOf(web3, {
       artistTokenAddr: artistTokenInstance.address,
       accountAddr: fanProfileInstance.address
     });
 
-    assert.equal(bougthAmount, balanceOf);
+    assert.equal(bougthAmount, balanceOfContract);
+
+    // Withdraw artist tokens back to user
+    await withdrawArtistTokens(web3, {
+      from: FAN_ACCOUNT,
+      beneficiary: FAN_ACCOUNT,
+      contractAddr: fanProfileInstance.address,
+      amount: balanceOfContract,
+      artistToken: artistTokenInstance.address
+    });
+
+    const balanceOfUser = await getBalanceOf(web3, {
+      artistTokenAddr: artistTokenInstance.address,
+      accountAddr: FAN_ACCOUNT
+    });
+
+    assert.equal(bougthAmount, balanceOfUser);
   });
 });
