@@ -15,8 +15,10 @@ const initialRaise = 300;     // Raise amount in external tokens.
 const friction = 20000;       // 2% in ppm
 const gasPrice = 500000000000; // 500 gwei
 const hatchDurationSeconds = 3024000; // 5 weeks
-const hatchVestingDurationSeconds = 0; // 3 months
+const hatchVestingDurationSeconds = 0; //
 const minExternalContribution = 10;
+const remainingHatchingAmount = 10;
+const hatchingAmount = initialRaise - remainingHatchingAmount;
 
 module.exports = function(deployer) {
   const fromAccount = process.env.ACCOUNT;
@@ -65,7 +67,7 @@ module.exports = function(deployer) {
             from: fromAccount,
             artistTokenAddr,
             wphtAddr: wphtAddr,
-            amountWeiBn: Web3Wrapper.utils.toBN(Web3Wrapper.utils.toWei(`${initialRaise}`)),
+            amountWeiBn: Web3Wrapper.utils.toBN(Web3Wrapper.utils.toWei(`${hatchingAmount}`)),
           }, true);
         })
         .then(() => {
@@ -79,3 +81,5 @@ module.exports = function(deployer) {
     throw err;
   });
 };
+
+module.exports.remainingHatchingAmount = remainingHatchingAmount;

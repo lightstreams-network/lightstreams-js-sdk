@@ -152,8 +152,9 @@ contract CommonsToken is BondingCurveToken, Pausable {
     public
     whileHatched(true)
     whenNotPaused
+    returns (uint256)
   {
-    _curvedMint(_amount);
+    return _curvedMint(_amount);
   }
 
   function burn(uint256 _amount)
@@ -171,6 +172,7 @@ contract CommonsToken is BondingCurveToken, Pausable {
     whileHatched(false)
     expiredStatus(false)
     whenNotPaused
+    returns (uint256)
   {
     uint256 contributed = _value;
 
@@ -189,6 +191,7 @@ contract CommonsToken is BondingCurveToken, Pausable {
 
     // Lock the INTERNAL tokens, total is EXTERNAL amount * price of internal token during the raise.
     initialContributions[msg.sender].lockedInternal += contributed * p0;
+    return contributed * p0;
   }
 
   function fundsAllocated(uint256 _externalAllocated)
@@ -215,6 +218,7 @@ contract CommonsToken is BondingCurveToken, Pausable {
     onlyHatcher
     vestingFinished
     whenNotPaused
+    returns (uint256)
   {
     require(initialContributions[msg.sender].lockedInternal > 0);
 
@@ -230,6 +234,7 @@ contract CommonsToken is BondingCurveToken, Pausable {
 
     initialContributions[msg.sender].lockedInternal -= toUnlock;
     _transfer(address(this), msg.sender, toUnlock);
+    return toUnlock;
   }
 
   function refund()
@@ -237,10 +242,12 @@ contract CommonsToken is BondingCurveToken, Pausable {
     whileHatched(false)
     expiredStatus(true)
     whenNotPaused
+    returns (uint256)
   {
     // Refund the EXTERNAL tokens from the contibution.
     uint256 paidExternal = initialContributions[msg.sender].paidExternal;
     externalToken.transfer(msg.sender, paidExternal);
+    return paidExternal;
   }
 
   function transfer(address to, uint256 value) public whenNotPaused returns (bool) {
@@ -304,7 +311,7 @@ contract CommonsToken is BondingCurveToken, Pausable {
    */
   function _curvedMint(uint256 amount) internal returns (uint256) {
     require(externalToken.transferFrom(msg.sender, address(this), amount));
-    super._curvedMint(amount);
+    return super._curvedMint(amount);
   }
 
   /**

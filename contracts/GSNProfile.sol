@@ -4,6 +4,7 @@ import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
 import "./utils/GSNMultiOwnableRecipient.sol";
 import "./bondingcurve/ArtistToken.sol";
+import "./bondingcurve/vendor/ERC20/WPHT.sol";
 import "./Acl.sol";
 
 /**
@@ -20,8 +21,13 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
     event FileRecovered(bytes32 cid, address acl, address newOwner, address byOwner);
     event OwnerRecovered(address newOwner, address byOwner);
 
-    event Withdraw(address beneficiary, uint256 withdrawn);
-    event WithdrawToken(address tokenAddr, address beneficiary, uint256 withdrawn);
+    event HatchedArtistTokens(uint256 amount);
+    event ClaimedArtistTokens(uint256 amount);
+    event RefundedTokens(uint256 amount);
+    event BoughtArtistTokens(uint256 amount);
+    event TransferArtistTokens(address tokenAddr, address beneficiary, uint256 amount);
+
+    event TransferTokens(address beneficiary, uint256 amount);
 
     modifier fileExists(bytes32 _cid) {
         require(hasFile(_cid) == true);
@@ -74,30 +80,58 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
         emit OwnerRecovered(_newOwner, _msgSender());
     }
 
-    function withdraw(address payable _beneficiary, uint256 _amount) public isOwner(_msgSender()) {
+    function transferTokens(address payable _beneficiary, uint256 _amount) public isOwner(_msgSender()) {
         require(_beneficiary != address(0), "Invalid beneficiary address");
-
-//        uint256 _withdrawable = address(this).balance;
-//        if (_amount > _withdrawable) {
-//            revert("There is not sufficient funds");
-//        }
-
         _beneficiary.transfer(_amount);
-        emit Withdraw(_beneficiary, _amount);
+        emit TransferTokens(_beneficiary, _amount);
     }
 
-    function withdrawArtistTokens(address _tokenAddr, address payable _beneficiary, uint256 _amount) public isOwner(_msgSender()) {
+    function hatchArtistToken(address _tokenAddr, address payable _wphtAddr, uint256 _amount, bool _runDeposit) public isOwner(_msgSender()) {
+        WPHT wphtInstance = WPHT(_wphtAddr);
+        ArtistToken tokenInstance = ArtistToken(_tokenAddr);
+        if (_runDeposit) {
+            wphtInstance.deposit.value(_amount)();
+        }
+
+        wphtInstance.approve(_tokenAddr, _amount);
+        uint256 hatchedAmount = tokenInstance.hatchContribute(_amount);
+        emit HatchedArtistTokens(hatchedAmount);
+    }
+
+    function claimArtistToken(address _tokenAddr) public isOwner(_msgSender()) {
+        ArtistToken tokenInstance = ArtistToken(_tokenAddr);
+        uint256 unlockAmount = tokenInstance.claimTokens();
+        emit ClaimedArtistTokens(unlockAmount);
+    }
+
+    function refundArtistToken(address _tokenAddr, address payable _wphtAddr) public isOwner(_msgSender()) {
+        ArtistToken tokenInstance = ArtistToken(_tokenAddr);
+        WPHT wphtInstance = WPHT(_wphtAddr);
+        uint256 refundedAmount = tokenInstance.refund();
+        wphtInstance.withdraw(refundedAmount);
+        emit RefundedTokens(refundedAmount);
+    }
+
+    function buyArtistToken(address _tokenAddr, address payable _wphtAddr, uint256 _amount, bool _runDeposit) public isOwner(_msgSender()) {
+        require(_amount <= address(this).balance, "Not enought funds");
+        WPHT wphtInstance = WPHT(_wphtAddr);
+        ArtistToken tokenInstance = ArtistToken(_tokenAddr);
+        if (_runDeposit) {
+            wphtInstance.deposit.value(_amount)();
+        }
+
+        wphtInstance.approve(_tokenAddr, _amount);
+        uint256 boughtAmount = tokenInstance.mint(_amount);
+        emit BoughtArtistTokens(boughtAmount);
+    }
+
+    function transferArtistTokens(address _tokenAddr, address payable _beneficiary, uint256 _amount) public isOwner(_msgSender()) {
         require(_beneficiary != address(0), "Invalid beneficiary address");
         require(_tokenAddr != address(0), "Token was not added");
 
         ArtistToken tokenInstance = ArtistToken(_tokenAddr);
-//        uint256 _withdrawable = tokenInstance.balanceOf(address(this));
-//        if (_amount > _withdrawable) {
-//            revert("There is not sufficient funds");
-//        }
-
         tokenInstance.transfer(_beneficiary, _amount);
-        emit WithdrawToken(_tokenAddr, _beneficiary, _amount);
+        emit TransferArtistTokens(_tokenAddr, _beneficiary, _amount);
     }
 
     /*

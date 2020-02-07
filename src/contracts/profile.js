@@ -209,7 +209,7 @@ module.exports.removeFile = (web3, { from, contractAddr, cid }) => {
   });
 };
 
-const withdraw = module.exports.withdraw = (web3, {from, beneficiary, contractAddr, amountInPht}) => {
+const transferTokens = module.exports.transferTokens = (web3, {from, beneficiary, contractAddr, amountInPht}) => {
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("beneficiary", beneficiary);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
@@ -218,12 +218,12 @@ const withdraw = module.exports.withdraw = (web3, {from, beneficiary, contractAd
     from: from,
     to: contractAddr,
     abi: profileScJSON.abi,
-    method: 'withdraw',
+    method: 'transferTokens',
     params: [beneficiary, Web3Wrapper.utils.toWei(amountInPht)]
   });
 };
 
-module.exports.withdrawArtistTokens = (web3, {from, beneficiary, contractAddr, artistToken, amount}) => {
+module.exports.transferArtistTokens = (web3, {from, beneficiary, contractAddr, artistToken, amount}) => {
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("beneficiary", beneficiary);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
@@ -233,38 +233,102 @@ module.exports.withdrawArtistTokens = (web3, {from, beneficiary, contractAddr, a
     from: from,
     to: contractAddr,
     abi: profileScJSON.abi,
-    method: 'withdrawArtistTokens',
+    method: 'transferArtistTokens',
     params: [artistToken, beneficiary, amount]
   });
 };
 
-module.exports.buyArtistTokenWrapper = async(web3, {from, contractAddr, artistTokenAddr, wphtAddr, amountInPht}) => {
-  // Firstly we withdraw from profile contract enough PHT to buy artist token
-  console.log(`Withdrawing ${amountInPht} from profile contract ${contractAddr}`);
-  await withdraw(web3, {
-    from,
-    beneficiary: from,
-    contractAddr,
-    amountInPht
-  });
+module.exports.hatchArtistToken = async (web3, {from, contractAddr, artistTokenAddr, wphtAddr, amountInPht}) => {
 
-  // Then we proceed buying the tokens
-  console.log(`Buying ${amountInPht} of artist tokens`);
-  const boughtAmountInBN = await buyArtistTokens(web3, {
-    from,
-    artistTokenAddr,
-    wphtAddr,
-    amountWeiBn: Web3Wrapper.utils.toBN(Web3Wrapper.utils.toWei(amountInPht))
-  }, true);
+  Web3Wrapper.validator.validateAddress("from", from);
+  Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
+  Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
 
-  // At last we transfer tokens back to our profile contract
-  console.log(`Transfer purchased artist tokens ${Web3Wrapper.utils.toPht(boughtAmountInBN)} back to profile contract ${contractAddr}`);
-  await transferArtistToken(web3, {
-    from,
+  const receipt = await Web3Wrapper.contractSendTx(web3, {
+    from: from,
     to: contractAddr,
-    artistTokenAddr,
-    amountInBn: boughtAmountInBN
+    abi: profileScJSON.abi,
+    method: 'hatchArtistToken',
+    params: [artistTokenAddr, wphtAddr, Web3Wrapper.utils.toWei(amountInPht), true]
   });
 
-  return boughtAmountInBN;
+  if (!receipt.events['HatchedArtistTokens']) {
+    return null;
+  }
+
+  const tokens = receipt.events['HatchedArtistTokens'].returnValues['amount'];
+  console.log(`Hatcher ${from} obtained an estimated amount of ${Web3Wrapper.utils.toPht(tokens).toString()} ArtistTokens ${artistTokenAddr}`);
+  return Web3Wrapper.utils.toBN(tokens);
+};
+
+module.exports.claimArtistToken = async (web3, {from, contractAddr, artistTokenAddr}) => {
+
+  Web3Wrapper.validator.validateAddress("from", from);
+  Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
+
+  const receipt = await Web3Wrapper.contractSendTx(web3, {
+    from: from,
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'claimArtistToken',
+    params: [artistTokenAddr]
+  });
+
+  if (!receipt.events['ClaimedArtistTokens']) {
+    return null;
+  }
+
+  const tokens = receipt.events['ClaimedArtistTokens'].returnValues['amount'];
+  console.log(`Hatcher ${from} claimed an amount of ${Web3Wrapper.utils.toPht(tokens).toString()} ArtistTokens ${artistTokenAddr}`);
+  return Web3Wrapper.utils.toBN(tokens);
+};
+
+module.exports.refundArtistToken = async (web3, {from, contractAddr, artistTokenAddr, wphtAddr}) => {
+
+  Web3Wrapper.validator.validateAddress("from", from);
+  Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
+  Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
+
+  const receipt = await Web3Wrapper.contractSendTx(web3, {
+    from: from,
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'refundArtistToken',
+    params: [artistTokenAddr, wphtAddr]
+  });
+
+  if (!receipt.events['RefundedTokens']) {
+    return null;
+  }
+
+  const tokens = receipt.events['RefundedTokens'].returnValues['amount'];
+  console.log(`Hatcher ${from} get a refund of ${Web3Wrapper.utils.toPht(tokens).toString()} WPHT tokens`);
+  return Web3Wrapper.utils.toBN(tokens);
+};
+
+module.exports.buyArtistToken = async(web3, {from, contractAddr, artistTokenAddr, wphtAddr, amountInPht}) => {
+
+  Web3Wrapper.validator.validateAddress("from", from);
+  Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
+  Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
+  Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
+
+  const receipt = await Web3Wrapper.contractSendTx(web3, {
+    from: from,
+    to: contractAddr,
+    abi: profileScJSON.abi,
+    method: 'buyArtistToken',
+    params: [artistTokenAddr, wphtAddr, Web3Wrapper.utils.toWei(amountInPht), true]
+  });
+
+  if(!receipt.events['BoughtArtistTokens']) {
+    return null;
+  }
+
+  const tokens = receipt.events['BoughtArtistTokens'].returnValues['amount'];
+  console.log(`Buyer ${from} purchased ${Web3Wrapper.utils.toPht(tokens).toString()} of ArtistTokens ${artistTokenAddr}`);
+  return Web3Wrapper.utils.toBN(tokens);
 };
