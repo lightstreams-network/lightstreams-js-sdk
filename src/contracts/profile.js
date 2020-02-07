@@ -238,7 +238,7 @@ module.exports.transferArtistTokens = (web3, {from, beneficiary, contractAddr, a
   });
 };
 
-module.exports.hatchArtistToken = async (web3, {from, contractAddr, artistTokenAddr, wphtAddr, amountInPht}) => {
+module.exports.hatchArtistToken = async (web3, {from, contractAddr, artistTokenAddr, wphtAddr, amountInPht, useGSN}) => {
 
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
@@ -250,6 +250,7 @@ module.exports.hatchArtistToken = async (web3, {from, contractAddr, artistTokenA
     to: contractAddr,
     abi: profileScJSON.abi,
     method: 'hatchArtistToken',
+    useGSN,
     params: [artistTokenAddr, wphtAddr, Web3Wrapper.utils.toWei(amountInPht), true]
   });
 
@@ -262,7 +263,7 @@ module.exports.hatchArtistToken = async (web3, {from, contractAddr, artistTokenA
   return Web3Wrapper.utils.toBN(tokens);
 };
 
-module.exports.claimArtistToken = async (web3, {from, contractAddr, artistTokenAddr}) => {
+module.exports.claimArtistToken = async (web3, {from, contractAddr, artistTokenAddr, useGSN}) => {
 
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
@@ -273,6 +274,7 @@ module.exports.claimArtistToken = async (web3, {from, contractAddr, artistTokenA
     to: contractAddr,
     abi: profileScJSON.abi,
     method: 'claimArtistToken',
+    useGSN,
     params: [artistTokenAddr]
   });
 
@@ -285,7 +287,7 @@ module.exports.claimArtistToken = async (web3, {from, contractAddr, artistTokenA
   return Web3Wrapper.utils.toBN(tokens);
 };
 
-module.exports.refundArtistToken = async (web3, {from, contractAddr, artistTokenAddr, wphtAddr}) => {
+module.exports.refundArtistToken = async (web3, {from, contractAddr, artistTokenAddr, wphtAddr, useGSN}) => {
 
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
@@ -297,6 +299,7 @@ module.exports.refundArtistToken = async (web3, {from, contractAddr, artistToken
     to: contractAddr,
     abi: profileScJSON.abi,
     method: 'refundArtistToken',
+    useGSN,
     params: [artistTokenAddr, wphtAddr]
   });
 
