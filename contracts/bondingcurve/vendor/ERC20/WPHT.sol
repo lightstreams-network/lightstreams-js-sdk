@@ -22,7 +22,9 @@
 
 pragma solidity ^0.5.0;
 
-contract WPHT {
+import "./IERC20.sol";
+
+contract WPHT is IERC20{
     string public name     = "Wrapped Photon";
     string public symbol   = "WPHT";
     uint8  public decimals = 18;

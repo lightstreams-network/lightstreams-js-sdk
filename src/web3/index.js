@@ -73,6 +73,7 @@ module.exports.sendTransaction = (web3, { from, to, valueInPht }) => {
 module.exports.contractCall = (web3, { to: contractAddr, abi, from, method, params }) => {
   return new Promise(async (resolve, reject) => {
     if (!isLatest(web3)) reject(new Error('Web3 version is not valid'));
+    console.log(`Contract Call: ${contractAddr}.${method}(${params.join(', ')})`);
 
     try {
       const contract = new web3.eth.Contract(abi, contractAddr);
@@ -91,6 +92,7 @@ module.exports.contractCall = (web3, { to: contractAddr, abi, from, method, para
 module.exports.contractSendTx = (web3, { to: contractAddr, abi, from, method, params, value, gas, useGSN }) => {
   return new Promise(async (resolve, reject) => {
     if (!isLatest(web3)) reject(new Error('Web3 version is not valid'));
+    console.log(`Contract Tx: ${contractAddr}.${method}('${params.join("', '")}') by ${from}`);
 
     try {
       const contract = new web3.eth.Contract(abi, contractAddr);
@@ -99,7 +101,7 @@ module.exports.contractSendTx = (web3, { to: contractAddr, abi, from, method, pa
       }
 
       const sendTx = contract.methods[method](...(params || []));
-      const estimatedGas = gas || await calculateEstimatedGas(sendTx, { from, value });
+      const estimatedGas = gas || await calculateEstimatedGas(sendTx, { from });
 
       sendTx.send({
         from,

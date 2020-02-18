@@ -13,7 +13,7 @@ const {
 
 const {
   buyArtistTokens,
-  transfer: transferArtistToken,
+  transfer: transferIERC20Token,
   getBalanceOf
 } = require('./artist_token');
 
@@ -209,7 +209,7 @@ module.exports.removeFile = (web3, { from, contractAddr, cid }) => {
   });
 };
 
-const transferTokens = module.exports.transferTokens = (web3, {from, beneficiary, contractAddr, amountInPht}) => {
+const transferToken = module.exports.transferToken = (web3, {from, beneficiary, contractAddr, amountInPht}) => {
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("beneficiary", beneficiary);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
@@ -218,23 +218,24 @@ const transferTokens = module.exports.transferTokens = (web3, {from, beneficiary
     from: from,
     to: contractAddr,
     abi: profileScJSON.abi,
-    method: 'transferTokens',
+    method: 'transferToken',
     params: [beneficiary, Web3Wrapper.utils.toWei(amountInPht)]
   });
 };
 
-module.exports.transferArtistTokens = (web3, {from, beneficiary, contractAddr, artistToken, amount}) => {
+module.exports.transferIERC20Token = (web3, {from, beneficiary, contractAddr, tokenAddr, amount}) => {
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("beneficiary", beneficiary);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
-  Web3Wrapper.validator.validateAddress("artistToken", artistToken);
+  Web3Wrapper.validator.validateAddress("tokenAddr", tokenAddr);
+  Web3Wrapper.validator.validateWeiBn("amount", amount);
 
   return Web3Wrapper.contractSendTx(web3, {
     from: from,
     to: contractAddr,
     abi: profileScJSON.abi,
-    method: 'transferArtistTokens',
-    params: [artistToken, beneficiary, amount]
+    method: 'transferIERC20Token',
+    params: [tokenAddr, beneficiary, amount.toString()]
   });
 };
 

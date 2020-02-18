@@ -3,7 +3,7 @@ const WPHT = artifacts.require('WPHT');
 const FundingPool = artifacts.require('FundingPool');
 const ArtistToken = artifacts.require('ArtistToken');
 
-const {deployArtistToken, hatchArtistToken, isArtistTokenHatched} = require('../src/contracts/artist_token');
+const {hatchArtistToken, isArtistTokenHatched} = require('../src/contracts/artist_token');
 const {forceMigration} = require('./00_unlock_account');
 const Web3Wrapper = require('../src/web3');
 
@@ -29,7 +29,6 @@ module.exports = function(deployer) {
   }
 
   let fundingPoolAddr;
-  let feeRecipientAddr;
   let artistTokenAddr;
   let wphtAddr;
 
@@ -38,7 +37,6 @@ module.exports = function(deployer) {
         .then((fundingPoolInstance) => {
           console.log(`FundingPoolInstance deployed at: ${fundingPoolInstance.address}`);
           fundingPoolAddr = fundingPoolInstance.address;
-          feeRecipientAddr = fundingPoolInstance.address;
           return deployer.deploy(WPHT, fromAccount);
         })
         .then(WPHTInstance => {
@@ -46,11 +44,13 @@ module.exports = function(deployer) {
           wphtAddr = WPHTInstance.address;
           const name = 'Armin Van Lightstreams';
           const symbol = 'AVL';
+          const feeRecipientAddr = fromAccount;
+          const pauserAddr = fromAccount;
           const initialRaiseInWeiBN = Web3Wrapper.utils.toBN(Web3Wrapper.utils.toWei(`${initialRaise}`));
           return deployer.deploy(ArtistToken,
               name,
               symbol,
-              [wphtAddr, fundingPoolAddr, feeRecipientAddr, fromAccount],
+              [wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr],
               [
                 gasPrice, theta, p0, initialRaiseInWeiBN,
                 friction, hatchDurationSeconds, hatchVestingDurationSeconds, minExternalContribution,
@@ -83,3 +83,5 @@ module.exports = function(deployer) {
 };
 
 module.exports.remainingHatchingAmount = remainingHatchingAmount;
+module.exports.thetaPercent = theta / 10000;
+module.exports.initialRaise = initialRaise;

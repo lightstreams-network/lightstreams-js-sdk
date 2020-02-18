@@ -12,26 +12,36 @@ const assert = chai.assert;
 
 const Profile = artifacts.require("GSNProfile");
 const ArtistToken = artifacts.require("ArtistToken");
+const FundingPool = artifacts.require("FundingPool");
 const WPHT = artifacts.require("WPHT");
 
 const Web3 = require('../src/web3');
 const {
   buyArtistToken,
-  transferArtistTokens,
+  transferIERC20Token,
   hatchArtistToken,
   refundArtistToken,
   claimArtistToken,
 } = require('../src/contracts/profile');
 
 const {
-  remainingHatchingAmount
+  allocateFunds,
+} = require('../src/contracts/fundingPool');
+
+const {
+  getWPHTBalanceOf,
+} = require('../src/contracts/wpht');
+
+const {
+  remainingHatchingAmount,
 } = require('../migrations/03_deploy_artist_token');
 
 const {
   getBalanceOf,
 } = require('../src/contracts/artist_token');
 
-contract('Profile', (accounts) => {
+// @IMPORTANT: Require redeploy migration `03_deploy_artist_token.js`
+contract('ArtistToken', (accounts) => {
   const ROOT_ACCOUNT = process.env.NETWORK === 'ganache' ? accounts[0] : process.env.ACCOUNT;
   let FAN_ACCOUNT;
   const ACCOUNT_DEFAULT_PASSWORD = 'test123';
@@ -131,12 +141,12 @@ contract('Profile', (accounts) => {
     assert.equal(bougthAmount, balanceOfContract);
 
     // Withdraw artist tokens back to user
-    await transferArtistTokens(web3, {
+    await transferIERC20Token(web3, {
       from: FAN_ACCOUNT,
       beneficiary: FAN_ACCOUNT,
       contractAddr: fanProfileInstance.address,
-      amount: balanceOfContract,
-      artistToken: artistTokenInstance.address
+      amount: Web3.utils.toBN(balanceOfContract),
+      tokenAddr: artistTokenInstance.address
     });
 
     const balanceOfUser = await getBalanceOf(web3, {
@@ -147,7 +157,7 @@ contract('Profile', (accounts) => {
     assert.equal(bougthAmount, balanceOfUser);
   });
 
-  it('should claim ArtistToken hatch amount', async () => {
+  it('should claim ArtistToken contributor hatch amount', async () => {
     const artistTokenInstance = await ArtistToken.deployed();
 
     console.log(`Claiming artist tokens...`);
@@ -163,6 +173,72 @@ contract('Profile', (accounts) => {
     });
 
     assert.equal(claimedTotal, balanceOfContract);
+  });
+
+  it('should claim accumulated WPHT from hatching', async () => {
+    const wphtInstance = await WPHT.deployed();
+    const artistTokenInstance = await ArtistToken.deployed();
+    const fundingPoolInstance = await FundingPool.deployed();
+    // We are using fan profile contract as beneficiary because it is the only profile deployed
+    // within the scope of this test
+    const beneficiaryAddr = fanProfileInstance.address;
+
+    const fundingPoolWPHTBalanceInWei = await getWPHTBalanceOf(web3, {
+      wphtAddr: wphtInstance.address,
+      accountAddr: fundingPoolInstance.address,
+    });
+
+    const beforeWPHTBalanceInWei = await getWPHTBalanceOf(web3, {
+      wphtAddr: wphtInstance.address,
+      accountAddr: beneficiaryAddr,
+    });
+
+    console.log(`Claiming ${Web3.utils.toPht(fundingPoolWPHTBalanceInWei)} WPHT from hatching of artist tokens...`);
+    await allocateFunds(web3, {
+      from: ROOT_ACCOUNT,
+      contractAddr: fundingPoolInstance.address,
+      artistTokenAddr: artistTokenInstance.address,
+      beneficiary: beneficiaryAddr,
+      amount: fundingPoolWPHTBalanceInWei
+    });
+
+    const afterWPHTBalanceInWei = await getWPHTBalanceOf(web3, {
+      wphtAddr: wphtInstance.address,
+      accountAddr: beneficiaryAddr,
+    });
+
+    assert.equal(afterWPHTBalanceInWei.toString(), beforeWPHTBalanceInWei.add(fundingPoolWPHTBalanceInWei).toString());
+  });
+
+  it('should pull WPHT from holded by profile contract', async () => {
+    const wphtInstance = await WPHT.deployed();
+    const beneficiaryAddr = ROOT_ACCOUNT;
+
+    const profileWPHTBalanceInWei = await getWPHTBalanceOf(web3, {
+      wphtAddr: wphtInstance.address,
+      accountAddr: fanProfileInstance.address,
+    });
+
+    const beforeWPHTBalanceInWei = await getWPHTBalanceOf(web3, {
+      wphtAddr: wphtInstance.address,
+      accountAddr: beneficiaryAddr,
+    });
+
+    // Withdraw artist tokens back to user
+    await transferIERC20Token(web3, {
+      from: FAN_ACCOUNT,
+      beneficiary: beneficiaryAddr,
+      contractAddr: fanProfileInstance.address,
+      amount: profileWPHTBalanceInWei,
+      tokenAddr: wphtInstance.address
+    });
+
+    const afterWPHTBalanceInWei = await getWPHTBalanceOf(web3, {
+      wphtAddr: wphtInstance.address,
+      accountAddr: beneficiaryAddr,
+    });
+
+    assert.equal(afterWPHTBalanceInWei.toString(), beforeWPHTBalanceInWei.add(profileWPHTBalanceInWei).toString());
   });
 
 });

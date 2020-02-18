@@ -4,6 +4,7 @@ import "@openzeppelin/upgrades/contracts/Initializable.sol";
 
 import "./utils/GSNMultiOwnableRecipient.sol";
 import "./bondingcurve/ArtistToken.sol";
+import "./bondingcurve/vendor/ERC20/IERC20.sol";
 import "./bondingcurve/vendor/ERC20/WPHT.sol";
 import "./Acl.sol";
 
@@ -25,9 +26,9 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
     event ClaimedArtistTokens(uint256 amount);
     event RefundedTokens(uint256 amount);
     event BoughtArtistTokens(uint256 amount);
-    event TransferArtistTokens(address tokenAddr, address beneficiary, uint256 amount);
 
-    event TransferTokens(address beneficiary, uint256 amount);
+    event TransferToken(address beneficiary, uint256 amount);
+    event TransferIERC20Token(address wphtAddr, address beneficiary, uint256 amount);
 
     modifier fileExists(bytes32 _cid) {
         require(hasFile(_cid) == true);
@@ -80,10 +81,17 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
         emit OwnerRecovered(_newOwner, _msgSender());
     }
 
-    function transferTokens(address payable _beneficiary, uint256 _amount) public isOwner(_msgSender()) {
+    function transferToken(address payable _beneficiary, uint256 _amount) public isOwner(_msgSender()) {
         require(_beneficiary != address(0), "Invalid beneficiary address");
         _beneficiary.transfer(_amount);
-        emit TransferTokens(_beneficiary, _amount);
+        emit TransferToken(_beneficiary, _amount);
+    }
+
+    function transferIERC20Token(address payable _tokenAddr, address payable _beneficiary, uint256 _amount) public isOwner(_msgSender()) {
+        require(_beneficiary != address(0), "Invalid beneficiary address");
+
+        IERC20(_tokenAddr).transfer(_beneficiary, _amount);
+        emit TransferIERC20Token(_tokenAddr, _beneficiary, _amount);
     }
 
     function hatchArtistToken(address _tokenAddr, address payable _wphtAddr, uint256 _amount, bool _runDeposit) public isOwner(_msgSender()) {
@@ -123,15 +131,6 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
         wphtInstance.approve(_tokenAddr, _amount);
         uint256 boughtAmount = tokenInstance.mint(_amount);
         emit BoughtArtistTokens(boughtAmount);
-    }
-
-    function transferArtistTokens(address _tokenAddr, address payable _beneficiary, uint256 _amount) public isOwner(_msgSender()) {
-        require(_beneficiary != address(0), "Invalid beneficiary address");
-        require(_tokenAddr != address(0), "Token was not added");
-
-        ArtistToken tokenInstance = ArtistToken(_tokenAddr);
-        tokenInstance.transfer(_beneficiary, _amount);
-        emit TransferArtistTokens(_tokenAddr, _beneficiary, _amount);
     }
 
     /*
