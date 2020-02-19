@@ -5,10 +5,12 @@
  */
 
 const Web3Wrapper = require('../web3');
+const Debug = require('debug');
 
 const artistTokenSc = require('../../build/contracts/ArtistToken.json');
 const fundingPoolSc = require('../../build/contracts/FundingPool.json');
 const wphtSc = require('../../build/contracts/WPHT.json');
+const logger = Debug('ls-sdk:contract:artistToken');
 
 module.exports.deployFundingPool = async (web3, { from }) => {
   Web3Wrapper.validator.validateAddress("from", from);
@@ -24,7 +26,7 @@ module.exports.deployFundingPool = async (web3, { from }) => {
     }
   );
 
-  console.log(`FundingPool deployed at: ${receipt.contractAddress}`);
+  logger(`FundingPool deployed at: ${receipt.contractAddress}`);
 
   return receipt;
 };
@@ -119,7 +121,7 @@ module.exports.deployArtistToken = async (
     }
   );
 
-  console.log(`ArtistToken deployed at: ${receipt.contractAddress}`);
+  logger(`ArtistToken deployed at: ${receipt.contractAddress}`);
   return receipt;
 };
 
@@ -137,7 +139,7 @@ module.exports.isArtistTokenHatched = async (web3, { artistTokenAddr }) => {
     }
   );
 
-  console.log(`ArtistToken ${artistTokenAddr} is hatched: ${isHatched}`);
+  logger(`ArtistToken ${artistTokenAddr} is hatched: ${isHatched}`);
 
   return isHatched;
 };
@@ -149,7 +151,7 @@ module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr
   Web3Wrapper.validator.validateWeiBn("amountWeiBn", amountWeiBn);
 
   const hatchingAmountInPHT = Web3Wrapper.utils.toPht(amountWeiBn);
-  console.log(`Hatcher ${from} sent a hatch worth of ${hatchingAmountInPHT} PHT to artist token ${artistTokenAddr}`);
+  logger(`Hatcher ${from} sent a hatch worth of ${hatchingAmountInPHT} PHT to artist token ${artistTokenAddr}`);
   if (runDepositFirst) {
     await Web3Wrapper.contractSendTx(
       web3,
@@ -195,7 +197,7 @@ module.exports.hatchArtistToken = async (web3, { from, artistTokenAddr, wphtAddr
     contributionInWPHT: hatchingAmountInPHT
   });
 
-  console.log(`Hatched completed, expected ${expectedArtistTokens} ArtistTokens`);
+  logger(`Hatched completed, expected ${expectedArtistTokens} ArtistTokens`);
   return receipt;
 };
 
@@ -213,7 +215,7 @@ module.exports.getArtistTokenTotalSupply = async (web3, { artistTokenAddr }) => 
     }
   );
 
-  console.log(`ArtistToken ${artistTokenAddr} total supply is: ${Web3Wrapper.utils.wei2pht(totalSupply)} PHT`);
+  logger(`ArtistToken ${artistTokenAddr} total supply is: ${Web3Wrapper.utils.wei2pht(totalSupply)} PHT`);
 
   return totalSupply;
 };
@@ -243,6 +245,19 @@ module.exports.transfer = async (web3, { artistTokenAddr, from, to, amountInBn }
       abi: artistTokenSc.abi,
       params: [to, amountInBn.toString()]
     }
+  );
+};
+
+module.exports.transferOwnership = async (web3, {artistTokenAddr, from, newOwnerAddr}) => {
+  return await Web3Wrapper.contractSendTx(
+      web3,
+      {
+        to: artistTokenAddr,
+        from: from,
+        method: 'transferOwnership',
+        abi: artistTokenSc.abi,
+        params: [newOwnerAddr]
+      }
   );
 };
 
@@ -386,7 +401,7 @@ module.exports.getArtistTokenBalanceOf = async (web3, { artistTokenAddr, account
     }
   );
 
-  console.log(`Account ${accountAddr} has ${Web3Wrapper.utils.wei2pht(balance.toString())} ${symbol} of ArtistToken ${artistTokenAddr}`);
+  logger(`Account ${accountAddr} has ${Web3Wrapper.utils.wei2pht(balance.toString())} ${symbol} of ArtistToken ${artistTokenAddr}`);
 
   return Web3Wrapper.utils.toBN(balance);
 };
@@ -438,7 +453,7 @@ module.exports.buyArtistTokens = async (web3, { from, artistTokenAddr, wphtAddr,
 
   const tokens = receipt.events['CurvedMint'].returnValues['amount'];
 
-  console.log(`Buyer ${from} purchased ${tokens.toString()} ${symbol} of ArtistToken ${artistTokenAddr}`);
+  logger(`Buyer ${from} purchased ${tokens.toString()} ${symbol} of ArtistToken ${artistTokenAddr}`);
 
   return Web3Wrapper.utils.toBN(tokens);
 };
@@ -465,7 +480,7 @@ module.exports.sellArtistTokens = async (web3, { from, artistTokenAddr, amountBn
 
   const wphtReimbursement = receipt.events['CurvedBurn'].returnValues['reimbursement'];
 
-  console.log(`Account ${from} sold ${Web3Wrapper.utils.wei2pht(amountBn.toString())} ${symbol} of ArtistToken ${artistTokenAddr} for ${Web3Wrapper.utils.wei2pht(wphtReimbursement.toString())} WPHT`);
+  logger(`Account ${from} sold ${Web3Wrapper.utils.wei2pht(amountBn.toString())} ${symbol} of ArtistToken ${artistTokenAddr} for ${Web3Wrapper.utils.wei2pht(wphtReimbursement.toString())} WPHT`);
 
   return wphtReimbursement;
 };

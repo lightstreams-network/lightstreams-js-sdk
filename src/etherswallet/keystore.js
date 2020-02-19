@@ -4,11 +4,13 @@
  * Copyright 2019 (c) Lightstreams, Granada
  */
 
+const Debug = require('debug');
 const ethers = require('ethers');
+const logger = Debug('ls-sdk:etherswallet');
 
 const showProgressCb = (actionText, progress) => {
   if((progress % 5) === 0){
-    console.log(`${actionText}: ` + parseInt(progress) + "% complete");
+    logger(`${actionText}: ` + parseInt(progress) + "% complete");
   }
 };
 

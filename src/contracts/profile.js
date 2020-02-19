@@ -3,7 +3,9 @@
  * Date: 14/08/19 15:44
  * Copyright 2019 (c) Lightstreams, Granada
  */
+const Debug = require('debug');
 const Web3Wrapper = require('../web3');
+
 const CID = require('cids');
 const {
   fundRecipient,
@@ -11,14 +13,9 @@ const {
   getRecipientFunds
 } = require('../gsn');
 
-const {
-  buyArtistTokens,
-  transfer: transferIERC20Token,
-  getBalanceOf
-} = require('./artist_token');
-
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
+const logger = Debug('ls-sdk:contract:profile');
 
 const cidPrefix = 'Qm';
 const cidLength = 46;
@@ -70,7 +67,7 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
   if (!txReceipt.status) {
     throw new Error(`ProfileFactory initialization failed`);
   } else {
-    console.log(`Activated GSN for ProfileFactory instance for RelayHub ${relayHub}...`);
+    logger(`Activated GSN for ProfileFactory instance for RelayHub ${relayHub}...`);
   }
 
   // Step 3: Profile factory is funded via RelayHub
@@ -81,11 +78,11 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
     amountInPht: factoryFundingInPht
   });
 
-  console.log(`Recipient ${contractAddr} is sponsored by relayHub with ${factoryFundingInPht} PHTs...`);
+  logger(`Recipient ${contractAddr} is sponsored by relayHub with ${factoryFundingInPht} PHTs...`);
 
   // Step 4: Top up factory contract to fund new profile deployments
   await Web3Wrapper.sendTransaction(web3, { from, to: contractAddr, valueInPht: faucetFundingInPht });
-  console.log(`Topped up ProfileFactory with ${faucetFundingInPht} PHTs to fund new profile creations...`);
+  logger(`Topped up ProfileFactory with ${faucetFundingInPht} PHTs to fund new profile creations...`);
 
   return contractAddr;
 };
@@ -93,14 +90,14 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
 module.exports.validateHasEnoughFundToDeployProfile = async(web3, { contractAddr }) => {
   const recipientFundsInWei = await getRecipientFunds(web3, { recipient: contractAddr });
   const recipientFundsInPht = Web3Wrapper.utils.toPht(`${recipientFundsInWei}`);
-  console.log(`GSNProfileFactory recipient has ${recipientFundsInPht} PHT for GSN`);
+  logger(`GSNProfileFactory recipient has ${recipientFundsInPht} PHT for GSN`);
   if (parseFloat(recipientFundsInPht) < 1.0) {
     throw new Error(`Not enough recipient funds: ${recipientFundsInPht} PHT`);
   }
 
   const balanceInWei = await Web3Wrapper.getBalance(web3, { address: contractAddr });
   const balanceInPht = Web3Wrapper.utils.toPht(balanceInWei);
-  console.log(`GSNProfileFactory contract has ${balanceInPht} PHT in balance`);
+  logger(`GSNProfileFactory contract has ${balanceInPht} PHT in balance`);
   const newProfileFundingInWei = await Web3Wrapper.contractCall(web3, {
     to: contractAddr,
     abi: factoryScJSON.abi,
@@ -260,7 +257,7 @@ module.exports.hatchArtistToken = async (web3, {from, contractAddr, artistTokenA
   }
 
   const tokens = receipt.events['HatchedArtistTokens'].returnValues['amount'];
-  console.log(`Hatcher ${from} obtained an estimated amount of ${Web3Wrapper.utils.toPht(tokens).toString()} ArtistTokens ${artistTokenAddr}`);
+  logger(`Hatcher ${from} obtained an estimated amount of ${Web3Wrapper.utils.toPht(tokens).toString()} ArtistTokens ${artistTokenAddr}`);
   return Web3Wrapper.utils.toBN(tokens);
 };
 
@@ -284,7 +281,7 @@ module.exports.claimArtistToken = async (web3, {from, contractAddr, artistTokenA
   }
 
   const tokens = receipt.events['ClaimedArtistTokens'].returnValues['amount'];
-  console.log(`Hatcher ${from} claimed an amount of ${Web3Wrapper.utils.toPht(tokens).toString()} ArtistTokens ${artistTokenAddr}`);
+  logger(`Hatcher ${from} claimed an amount of ${Web3Wrapper.utils.toPht(tokens).toString()} ArtistTokens ${artistTokenAddr}`);
   return Web3Wrapper.utils.toBN(tokens);
 };
 
@@ -309,7 +306,7 @@ module.exports.refundArtistToken = async (web3, {from, contractAddr, artistToken
   }
 
   const tokens = receipt.events['RefundedTokens'].returnValues['amount'];
-  console.log(`Hatcher ${from} get a refund of ${Web3Wrapper.utils.toPht(tokens).toString()} WPHT tokens`);
+  logger(`Hatcher ${from} get a refund of ${Web3Wrapper.utils.toPht(tokens).toString()} WPHT tokens`);
   return Web3Wrapper.utils.toBN(tokens);
 };
 
@@ -333,6 +330,6 @@ module.exports.buyArtistToken = async(web3, {from, contractAddr, artistTokenAddr
   }
 
   const tokens = receipt.events['BoughtArtistTokens'].returnValues['amount'];
-  console.log(`Buyer ${from} purchased ${Web3Wrapper.utils.toPht(tokens).toString()} of ArtistTokens ${artistTokenAddr}`);
+  logger(`Buyer ${from} purchased ${Web3Wrapper.utils.toPht(tokens).toString()} of ArtistTokens ${artistTokenAddr}`);
   return Web3Wrapper.utils.toBN(tokens);
 };

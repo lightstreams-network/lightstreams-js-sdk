@@ -5,10 +5,12 @@
  */
 
 
+const Debug = require('debug');
 const { fromConnection } = require('@openzeppelin/network');
 const { fundRecipient: fRecipient, getRelayHub } = require('@openzeppelin/gsn-helpers/src/helpers');
 const { isRelayHubDeployedForRecipient, getRecipientFunds } = require('@openzeppelin/gsn-provider').utils;
 const web3Utils = require('web3-utils');
+const logger = Debug('ls-sdk:gsn');
 
 module.exports.newWeb3Engine = (provider, { signKey, dev, verbose }) => {
   return fromConnection(provider, {
@@ -45,7 +47,7 @@ module.exports.fundRecipient = async (web3, { from, recipient, relayHub, amountI
     throw new Error(`Invalid "amountInPht" value ${amountInPht}. Expected a float number`);
   }
 
-  console.log(`Account ${from} depositing ${amountInPht} PHT in relayhub ${relayHub} to fund recipient ${recipient} `);
+  logger(`Account ${from} depositing ${amountInPht} PHT in relayhub ${relayHub} to fund recipient ${recipient} `);
   const curBalance = await fRecipient(web3, {
     from,
     recipient,

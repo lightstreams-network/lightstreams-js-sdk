@@ -5,10 +5,12 @@
  */
 
 const ENS = require('ethereum-ens');
+const Debug = require('debug');
+
 const ENSRegistry = require('./ENSRegistry');
 const PublicResolver = require('./PublicResolver');
-// const FIFSRegistrar = require('./FIFSRegistrar');
 const defaultResolverNodeId = 'resolver';
+const logger = Debug('ls-sdk:ens');
 
 module.exports.initializeManager = (provider, ensRegistryAddress) => {
   return new ENS(provider, ensRegistryAddress);
@@ -58,7 +60,7 @@ module.exports.registerNode = async (web3, {ensAddress, parentNode, from, subnod
   });
 
   if (toAddress) {
-    console.log(`Set node address to ${toAddress}....`);
+    logger(`Set node address to ${toAddress}....`);
     const txReceipt = await PublicResolver(web3).setAddr(resolverAddress,
       { from: from, node: subnode, address: toAddress }
     );
@@ -66,7 +68,7 @@ module.exports.registerNode = async (web3, {ensAddress, parentNode, from, subnod
       console.error(txReceipt);
       throw new Error(`Failed to set resolver address.`)
     } else {
-      console.log(`Successfully set "${subnode}" to address "${resolverAddress}"`);
+      logger(`Successfully set "${subnode}" to address "${resolverAddress}"`);
     }
   }
 };
@@ -81,7 +83,7 @@ module.exports.registerNode = async (web3, {ensAddress, parentNode, from, subnod
 
 const registerNode = async(web3, { from, ensAddress, parentNode, subnode }) => {
   parentNode = parentNode || '0x0000000000000000000000000000000000000000';
-  console.log(`Registering node "${subnode}.${parentNode}"...`);
+  logger(`Registering node "${subnode}.${parentNode}"...`);
   const txReceipt = await ENSRegistry(web3).registerNode(ensAddress, {
     from,
     owner: from,
@@ -93,12 +95,12 @@ const registerNode = async(web3, { from, ensAddress, parentNode, subnode }) => {
     console.error(txReceipt);
     throw new Error(`Failed to register node ${subnode}.${parentNode}}`)
   } else {
-    console.log(`Node "${subnode}.${parentNode}" registered successfully (${txReceipt.cumulativeGasUsed} usedGas)`);
+    logger(`Node "${subnode}.${parentNode}" registered successfully (${txReceipt.cumulativeGasUsed} usedGas)`);
   }
 };
 
 const setNodeResolver = async (web3, { from, node, ensAddress, resolverAddress }) => {
-  console.log(`Set resolver ${resolverAddress} for "${node}"...`);
+  logger(`Set resolver ${resolverAddress} for "${node}"...`);
 
   const fetchedOwner = await ENSRegistry(web3).owner(ensAddress, { node });
   if (fetchedOwner.toLowerCase() !== from.toLowerCase()) {
@@ -111,33 +113,33 @@ const setNodeResolver = async (web3, { from, node, ensAddress, resolverAddress }
     console.error(txReceipt);
     throw new Error(`Failed to set resolver`)
   } else {
-    console.log(`Resolver was set correctly. (${txReceipt.cumulativeGasUsed} usedGas)`)
+    logger(`Resolver was set correctly. (${txReceipt.cumulativeGasUsed} usedGas)`)
   }
 };
 
 const deployRegistry = async (web3, { from }) => {
-  console.log(`Deploying registry...`);
+  logger(`Deploying registry...`);
   const txReceipt = await ENSRegistry(web3).deploy({ from: from });
   const address = txReceipt.contractAddress;
   if (txReceipt.status !== true) {
     console.error(txReceipt);
     throw new Error(`Failed to deploy ENSRegistry ${txReceipt.transactionHash}`)
   } else {
-    console.log(`ENSRegistry deployed correctly at ${address} (${txReceipt.cumulativeGasUsed} usedGas)`)
+    logger(`ENSRegistry deployed correctly at ${address} (${txReceipt.cumulativeGasUsed} usedGas)`)
   }
 
   return address;
 };
 
 const deployResolver = async (web3, { from, ensAddress }) => {
-  console.log(`Deploying resolver...`);
+  logger(`Deploying resolver...`);
   const txReceipt = await PublicResolver(web3).deploy({ from: from, ensAddress });
   const address = txReceipt.contractAddress;
   if (txReceipt.status !== true) {
     console.error(txReceipt);
     throw new Error(`Failed to deploy PublicResolver ${txReceipt.transactionHash}`)
   } else {
-    console.log(`PublicResolver deployed correctly at ${address}`)
+    logger(`PublicResolver deployed correctly at ${address}`)
   }
 
   return address;

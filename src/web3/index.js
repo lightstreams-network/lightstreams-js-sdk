@@ -4,10 +4,12 @@
  * Copyright 2019 (c) Lightstreams, Granada
  */
 
+const Debug = require('debug');
 const Web3 = require('web3');
 const net = require('net');
 
 const { fetchTxReceipt, calculateEstimatedGas, isLatest, FailedTxError } = require('./helpers');
+const logger = Debug('ls-sdk:web3');
 
 const defaultCfg = {
   provider: process.env.WEB3_PROVIDER || 'http://locahost:8545',
@@ -73,7 +75,7 @@ module.exports.sendTransaction = (web3, { from, to, valueInPht }) => {
 module.exports.contractCall = (web3, { to: contractAddr, abi, from, method, params }) => {
   return new Promise(async (resolve, reject) => {
     if (!isLatest(web3)) reject(new Error('Web3 version is not valid'));
-    console.log(`Contract Call: ${contractAddr}.${method}(${params.join(', ')})`);
+    logger(`Contract Call: ${contractAddr}.${method}(${params.join(', ')})`);
 
     try {
       const contract = new web3.eth.Contract(abi, contractAddr);
@@ -92,7 +94,7 @@ module.exports.contractCall = (web3, { to: contractAddr, abi, from, method, para
 module.exports.contractSendTx = (web3, { to: contractAddr, abi, from, method, params, value, gas, useGSN }) => {
   return new Promise(async (resolve, reject) => {
     if (!isLatest(web3)) reject(new Error('Web3 version is not valid'));
-    console.log(`Contract Tx: ${contractAddr}.${method}('${params.join("', '")}') by ${from}`);
+    logger(`Contract Tx: ${contractAddr}.${method}('${params.join("', '")}') by ${from}`);
 
     try {
       const contract = new web3.eth.Contract(abi, contractAddr);
@@ -109,7 +111,7 @@ module.exports.contractSendTx = (web3, { to: contractAddr, abi, from, method, pa
         useGSN: useGSN || false,
         gas: estimatedGas
       }).on('transactionHash', (txHash) => {
-        console.log(`Tx executed: `, txHash)
+        logger(`Tx executed: `, txHash)
       }).on('receipt', (txReceipt) => {
         if (!txReceipt.status) reject(txReceipt);
         else resolve(txReceipt);
@@ -134,7 +136,7 @@ module.exports.deployContract = (web3, { from, abi, bytecode, params }) => {
         from,
         gas: estimatedGas
       }).on('transactionHash', (txHash) => {
-        console.log(`Tx executed: `, txHash)
+        logger(`Tx executed: `, txHash)
       }).on('receipt', (txReceipt) => {
         if (!txReceipt.status) reject(FailedTxError(txReceipt));
         else resolve(txReceipt);
