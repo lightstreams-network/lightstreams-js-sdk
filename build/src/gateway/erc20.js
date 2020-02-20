@@ -1,5 +1,9 @@
 "use strict";
 
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 /**
  * User: ggarrido
  * Date: 4/02/19 11:22
@@ -53,28 +57,38 @@ module.exports = function (gwDomain) {
      * @param amount_wei Amount in wei to purchase
      * @returns {Promise<{ tokens }>}
      */
-    purchase: function purchase(erc20_address, account, password, amount_wei) {
-      return regeneratorRuntime.async(function purchase$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _context.next = 2;
-              return regeneratorRuntime.awrap(request.post("".concat(gwDomain).concat(ERC20_PURCHASE_PATH), {
-                erc20_address: erc20_address,
-                password: password,
-                account: account,
-                amount_wei: amount_wei.toString()
-              }));
+    purchase: function () {
+      var _purchase = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(erc20_address, account, password, amount_wei) {
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return request.post("".concat(gwDomain).concat(ERC20_PURCHASE_PATH), {
+                  erc20_address: erc20_address,
+                  password: password,
+                  account: account,
+                  amount_wei: amount_wei.toString()
+                });
 
-            case 2:
-              return _context.abrupt("return", _context.sent);
+              case 2:
+                return _context.abrupt("return", _context.sent);
 
-            case 3:
-            case "end":
-              return _context.stop();
+              case 3:
+              case "end":
+                return _context.stop();
+            }
           }
-        }
-      });
-    }
+        }, _callee);
+      }));
+
+      function purchase(_x, _x2, _x3, _x4) {
+        return _purchase.apply(this, arguments);
+      }
+
+      return purchase;
+    }()
   };
 };

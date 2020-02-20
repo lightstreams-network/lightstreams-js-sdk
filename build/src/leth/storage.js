@@ -1,5 +1,9 @@
 "use strict";
 
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 /**
  * User: llukac<lukas@lightstreams.io>
  * Date: 11/12/19 10:10
@@ -22,35 +26,45 @@ var acl = require('./acl');
  */
 
 
-module.exports.add = function _callee(web3, gatewayStorage, _ref) {
-  var from, owner, file, _ref$isPublic, isPublic, receipt;
+module.exports.add =
+/*#__PURE__*/
+function () {
+  var _ref = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee(web3, gatewayStorage, _ref2) {
+    var from, owner, file, _ref2$isPublic, isPublic, receipt;
 
-  return regeneratorRuntime.async(function _callee$(_context) {
-    while (1) {
-      switch (_context.prev = _context.next) {
-        case 0:
-          from = _ref.from, owner = _ref.owner, file = _ref.file, _ref$isPublic = _ref.isPublic, isPublic = _ref$isPublic === void 0 ? false : _ref$isPublic;
-          Web3Wrapper.validator.validateAddress("from", from);
-          Web3Wrapper.validator.validateAddress("owner", owner);
-          _context.next = 5;
-          return regeneratorRuntime.awrap(acl.create(web3, {
-            from: from,
-            owner: owner,
-            isPublic: isPublic
-          }));
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            from = _ref2.from, owner = _ref2.owner, file = _ref2.file, _ref2$isPublic = _ref2.isPublic, isPublic = _ref2$isPublic === void 0 ? false : _ref2$isPublic;
+            Web3Wrapper.validator.validateAddress("from", from);
+            Web3Wrapper.validator.validateAddress("owner", owner);
+            _context.next = 5;
+            return acl.create(web3, {
+              from: from,
+              owner: owner,
+              isPublic: isPublic
+            });
 
-        case 5:
-          receipt = _context.sent;
-          _context.next = 8;
-          return regeneratorRuntime.awrap(gatewayStorage.addWithAcl(owner, receipt.contractAddress, file));
+          case 5:
+            receipt = _context.sent;
+            _context.next = 8;
+            return gatewayStorage.addWithAcl(owner, receipt.contractAddress, file);
 
-        case 8:
-          return _context.abrupt("return", _context.sent);
+          case 8:
+            return _context.abrupt("return", _context.sent);
 
-        case 9:
-        case "end":
-          return _context.stop();
+          case 9:
+          case "end":
+            return _context.stop();
+        }
       }
-    }
-  });
-};
+    }, _callee);
+  }));
+
+  return function (_x, _x2, _x3) {
+    return _ref.apply(this, arguments);
+  };
+}();

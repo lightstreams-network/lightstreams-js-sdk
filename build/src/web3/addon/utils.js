@@ -11,7 +11,7 @@ var ethUtil = require('ethereumjs-util');
 
 module.exports.toWei = function (pht) {
   var unit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'ether';
-  return web3Utils.toWei(pht, unit);
+  return web3Utils.toWei("".concat(pht), unit);
 };
 
 module.exports.wei2pht = function (n) {

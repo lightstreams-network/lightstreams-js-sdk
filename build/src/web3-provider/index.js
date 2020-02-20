@@ -53,7 +53,8 @@ module.exports = function () {
         lsProviderEngine.setNetwork({
           name: 'standalone',
           networkId: chainId,
-          chainId: chainId
+          chainId: chainId,
+          hardfork: 'constantinople'
         });
         break;
 
@@ -61,7 +62,8 @@ module.exports = function () {
         lsProviderEngine.setNetwork({
           name: 'sirius',
           networkId: chainId,
-          chainId: chainId
+          chainId: chainId,
+          hardfork: 'petersburg'
         });
         break;
 
@@ -69,7 +71,8 @@ module.exports = function () {
         lsProviderEngine.setNetwork({
           name: 'mainnet',
           networkId: chainId,
-          chainId: chainId
+          chainId: chainId,
+          hardfork: 'petersburg'
         });
         break;
 
