@@ -6,7 +6,6 @@
 const Debug = require('debug');
 const Web3Wrapper = require('../web3');
 
-const CID = require('cids');
 const {
   fundRecipient,
   isRelayHubDeployed,
@@ -17,26 +16,7 @@ const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 const profileScJSON = require('../../build/contracts/GSNProfile.json');
 const logger = Debug('ls-sdk:contract:profile');
 
-const cidPrefix = 'Qm';
-const cidLength = 46;
-
-function convertHexToCid(hexValue) {
-  // [18,32] Correspond to the removed cidPrefix 'Qm'
-  const arrayBuffer = [...[18, 32], ...Web3Wrapper.utils.hexToBytes(hexValue)];
-  const cidObj = new CID(Web3Wrapper.utils.toBuffer(arrayBuffer));
-  return cidObj.toString();
-}
-
-function convertCidToBytes32(cid) {
-  if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
-    throw new Error('Invalid cid value');
-  }
-  const cidObj = new CID(cid);
-  return cidObj.multihash.slice(2).toJSON().data;
-}
-
-module.exports.convertHexToCid = convertHexToCid;
-module.exports.convertCidToBytes32 = convertCidToBytes32;
+const {convertHexToCid, convertCidToBytes32} = require('../leth/cid');
 
 module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub, from, factoryFundingInPht, faucetFundingInPht }) => {
   Web3Wrapper.validator.validateAddress("from", from);
