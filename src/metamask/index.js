@@ -43,7 +43,7 @@ module.exports.web3 = (opts = {}) => {
     throw new Error(`Missing option "rpcUrl"`);
   }
 
-  const walletSubprovider = WalletSubprovider(providerEngine, {
+  const walletSubprovider = WalletSubprovider({
     getAccounts: (cb) => {
       providerEngine.eth.getAccounts(cb)
     },
