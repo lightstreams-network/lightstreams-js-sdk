@@ -90,17 +90,36 @@ module.exports.validateHasEnoughFundToDeployProfile = async(web3, { contractAddr
   }
 };
 
-module.exports.deployProfileByFactory = async (web3, { from, contractAddr, useGSN }) => {
+module.exports.deployProfileByFactory = async (web3, { from, owner, contractAddr, useGSN }) => {
   const txReceipt = await Web3Wrapper.contractSendTx(web3, {
     to: contractAddr,
     from,
     useGSN: useGSN || false,
     abi: factoryScJSON.abi,
     method: 'newProfile',
-    params: [from]
+    params: [owner || from]
   });
 
   return txReceipt.events['NewProfile'].returnValues['addr'];
+};
+
+module.exports.deployProfileFactory = (web3, {from, profileFundingInPht}) => {
+  return Web3Wrapper.deployContract(web3, {
+    from,
+    abi: factoryScJSON.abi,
+    bytecode: factoryScJSON.bytecode,
+    params: [Web3Wrapper.utils.toWei(`${profileFundingInPht}`)]
+  });
+};
+
+
+module.exports.deployProfile = (web3, { from, owner }) => {
+  return Web3Wrapper.deployContract(web3, {
+    from,
+    abi: profileScJSON.abi,
+    bytecode: profileScJSON.bytecode,
+    params: [owner]
+  });
 };
 
 module.exports.addOwner = async (web3, { from, contractAddr, useGSN, ownerAddr }) => {

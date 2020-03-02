@@ -15,7 +15,7 @@ const ProviderEngine = require('./engine');
 const { PersonalSubprovider, GsnSubprovider, WalletSubprovider } = require('./subproviders');
 
 module.exports = (opts = {}, walletSubprovider = null) => {
-  const { rpcUrl, ...engineOpts } = opts;
+  const { rpcUrl, useRemoteKeystore, ...engineOpts } = opts;
   const lsProviderEngine = new ProviderEngine(engineOpts);
   const version = '0.8.0';
 
@@ -92,9 +92,10 @@ module.exports = (opts = {}, walletSubprovider = null) => {
     });
   }
 
-  lsProviderEngine.addProvider(walletSubprovider);
-
-  lsProviderEngine.addProvider(new PersonalSubprovider(lsProviderEngine));
+  if(!useRemoteKeystore) {
+    lsProviderEngine.addProvider(walletSubprovider);
+    lsProviderEngine.addProvider(new PersonalSubprovider(lsProviderEngine));
+  }
 
   lsProviderEngine.addProvider(new RpcSubprovider({
     rpcUrl: rpcUrl, // Expected to be
