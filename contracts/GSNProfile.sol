@@ -94,9 +94,9 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
         emit TransferIERC20Token(_tokenAddr, _beneficiary, _amount);
     }
 
-    function hatchArtistToken(address _tokenAddr, address payable _wphtAddr, uint256 _amount, bool _runDeposit) public isOwner(_msgSender()) {
-        WPHT wphtInstance = WPHT(_wphtAddr);
+    function hatchArtistToken(address _tokenAddr, uint256 _amount, bool _runDeposit) public isOwner(_msgSender()) {
         ArtistToken tokenInstance = ArtistToken(_tokenAddr);
+        WPHT wphtInstance = WPHT(address(uint160(address(tokenInstance.externalToken()))));
         if (_runDeposit) {
             wphtInstance.deposit.value(_amount)();
         }
@@ -112,18 +112,18 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
         emit ClaimedArtistTokens(unlockAmount);
     }
 
-    function refundArtistToken(address _tokenAddr, address payable _wphtAddr) public isOwner(_msgSender()) {
+    function refundArtistToken(address _tokenAddr) public isOwner(_msgSender()) {
         ArtistToken tokenInstance = ArtistToken(_tokenAddr);
-        WPHT wphtInstance = WPHT(_wphtAddr);
+        WPHT wphtInstance = WPHT(address(uint160(address(tokenInstance.externalToken()))));
         uint256 refundedAmount = tokenInstance.refund();
         wphtInstance.withdraw(refundedAmount);
         emit RefundedTokens(refundedAmount);
     }
 
-    function buyArtistToken(address _tokenAddr, address payable _wphtAddr, uint256 _amount, bool _runDeposit) public isOwner(_msgSender()) {
+    function buyArtistToken(address _tokenAddr, uint256 _amount, bool _runDeposit) public isOwner(_msgSender()) {
         require(_amount <= address(this).balance, "Not enought funds");
-        WPHT wphtInstance = WPHT(_wphtAddr);
         ArtistToken tokenInstance = ArtistToken(_tokenAddr);
+        WPHT wphtInstance = WPHT(address(uint160(address(tokenInstance.externalToken()))));
         if (_runDeposit) {
             wphtInstance.deposit.value(_amount)();
         }

@@ -86,7 +86,6 @@ contract('ArtistToken', (accounts) => {
   //     from: FAN_ACCOUNT,
   //     contractAddr: fanProfileInstance.address,
   //     artistTokenAddr: artistTokenInstance.address,
-  //     wphtAddr: wphtInstance.address,
   //     amountInPht: smallHatchAmount
   //   });
   //
@@ -94,7 +93,6 @@ contract('ArtistToken', (accounts) => {
   //     from: FAN_ACCOUNT,
   //     contractAddr: fanProfileInstance.address,
   //     artistTokenAddr: artistTokenInstance.address,
-  //     wphtAddr: wphtInstance.address
   //   });
   //
   //   const profileBalanceAfter = await web3.eth.getBalance(fanProfileInstance.address);
@@ -122,14 +120,12 @@ contract('ArtistToken', (accounts) => {
 
   it('should buy artist tokens using profile contract funds', async () => {
     const artistTokenInstance = await ArtistToken.deployed();
-    const wphtInstance = await WPHT.deployed();
 
     console.log(`Buying ${fanBuyAmountInPht} artist tokens`);
     const bougthAmount = await buyArtistToken(web3, {
       from: FAN_ACCOUNT,
       contractAddr: fanProfileInstance.address,
       artistTokenAddr: artistTokenInstance.address,
-      wphtAddr: wphtInstance.address,
       amountInPht: fanBuyAmountInPht
     });
 

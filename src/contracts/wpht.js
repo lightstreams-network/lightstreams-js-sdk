@@ -11,6 +11,15 @@ const wphtSc = require('../../build/contracts/WPHT.json');
 const fundingPoolSc = require('../../build/contracts/FundingPool.json');
 const logger = Debug('ls-sdk:contract:wpht');
 
+module.exports.deployContract = (web3, {from}) => {
+  return Web3Wrapper.deployContract(web3, {
+    from,
+    abi: wphtSc.abi,
+    bytecode: wphtSc.bytecode,
+    params: []
+  })
+};
+
 module.exports.getWPHTBalanceOf = async (web3, { wphtAddr, accountAddr }) => {
   Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
   Web3Wrapper.validator.validateAddress("accountAddr", accountAddr);
@@ -25,8 +34,6 @@ module.exports.getWPHTBalanceOf = async (web3, { wphtAddr, accountAddr }) => {
       params: [accountAddr],
     }
   );
-
-  logger(`Account ${accountAddr} has ${Web3Wrapper.utils.wei2pht(balance.toString())} WPHT`);
 
   return Web3Wrapper.utils.toBN(balance);
 };

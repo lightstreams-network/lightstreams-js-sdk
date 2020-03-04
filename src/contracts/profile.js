@@ -55,13 +55,13 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
     from,
     recipient: contractAddr,
     relayHub: relayHub,
-    amountInPht: factoryFundingInPht
+    amountInPht: `${factoryFundingInPht}`
   });
 
   logger(`Recipient ${contractAddr} is sponsored by relayHub with ${factoryFundingInPht} PHTs...`);
 
   // Step 4: Top up factory contract to fund new profile deployments
-  await Web3Wrapper.sendTransaction(web3, { from, to: contractAddr, valueInPht: faucetFundingInPht });
+  await Web3Wrapper.sendTransaction(web3, { from, to: contractAddr, valueInPht: `${faucetFundingInPht}` });
   logger(`Topped up ProfileFactory with ${faucetFundingInPht} PHTs to fund new profile creations...`);
 
   return contractAddr;
@@ -235,10 +235,9 @@ module.exports.transferIERC20Token = (web3, {from, beneficiary, contractAddr, to
   });
 };
 
-module.exports.hatchArtistToken = async (web3, {from, contractAddr, artistTokenAddr, wphtAddr, amountInPht, useGSN}) => {
+module.exports.hatchArtistToken = async (web3, {from, contractAddr, artistTokenAddr, amountInPht, useGSN}) => {
 
   Web3Wrapper.validator.validateAddress("from", from);
-  Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
   Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
 
@@ -248,7 +247,7 @@ module.exports.hatchArtistToken = async (web3, {from, contractAddr, artistTokenA
     abi: profileScJSON.abi,
     method: 'hatchArtistToken',
     useGSN,
-    params: [artistTokenAddr, wphtAddr, Web3Wrapper.utils.toWei(amountInPht), true]
+    params: [artistTokenAddr, Web3Wrapper.utils.toWei(amountInPht), true]
   });
 
   if (!receipt.events['HatchedArtistTokens']) {
@@ -284,12 +283,11 @@ module.exports.claimArtistToken = async (web3, {from, contractAddr, artistTokenA
   return Web3Wrapper.utils.toBN(tokens);
 };
 
-module.exports.refundArtistToken = async (web3, {from, contractAddr, artistTokenAddr, wphtAddr, useGSN}) => {
+module.exports.refundArtistToken = async (web3, {from, contractAddr, artistTokenAddr, useGSN}) => {
 
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
   Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
-  Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
 
   const receipt = await Web3Wrapper.contractSendTx(web3, {
     from: from,
@@ -297,7 +295,7 @@ module.exports.refundArtistToken = async (web3, {from, contractAddr, artistToken
     abi: profileScJSON.abi,
     method: 'refundArtistToken',
     useGSN,
-    params: [artistTokenAddr, wphtAddr]
+    params: [artistTokenAddr]
   });
 
   if (!receipt.events['RefundedTokens']) {
@@ -309,10 +307,9 @@ module.exports.refundArtistToken = async (web3, {from, contractAddr, artistToken
   return Web3Wrapper.utils.toBN(tokens);
 };
 
-module.exports.buyArtistToken = async(web3, {from, contractAddr, artistTokenAddr, wphtAddr, amountInPht}) => {
+module.exports.buyArtistToken = async(web3, {from, contractAddr, artistTokenAddr, amountInPht}) => {
 
   Web3Wrapper.validator.validateAddress("from", from);
-  Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
   Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
 
@@ -321,7 +318,7 @@ module.exports.buyArtistToken = async(web3, {from, contractAddr, artistTokenAddr
     to: contractAddr,
     abi: profileScJSON.abi,
     method: 'buyArtistToken',
-    params: [artistTokenAddr, wphtAddr, Web3Wrapper.utils.toWei(amountInPht), true]
+    params: [artistTokenAddr, Web3Wrapper.utils.toWei(amountInPht), true]
   });
 
   if(!receipt.events['BoughtArtistTokens']) {
