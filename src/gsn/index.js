@@ -10,6 +10,7 @@ const { fromConnection } = require('@openzeppelin/network');
 const { fundRecipient: fRecipient, getRelayHub } = require('@openzeppelin/gsn-helpers/src/helpers');
 const { isRelayHubDeployedForRecipient, getRecipientFunds } = require('@openzeppelin/gsn-provider').utils;
 const web3Utils = require('web3-utils');
+const Web3Wrapper = require('../web3');
 const logger = Debug('ls-sdk:gsn');
 
 module.exports.newWeb3Engine = (provider, { signKey, dev, verbose }) => {
@@ -25,18 +26,43 @@ module.exports.newWeb3Engine = (provider, { signKey, dev, verbose }) => {
   });
 };
 
-// The "from" account is sending "amountInPht" tokens to the "relayHub" address to sponsor the usage
-// of the smart contract address specified at the "recipient"
-module.exports.fundRecipient = async (web3, { from, recipient, relayHub, amountInPht }) => {
-  if(!web3Utils.isAddress(from)) {
+module.exports.initializeRecipient = async (web3, {from, recipient, relayHub, abi}) => {
+  if (!Web3Wrapper.utils.isAddress(from)) {
     throw new Error(`Invalid "from" address ${from}. Expected a valid eth addr`);
   }
 
-  if (!web3Utils.isAddress(recipient)) {
+  if (!Web3Wrapper.utils.isAddress(recipient)) {
     throw new Error(`Invalid "recipient" address ${recipient}. Expected a valid eth addr`);
   }
 
-  if (!web3Utils.isAddress(relayHub)) {
+  if (!Web3Wrapper.utils.isAddress(relayHub)) {
+    throw new Error(`Invalid "relayHub" address ${relayHub}. Expected a valid eth addr`);
+  }
+
+  // Validate RelayHub exists at the passed address
+  await getRelayHub(web3, relayHub);
+
+  return Web3Wrapper.contractSendTx(web3, {
+    to: recipient,
+    from,
+    abi: abi,
+    method: 'initialize',
+    params: [relayHub]
+  });
+};
+
+// The "from" account is sending "amountInPht" tokens to the "relayHub" address to sponsor the usage
+// of the smart contract address specified at the "recipient"
+module.exports.fundRecipient = async (web3, { from, recipient, relayHub, amountInPht }) => {
+  if(!Web3Wrapper.utils.isAddress(from)) {
+    throw new Error(`Invalid "from" address ${from}. Expected a valid eth addr`);
+  }
+
+  if (!Web3Wrapper.utils.isAddress(recipient)) {
+    throw new Error(`Invalid "recipient" address ${recipient}. Expected a valid eth addr`);
+  }
+
+  if (!Web3Wrapper.utils.isAddress(relayHub)) {
     throw new Error(`Invalid "relayHub" address ${relayHub}. Expected a valid eth addr`);
   }
 

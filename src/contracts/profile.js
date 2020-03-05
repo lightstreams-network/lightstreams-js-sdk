@@ -9,7 +9,8 @@ const Web3Wrapper = require('../web3');
 const {
   fundRecipient,
   isRelayHubDeployed,
-  getRecipientFunds
+  getRecipientFunds,
+  initializeRecipient
 } = require('../gsn');
 
 const factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
@@ -37,24 +38,19 @@ module.exports.initializeProfileFactory = async (web3, { contractAddr, relayHub,
   }
 
   // Step 2: Initialize gsn feature within profile factory contract
-  const txReceipt = await Web3Wrapper.contractSendTx(web3, {
-    to: contractAddr,
+  await initializeRecipient(web3, {
     from,
+    recipient: contractAddr,
     abi: factoryScJSON.abi,
-    method: 'initialize',
-    params: [relayHub]
+    relayHub
   });
-  if (!txReceipt.status) {
-    throw new Error(`ProfileFactory initialization failed`);
-  } else {
-    logger(`Activated GSN for ProfileFactory instance for RelayHub ${relayHub}...`);
-  }
+  logger(`Activated GSN for ProfileFactory instance for RelayHub ${relayHub}...`);
 
   // Step 3: Profile factory is funded via RelayHub
   await fundRecipient(web3, {
     from,
     recipient: contractAddr,
-    relayHub: relayHub,
+    relayHub,
     amountInPht: `${factoryFundingInPht}`
   });
 
@@ -307,7 +303,7 @@ module.exports.refundArtistToken = async (web3, {from, contractAddr, artistToken
   return Web3Wrapper.utils.toBN(tokens);
 };
 
-module.exports.buyArtistToken = async(web3, {from, contractAddr, artistTokenAddr, amountInPht}) => {
+module.exports.buyArtistToken = async(web3, {from, contractAddr, artistTokenAddr, amountInPht, useGSN}) => {
 
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
@@ -318,6 +314,7 @@ module.exports.buyArtistToken = async(web3, {from, contractAddr, artistTokenAddr
     to: contractAddr,
     abi: profileScJSON.abi,
     method: 'buyArtistToken',
+    useGSN,
     params: [artistTokenAddr, Web3Wrapper.utils.toWei(amountInPht), true]
   });
 
