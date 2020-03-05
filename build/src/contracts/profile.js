@@ -16,7 +16,8 @@ var Web3Wrapper = require('../web3');
 var _require = require('../gsn'),
     fundRecipient = _require.fundRecipient,
     isRelayHubDeployed = _require.isRelayHubDeployed,
-    getRecipientFunds = _require.getRecipientFunds;
+    getRecipientFunds = _require.getRecipientFunds,
+    initializeRecipient = _require.initializeRecipient;
 
 var factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 
@@ -34,7 +35,7 @@ function () {
   var _ref = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee(web3, _ref2) {
-    var contractAddr, relayHub, from, factoryFundingInPht, faucetFundingInPht, isRelayHub, txReceipt;
+    var contractAddr, relayHub, from, factoryFundingInPht, faucetFundingInPht, isRelayHub;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -77,29 +78,17 @@ function () {
 
           case 13:
             _context.next = 15;
-            return Web3Wrapper.contractSendTx(web3, {
-              to: contractAddr,
+            return initializeRecipient(web3, {
               from: from,
+              recipient: contractAddr,
               abi: factoryScJSON.abi,
-              method: 'initialize',
-              params: [relayHub]
+              relayHub: relayHub
             });
 
           case 15:
-            txReceipt = _context.sent;
+            logger("Activated GSN for ProfileFactory instance for RelayHub ".concat(relayHub, "...")); // Step 3: Profile factory is funded via RelayHub
 
-            if (txReceipt.status) {
-              _context.next = 20;
-              break;
-            }
-
-            throw new Error("ProfileFactory initialization failed");
-
-          case 20:
-            logger("Activated GSN for ProfileFactory instance for RelayHub ".concat(relayHub, "..."));
-
-          case 21:
-            _context.next = 23;
+            _context.next = 18;
             return fundRecipient(web3, {
               from: from,
               recipient: contractAddr,
@@ -107,21 +96,21 @@ function () {
               amountInPht: "".concat(factoryFundingInPht)
             });
 
-          case 23:
+          case 18:
             logger("Recipient ".concat(contractAddr, " is sponsored by relayHub with ").concat(factoryFundingInPht, " PHTs...")); // Step 4: Top up factory contract to fund new profile deployments
 
-            _context.next = 26;
+            _context.next = 21;
             return Web3Wrapper.sendTransaction(web3, {
               from: from,
               to: contractAddr,
               valueInPht: "".concat(faucetFundingInPht)
             });
 
-          case 26:
+          case 21:
             logger("Topped up ProfileFactory with ".concat(faucetFundingInPht, " PHTs to fund new profile creations..."));
             return _context.abrupt("return", contractAddr);
 
-          case 28:
+          case 23:
           case "end":
             return _context.stop();
         }
@@ -616,12 +605,12 @@ function () {
   var _ref26 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee9(web3, _ref27) {
-    var from, contractAddr, artistTokenAddr, amountInPht, receipt, tokens;
+    var from, contractAddr, artistTokenAddr, amountInPht, useGSN, receipt, tokens;
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
           case 0:
-            from = _ref27.from, contractAddr = _ref27.contractAddr, artistTokenAddr = _ref27.artistTokenAddr, amountInPht = _ref27.amountInPht;
+            from = _ref27.from, contractAddr = _ref27.contractAddr, artistTokenAddr = _ref27.artistTokenAddr, amountInPht = _ref27.amountInPht, useGSN = _ref27.useGSN;
             Web3Wrapper.validator.validateAddress("from", from);
             Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
             Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
@@ -631,6 +620,7 @@ function () {
               to: contractAddr,
               abi: profileScJSON.abi,
               method: 'buyArtistToken',
+              useGSN: useGSN,
               params: [artistTokenAddr, Web3Wrapper.utils.toWei(amountInPht), true]
             });
 

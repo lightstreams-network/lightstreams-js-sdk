@@ -37,6 +37,7 @@ module.exports.deployArtistToken = async (
     from,
     name,
     symbol,
+    owner,
     wphtAddr,
     fundingPoolAddr,
     feeRecipientAddr,
@@ -59,6 +60,10 @@ module.exports.deployArtistToken = async (
     throw new Error(`Invalid argument "symbol": "${symbol}". Expected a 3-4 char artist symbol`);
   }
   symbol = symbol.toUpperCase();
+
+  if(owner) {
+    Web3Wrapper.validator.validateAddress("owner", owner);
+  }
 
   Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
   Web3Wrapper.validator.validateAddress("fundingPoolAddr", fundingPoolAddr);
@@ -109,6 +114,7 @@ module.exports.deployArtistToken = async (
       abi: artistTokenSc.abi,
       bytecode: artistTokenSc.bytecode,
       params: [
+        owner || from,
         name,
         symbol,
         [wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr],

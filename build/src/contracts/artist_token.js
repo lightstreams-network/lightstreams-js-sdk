@@ -67,12 +67,12 @@ function () {
   var _ref3 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(web3, _ref4) {
-    var from, name, symbol, wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr, reserveRatio, gasPrice, theta, p0, initialRaise, friction, hatchDurationSeconds, hatchVestingDurationSeconds, minExternalContribution, receipt;
+    var from, name, symbol, owner, wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr, reserveRatio, gasPrice, theta, p0, initialRaise, friction, hatchDurationSeconds, hatchVestingDurationSeconds, minExternalContribution, receipt;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            from = _ref4.from, name = _ref4.name, symbol = _ref4.symbol, wphtAddr = _ref4.wphtAddr, fundingPoolAddr = _ref4.fundingPoolAddr, feeRecipientAddr = _ref4.feeRecipientAddr, pauserAddr = _ref4.pauserAddr, reserveRatio = _ref4.reserveRatio, gasPrice = _ref4.gasPrice, theta = _ref4.theta, p0 = _ref4.p0, initialRaise = _ref4.initialRaise, friction = _ref4.friction, hatchDurationSeconds = _ref4.hatchDurationSeconds, hatchVestingDurationSeconds = _ref4.hatchVestingDurationSeconds, minExternalContribution = _ref4.minExternalContribution;
+            from = _ref4.from, name = _ref4.name, symbol = _ref4.symbol, owner = _ref4.owner, wphtAddr = _ref4.wphtAddr, fundingPoolAddr = _ref4.fundingPoolAddr, feeRecipientAddr = _ref4.feeRecipientAddr, pauserAddr = _ref4.pauserAddr, reserveRatio = _ref4.reserveRatio, gasPrice = _ref4.gasPrice, theta = _ref4.theta, p0 = _ref4.p0, initialRaise = _ref4.initialRaise, friction = _ref4.friction, hatchDurationSeconds = _ref4.hatchDurationSeconds, hatchVestingDurationSeconds = _ref4.hatchVestingDurationSeconds, minExternalContribution = _ref4.minExternalContribution;
 
             if (!(name && !name.length > 1)) {
               _context2.next = 3;
@@ -91,98 +91,103 @@ function () {
 
           case 5:
             symbol = symbol.toUpperCase();
+
+            if (owner) {
+              Web3Wrapper.validator.validateAddress("owner", owner);
+            }
+
             Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
             Web3Wrapper.validator.validateAddress("fundingPoolAddr", fundingPoolAddr);
             Web3Wrapper.validator.validateAddress("feeRecipientAddr", feeRecipientAddr);
             Web3Wrapper.validator.validateAddress("pauserAddr", pauserAddr);
 
             if (!isNaN(parseInt(reserveRatio))) {
-              _context2.next = 12;
+              _context2.next = 13;
               break;
             }
 
             throw new Error("Invalid \"reserveRatio\" value \"".concat(reserveRatio, "\". Expected an integer number"));
 
-          case 12:
+          case 13:
             if (!isNaN(parseInt(gasPrice))) {
-              _context2.next = 14;
+              _context2.next = 15;
               break;
             }
 
             throw new Error("Invalid \"gasPrice\" value \"".concat(gasPrice, "\". Expected an integer number"));
 
-          case 14:
+          case 15:
             if (!isNaN(parseInt(theta))) {
-              _context2.next = 16;
+              _context2.next = 17;
               break;
             }
 
             throw new Error("Invalid \"theta\" value \"".concat(theta, "\". Expected an integer number"));
 
-          case 16:
+          case 17:
             if (!isNaN(parseInt(p0))) {
-              _context2.next = 18;
+              _context2.next = 19;
               break;
             }
 
             throw new Error("Invalid \"p0\" value \"".concat(p0, "\". Expected an integer number"));
 
-          case 18:
+          case 19:
             if (!isNaN(parseInt(initialRaise))) {
-              _context2.next = 20;
+              _context2.next = 21;
               break;
             }
 
             throw new Error("Invalid \"initialRaise\" value \"".concat(initialRaise, "\". Expected an integer number"));
 
-          case 20:
+          case 21:
             if (!isNaN(parseInt(friction))) {
-              _context2.next = 22;
+              _context2.next = 23;
               break;
             }
 
             throw new Error("Invalid \"friction\" value \"".concat(friction, "\". Expected an integer number"));
 
-          case 22:
+          case 23:
             if (!isNaN(parseInt(hatchDurationSeconds))) {
-              _context2.next = 24;
+              _context2.next = 25;
               break;
             }
 
             throw new Error("Invalid \"hatch duration\" value \"".concat(hatchDurationSeconds, "\". Expected an integer number"));
 
-          case 24:
+          case 25:
             if (!isNaN(parseInt(hatchVestingDurationSeconds))) {
-              _context2.next = 26;
+              _context2.next = 27;
               break;
             }
 
             throw new Error("Invalid \"hatch vesting duration\" value \"".concat(hatchVestingDurationSeconds, "\". Expected an integer number"));
 
-          case 26:
+          case 27:
             if (!isNaN(parseInt(minExternalContribution))) {
-              _context2.next = 28;
+              _context2.next = 29;
               break;
             }
 
             throw new Error("Invalid \"minExternalContribution\" value \"".concat(minExternalContribution, "\". Expected an integer number"));
 
-          case 28:
-            _context2.next = 30;
+          case 29:
+            _context2.next = 31;
             return Web3Wrapper.deployContract(web3, {
               from: from,
               useGSN: false,
               abi: artistTokenSc.abi,
               bytecode: artistTokenSc.bytecode,
-              params: [name, symbol, [wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr], [gasPrice, theta, p0, Web3Wrapper.utils.toWei("".concat(initialRaise)), friction, hatchDurationSeconds, hatchVestingDurationSeconds, minExternalContribution], reserveRatio]
+              params: [owner || from, name, symbol, [wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr], [gasPrice, theta, p0, Web3Wrapper.utils.toWei("".concat(initialRaise)), friction, hatchDurationSeconds, hatchVestingDurationSeconds, minExternalContribution], reserveRatio]
             });
 
-          case 30:
+          case 31:
             receipt = _context2.sent;
             logger("ArtistToken deployed at: ".concat(receipt.contractAddress));
             return _context2.abrupt("return", receipt);
 
-          case 33:
+          case 34:
           case "end":
             return _context2.stop();
         }

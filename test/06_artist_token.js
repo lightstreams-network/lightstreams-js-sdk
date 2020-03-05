@@ -176,6 +176,7 @@ contract('ArtistToken', (accounts) => {
 
   it('should deploy a ArtistToken', async () => {
     artistToken = await ArtistTokenSc.new(
+      artist,
       ARTIST_NAME,
       ARTIST_SYMBOL,
       [wPHT.address, fundingPool.address, feeRecipient, lightstreams],

@@ -13,6 +13,7 @@ contract ArtistToken is CommonsToken, Ownable {
     * @param _reserveRatio
     */
     constructor (
+        address _owner,
         string memory _name,
         string memory _symbol,
         address[4] memory _addresses,
@@ -24,7 +25,7 @@ contract ArtistToken is CommonsToken, Ownable {
         _settings,
         _reserveRatio
     )
-    Ownable(msg.sender)
+    Ownable(_owner)
     {
         name = _name;
         symbol = _symbol;

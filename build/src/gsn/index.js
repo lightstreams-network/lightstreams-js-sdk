@@ -24,6 +24,8 @@ var _require$utils = require('@openzeppelin/gsn-provider').utils,
 
 var web3Utils = require('web3-utils');
 
+var Web3Wrapper = require('../web3');
+
 var logger = Debug('ls-sdk:gsn');
 
 module.exports.newWeb3Engine = function (provider, _ref) {
@@ -40,24 +42,22 @@ module.exports.newWeb3Engine = function (provider, _ref) {
   }).then(function (ctx) {
     return ctx.lib;
   });
-}; // The "from" account is sending "amountInPht" tokens to the "relayHub" address to sponsor the usage
-// of the smart contract address specified at the "recipient"
+};
 
-
-module.exports.fundRecipient =
+module.exports.initializeRecipient =
 /*#__PURE__*/
 function () {
   var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee(web3, _ref3) {
-    var from, recipient, relayHub, amountInPht, curBalance;
+    var from, recipient, relayHub, abi;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            from = _ref3.from, recipient = _ref3.recipient, relayHub = _ref3.relayHub, amountInPht = _ref3.amountInPht;
+            from = _ref3.from, recipient = _ref3.recipient, relayHub = _ref3.relayHub, abi = _ref3.abi;
 
-            if (web3Utils.isAddress(from)) {
+            if (Web3Wrapper.utils.isAddress(from)) {
               _context.next = 3;
               break;
             }
@@ -65,7 +65,7 @@ function () {
             throw new Error("Invalid \"from\" address ".concat(from, ". Expected a valid eth addr"));
 
           case 3:
-            if (web3Utils.isAddress(recipient)) {
+            if (Web3Wrapper.utils.isAddress(recipient)) {
               _context.next = 5;
               break;
             }
@@ -73,7 +73,7 @@ function () {
             throw new Error("Invalid \"recipient\" address ".concat(recipient, ". Expected a valid eth addr"));
 
           case 5:
-            if (web3Utils.isAddress(relayHub)) {
+            if (Web3Wrapper.utils.isAddress(relayHub)) {
               _context.next = 7;
               break;
             }
@@ -85,29 +85,15 @@ function () {
             return getRelayHub(web3, relayHub);
 
           case 9:
-            if (!isNaN(parseFloat(amountInPht))) {
-              _context.next = 11;
-              break;
-            }
-
-            throw new Error("Invalid \"amountInPht\" value ".concat(amountInPht, ". Expected a float number"));
-
-          case 11:
-            logger("Account ".concat(from, " depositing ").concat(amountInPht, " PHT in relayhub ").concat(relayHub, " to fund recipient ").concat(recipient, " "));
-            _context.next = 14;
-            return fRecipient(web3, {
+            return _context.abrupt("return", Web3Wrapper.contractSendTx(web3, {
+              to: recipient,
               from: from,
-              recipient: recipient,
-              relayHubAddress: relayHub,
-              // IMPORTANT: Amount cannot be higher than relay server address balance (@TODO: Implement validation)
-              amount: web3Utils.toWei(amountInPht, "ether")
-            });
+              abi: abi,
+              method: 'initialize',
+              params: [relayHub]
+            }));
 
-          case 14:
-            curBalance = _context.sent;
-            return _context.abrupt("return", curBalance);
-
-          case 16:
+          case 10:
           case "end":
             return _context.stop();
         }
@@ -118,39 +104,79 @@ function () {
   return function (_x, _x2) {
     return _ref2.apply(this, arguments);
   };
-}();
+}(); // The "from" account is sending "amountInPht" tokens to the "relayHub" address to sponsor the usage
+// of the smart contract address specified at the "recipient"
 
-module.exports.getRecipientFunds =
+
+module.exports.fundRecipient =
 /*#__PURE__*/
 function () {
   var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(web3, _ref5) {
-    var recipient;
+    var from, recipient, relayHub, amountInPht, curBalance;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            recipient = _ref5.recipient;
-            _context2.prev = 1;
-            _context2.next = 4;
-            return getRecipientFunds(web3, recipient);
+            from = _ref5.from, recipient = _ref5.recipient, relayHub = _ref5.relayHub, amountInPht = _ref5.amountInPht;
 
-          case 4:
-            return _context2.abrupt("return", _context2.sent);
+            if (Web3Wrapper.utils.isAddress(from)) {
+              _context2.next = 3;
+              break;
+            }
+
+            throw new Error("Invalid \"from\" address ".concat(from, ". Expected a valid eth addr"));
+
+          case 3:
+            if (Web3Wrapper.utils.isAddress(recipient)) {
+              _context2.next = 5;
+              break;
+            }
+
+            throw new Error("Invalid \"recipient\" address ".concat(recipient, ". Expected a valid eth addr"));
+
+          case 5:
+            if (Web3Wrapper.utils.isAddress(relayHub)) {
+              _context2.next = 7;
+              break;
+            }
+
+            throw new Error("Invalid \"relayHub\" address ".concat(relayHub, ". Expected a valid eth addr"));
 
           case 7:
-            _context2.prev = 7;
-            _context2.t0 = _context2["catch"](1);
-            console.error(_context2.t0);
-            return _context2.abrupt("return", false);
+            _context2.next = 9;
+            return getRelayHub(web3, relayHub);
+
+          case 9:
+            if (!isNaN(parseFloat(amountInPht))) {
+              _context2.next = 11;
+              break;
+            }
+
+            throw new Error("Invalid \"amountInPht\" value ".concat(amountInPht, ". Expected a float number"));
 
           case 11:
+            logger("Account ".concat(from, " depositing ").concat(amountInPht, " PHT in relayhub ").concat(relayHub, " to fund recipient ").concat(recipient, " "));
+            _context2.next = 14;
+            return fRecipient(web3, {
+              from: from,
+              recipient: recipient,
+              relayHubAddress: relayHub,
+              // IMPORTANT: Amount cannot be higher than relay server address balance (@TODO: Implement validation)
+              amount: web3Utils.toWei(amountInPht, "ether")
+            });
+
+          case 14:
+            curBalance = _context2.sent;
+            return _context2.abrupt("return", curBalance);
+
+          case 16:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[1, 7]]);
+    }, _callee2);
   }));
 
   return function (_x3, _x4) {
@@ -158,7 +184,7 @@ function () {
   };
 }();
 
-module.exports.isRelayHubDeployedForRecipient =
+module.exports.getRecipientFunds =
 /*#__PURE__*/
 function () {
   var _ref6 = _asyncToGenerator(
@@ -172,7 +198,7 @@ function () {
             recipient = _ref7.recipient;
             _context3.prev = 1;
             _context3.next = 4;
-            return isRelayHubDeployedForRecipient(web3, recipient);
+            return getRecipientFunds(web3, recipient);
 
           case 4:
             return _context3.abrupt("return", _context3.sent);
@@ -196,24 +222,24 @@ function () {
   };
 }();
 
-module.exports.isRelayHubDeployed =
+module.exports.isRelayHubDeployedForRecipient =
 /*#__PURE__*/
 function () {
   var _ref8 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee4(web3, _ref9) {
-    var relayHub;
+    var recipient;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            relayHub = _ref9.relayHub;
+            recipient = _ref9.recipient;
             _context4.prev = 1;
             _context4.next = 4;
-            return getRelayHub(web3, relayHub);
+            return isRelayHubDeployedForRecipient(web3, recipient);
 
           case 4:
-            return _context4.abrupt("return", true);
+            return _context4.abrupt("return", _context4.sent);
 
           case 7:
             _context4.prev = 7;
@@ -231,5 +257,43 @@ function () {
 
   return function (_x7, _x8) {
     return _ref8.apply(this, arguments);
+  };
+}();
+
+module.exports.isRelayHubDeployed =
+/*#__PURE__*/
+function () {
+  var _ref10 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee5(web3, _ref11) {
+    var relayHub;
+    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            relayHub = _ref11.relayHub;
+            _context5.prev = 1;
+            _context5.next = 4;
+            return getRelayHub(web3, relayHub);
+
+          case 4:
+            return _context5.abrupt("return", true);
+
+          case 7:
+            _context5.prev = 7;
+            _context5.t0 = _context5["catch"](1);
+            console.error(_context5.t0);
+            return _context5.abrupt("return", false);
+
+          case 11:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5, null, [[1, 7]]);
+  }));
+
+  return function (_x9, _x10) {
+    return _ref10.apply(this, arguments);
   };
 }();
