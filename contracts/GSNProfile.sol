@@ -121,7 +121,7 @@ contract GSNProfile is Initializable, GSNMultiOwnableRecipient {
     }
 
     function buyArtistToken(address _tokenAddr, uint256 _amount, bool _runDeposit) public isOwner(_msgSender()) {
-        require(_amount <= address(this).balance, "Not enought funds");
+        require(_amount <= address(this).balance, "Not enough funds");
         ArtistToken tokenInstance = ArtistToken(_tokenAddr);
         WPHT wphtInstance = WPHT(address(uint160(address(tokenInstance.externalToken()))));
         if (_runDeposit) {

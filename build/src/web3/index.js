@@ -39,12 +39,12 @@ var logger = Debug('ls-sdk:web3');
 var defaultCfg = {
   provider: process.env.WEB3_PROVIDER || 'http://locahost:8545',
   gasPrice: process.env.WEB3_GAS_PRICE || 500000000000
-};
+}; // @param [options] { rpcUrl, useRemoteKeystore, ...engineOpts };
 
 module.exports.newEngine = function (provider) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-  if (typeof provider === 'string' && !options.useRemoteKeystore) {
+  if (typeof provider === 'string') {
     var Web3Provider = require('../web3-provider'); // @TODO Resolve recursive dependency if imported in headers
 
 
@@ -122,7 +122,7 @@ module.exports.contractCall = function (web3, _ref3) {
           switch (_context.prev = _context.next) {
             case 0:
               if (!isLatest(web3)) reject(new Error('Web3 version is not valid'));
-              logger("Contract Call: ".concat(contractAddr, ".").concat(method, "(").concat(params ? params.join(', ') : '', ")"));
+              logger("Contract Call: ".concat(contractAddr, ".").concat(method, "(\"").concat(params ? params.join('", "') : '', "\")"));
               _context.prev = 2;
               contract = new web3.eth.Contract(abi, contractAddr);
 
@@ -186,7 +186,7 @@ module.exports.contractSendTx = function (web3, _ref5) {
           switch (_context2.prev = _context2.next) {
             case 0:
               if (!isLatest(web3)) reject(new Error('Web3 version is not valid'));
-              logger("Contract Tx: ".concat(contractAddr, ".").concat(method, "('").concat(params ? params.join(', ') : '', "') by ").concat(from));
+              logger("Contract Tx: ".concat(contractAddr, ".").concat(method, "(\"").concat(params ? params.join('", "') : '', "\") by ").concat(from));
               _context2.prev = 2;
               contract = new web3.eth.Contract(abi, contractAddr);
 
@@ -265,18 +265,19 @@ module.exports.deployContract = function (web3, _ref7) {
           switch (_context3.prev = _context3.next) {
             case 0:
               if (!isLatest(web3)) reject(new Error('Web3 version is not valid'));
-              _context3.prev = 1;
+              logger("Deploy contract: (\"".concat(params ? params.join('", "') : '', "\")"));
+              _context3.prev = 2;
               contract = new web3.eth.Contract(abi);
               contractDeploy = contract.deploy({
                 data: bytecode,
                 arguments: params || []
               });
-              _context3.next = 6;
+              _context3.next = 7;
               return calculateEstimatedGas(contractDeploy, {
                 from: from
               });
 
-            case 6:
+            case 7:
               estimatedGas = _context3.sent;
               contractDeploy.send({
                 from: from,
@@ -286,20 +287,20 @@ module.exports.deployContract = function (web3, _ref7) {
               }).on('receipt', function (txReceipt) {
                 if (!txReceipt.status) reject(FailedTxError(txReceipt));else resolve(txReceipt);
               }).on('error', reject);
-              _context3.next = 13;
+              _context3.next = 14;
               break;
 
-            case 10:
-              _context3.prev = 10;
-              _context3.t0 = _context3["catch"](1);
+            case 11:
+              _context3.prev = 11;
+              _context3.t0 = _context3["catch"](2);
               reject(_context3.t0);
 
-            case 13:
+            case 14:
             case "end":
               return _context3.stop();
           }
         }
-      }, _callee3, null, [[1, 10]]);
+      }, _callee3, null, [[2, 11]]);
     }));
 
     return function (_x5, _x6) {

@@ -39,7 +39,8 @@ module.exports = function () {
   var walletSubprovider = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
   var rpcUrl = opts.rpcUrl,
-      engineOpts = _objectWithoutProperties(opts, ["rpcUrl"]);
+      useRemoteKeystore = opts.useRemoteKeystore,
+      engineOpts = _objectWithoutProperties(opts, ["rpcUrl", "useRemoteKeystore"]);
 
   var lsProviderEngine = new ProviderEngine(engineOpts);
   var version = '0.8.0'; // @TODO Decouple from etherswallet module
@@ -147,8 +148,11 @@ module.exports = function () {
     });
   }
 
-  lsProviderEngine.addProvider(walletSubprovider);
-  lsProviderEngine.addProvider(new PersonalSubprovider(lsProviderEngine));
+  if (!useRemoteKeystore) {
+    lsProviderEngine.addProvider(walletSubprovider);
+    lsProviderEngine.addProvider(new PersonalSubprovider(lsProviderEngine));
+  }
+
   lsProviderEngine.addProvider(new RpcSubprovider({
     rpcUrl: rpcUrl // Expected to be
 

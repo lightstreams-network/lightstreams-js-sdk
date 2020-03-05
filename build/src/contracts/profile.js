@@ -4,14 +4,6 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
 /**
  * User: ggarrido
  * Date: 14/08/19 15:44
@@ -20,8 +12,6 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 var Debug = require('debug');
 
 var Web3Wrapper = require('../web3');
-
-var CID = require('cids');
 
 var _require = require('../gsn'),
     fundRecipient = _require.fundRecipient,
@@ -33,27 +23,10 @@ var factoryScJSON = require('../../build/contracts/GSNProfileFactory.json');
 var profileScJSON = require('../../build/contracts/GSNProfile.json');
 
 var logger = Debug('ls-sdk:contract:profile');
-var cidPrefix = 'Qm';
-var cidLength = 46;
 
-function convertHexToCid(hexValue) {
-  // [18,32] Correspond to the removed cidPrefix 'Qm'
-  var arrayBuffer = [18, 32].concat(_toConsumableArray(Web3Wrapper.utils.hexToBytes(hexValue)));
-  var cidObj = new CID(Web3Wrapper.utils.toBuffer(arrayBuffer));
-  return cidObj.toString();
-}
-
-function convertCidToBytes32(cid) {
-  if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
-    throw new Error('Invalid cid value');
-  }
-
-  var cidObj = new CID(cid);
-  return cidObj.multihash.slice(2).toJSON().data;
-}
-
-module.exports.convertHexToCid = convertHexToCid;
-module.exports.convertCidToBytes32 = convertCidToBytes32;
+var _require2 = require('../leth/cid'),
+    convertHexToCid = _require2.convertHexToCid,
+    convertCidToBytes32 = _require2.convertCidToBytes32;
 
 module.exports.initializeProfileFactory =
 /*#__PURE__*/
@@ -131,7 +104,7 @@ function () {
               from: from,
               recipient: contractAddr,
               relayHub: relayHub,
-              amountInPht: factoryFundingInPht
+              amountInPht: "".concat(factoryFundingInPht)
             });
 
           case 23:
@@ -141,7 +114,7 @@ function () {
             return Web3Wrapper.sendTransaction(web3, {
               from: from,
               to: contractAddr,
-              valueInPht: faucetFundingInPht
+              valueInPht: "".concat(faucetFundingInPht)
             });
 
           case 26:
@@ -237,12 +210,12 @@ function () {
   var _ref5 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee3(web3, _ref6) {
-    var from, contractAddr, useGSN, txReceipt;
+    var from, owner, contractAddr, useGSN, txReceipt;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            from = _ref6.from, contractAddr = _ref6.contractAddr, useGSN = _ref6.useGSN;
+            from = _ref6.from, owner = _ref6.owner, contractAddr = _ref6.contractAddr, useGSN = _ref6.useGSN;
             _context3.next = 3;
             return Web3Wrapper.contractSendTx(web3, {
               to: contractAddr,
@@ -250,7 +223,7 @@ function () {
               useGSN: useGSN || false,
               abi: factoryScJSON.abi,
               method: 'newProfile',
-              params: [from]
+              params: [owner || from]
             });
 
           case 3:
@@ -270,18 +243,40 @@ function () {
   };
 }();
 
+module.exports.deployProfileFactory = function (web3, _ref7) {
+  var from = _ref7.from,
+      profileFundingInPht = _ref7.profileFundingInPht;
+  return Web3Wrapper.deployContract(web3, {
+    from: from,
+    abi: factoryScJSON.abi,
+    bytecode: factoryScJSON.bytecode,
+    params: [Web3Wrapper.utils.toWei("".concat(profileFundingInPht))]
+  });
+};
+
+module.exports.deployProfile = function (web3, _ref8) {
+  var from = _ref8.from,
+      owner = _ref8.owner;
+  return Web3Wrapper.deployContract(web3, {
+    from: from,
+    abi: profileScJSON.abi,
+    bytecode: profileScJSON.bytecode,
+    params: [owner]
+  });
+};
+
 module.exports.addOwner =
 /*#__PURE__*/
 function () {
-  var _ref7 = _asyncToGenerator(
+  var _ref9 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee4(web3, _ref8) {
+  regeneratorRuntime.mark(function _callee4(web3, _ref10) {
     var from, contractAddr, useGSN, ownerAddr;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            from = _ref8.from, contractAddr = _ref8.contractAddr, useGSN = _ref8.useGSN, ownerAddr = _ref8.ownerAddr;
+            from = _ref10.from, contractAddr = _ref10.contractAddr, useGSN = _ref10.useGSN, ownerAddr = _ref10.ownerAddr;
             return _context4.abrupt("return", Web3Wrapper.contractSendTx(web3, {
               to: contractAddr,
               from: from,
@@ -300,22 +295,22 @@ function () {
   }));
 
   return function (_x7, _x8) {
-    return _ref7.apply(this, arguments);
+    return _ref9.apply(this, arguments);
   };
 }();
 
 module.exports.recover =
 /*#__PURE__*/
 function () {
-  var _ref9 = _asyncToGenerator(
+  var _ref11 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee5(web3, contractAddr, _ref10) {
+  regeneratorRuntime.mark(function _callee5(web3, contractAddr, _ref12) {
     var from, newOwner, useGSN;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            from = _ref10.from, newOwner = _ref10.newOwner, useGSN = _ref10.useGSN;
+            from = _ref12.from, newOwner = _ref12.newOwner, useGSN = _ref12.useGSN;
 
             if (!(!newOwner && !from)) {
               _context5.next = 3;
@@ -343,12 +338,12 @@ function () {
   }));
 
   return function (_x9, _x10, _x11) {
-    return _ref9.apply(this, arguments);
+    return _ref11.apply(this, arguments);
   };
 }();
 
-module.exports.getOwners = function (web3, _ref11) {
-  var contractAddr = _ref11.contractAddr;
+module.exports.getOwners = function (web3, _ref13) {
+  var contractAddr = _ref13.contractAddr;
   return Web3Wrapper.contractCall(web3, {
     to: contractAddr,
     abi: profileScJSON.abi,
@@ -360,8 +355,8 @@ module.exports.getOwners = function (web3, _ref11) {
   });
 };
 
-module.exports.getFiles = function (web3, _ref12) {
-  var contractAddr = _ref12.contractAddr;
+module.exports.getFiles = function (web3, _ref14) {
+  var contractAddr = _ref14.contractAddr;
   return Web3Wrapper.contractCall(web3, {
     to: contractAddr,
     abi: profileScJSON.abi,
@@ -371,9 +366,9 @@ module.exports.getFiles = function (web3, _ref12) {
   });
 };
 
-module.exports.getFileAcl = function (web3, _ref13) {
-  var contractAddr = _ref13.contractAddr,
-      cid = _ref13.cid;
+module.exports.getFileAcl = function (web3, _ref15) {
+  var contractAddr = _ref15.contractAddr,
+      cid = _ref15.cid;
   return Web3Wrapper.contractCall(web3, {
     to: contractAddr,
     abi: profileScJSON.abi,
@@ -382,11 +377,11 @@ module.exports.getFileAcl = function (web3, _ref13) {
   });
 };
 
-module.exports.addFile = function (web3, _ref14) {
-  var from = _ref14.from,
-      contractAddr = _ref14.contractAddr,
-      cid = _ref14.cid,
-      acl = _ref14.acl;
+module.exports.addFile = function (web3, _ref16) {
+  var from = _ref16.from,
+      contractAddr = _ref16.contractAddr,
+      cid = _ref16.cid,
+      acl = _ref16.acl;
 
   if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
     throw new Error('Invalid cid value');
@@ -401,10 +396,10 @@ module.exports.addFile = function (web3, _ref14) {
   });
 };
 
-module.exports.removeFile = function (web3, _ref15) {
-  var from = _ref15.from,
-      contractAddr = _ref15.contractAddr,
-      cid = _ref15.cid;
+module.exports.removeFile = function (web3, _ref17) {
+  var from = _ref17.from,
+      contractAddr = _ref17.contractAddr,
+      cid = _ref17.cid;
 
   if (cid.length !== cidLength || cid.indexOf(cidPrefix) !== 0) {
     throw new Error('Invalid cid value');
@@ -419,11 +414,11 @@ module.exports.removeFile = function (web3, _ref15) {
   });
 };
 
-var transferToken = module.exports.transferToken = function (web3, _ref16) {
-  var from = _ref16.from,
-      beneficiary = _ref16.beneficiary,
-      contractAddr = _ref16.contractAddr,
-      amountInPht = _ref16.amountInPht;
+var transferToken = module.exports.transferToken = function (web3, _ref18) {
+  var from = _ref18.from,
+      beneficiary = _ref18.beneficiary,
+      contractAddr = _ref18.contractAddr,
+      amountInPht = _ref18.amountInPht;
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("beneficiary", beneficiary);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
@@ -436,12 +431,12 @@ var transferToken = module.exports.transferToken = function (web3, _ref16) {
   });
 };
 
-module.exports.transferIERC20Token = function (web3, _ref17) {
-  var from = _ref17.from,
-      beneficiary = _ref17.beneficiary,
-      contractAddr = _ref17.contractAddr,
-      tokenAddr = _ref17.tokenAddr,
-      amount = _ref17.amount;
+module.exports.transferIERC20Token = function (web3, _ref19) {
+  var from = _ref19.from,
+      beneficiary = _ref19.beneficiary,
+      contractAddr = _ref19.contractAddr,
+      tokenAddr = _ref19.tokenAddr,
+      amount = _ref19.amount;
   Web3Wrapper.validator.validateAddress("from", from);
   Web3Wrapper.validator.validateAddress("beneficiary", beneficiary);
   Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
@@ -459,45 +454,44 @@ module.exports.transferIERC20Token = function (web3, _ref17) {
 module.exports.hatchArtistToken =
 /*#__PURE__*/
 function () {
-  var _ref18 = _asyncToGenerator(
+  var _ref20 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee6(web3, _ref19) {
-    var from, contractAddr, artistTokenAddr, wphtAddr, amountInPht, useGSN, receipt, tokens;
+  regeneratorRuntime.mark(function _callee6(web3, _ref21) {
+    var from, contractAddr, artistTokenAddr, amountInPht, useGSN, receipt, tokens;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
-            from = _ref19.from, contractAddr = _ref19.contractAddr, artistTokenAddr = _ref19.artistTokenAddr, wphtAddr = _ref19.wphtAddr, amountInPht = _ref19.amountInPht, useGSN = _ref19.useGSN;
+            from = _ref21.from, contractAddr = _ref21.contractAddr, artistTokenAddr = _ref21.artistTokenAddr, amountInPht = _ref21.amountInPht, useGSN = _ref21.useGSN;
             Web3Wrapper.validator.validateAddress("from", from);
-            Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
             Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
             Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
-            _context6.next = 7;
+            _context6.next = 6;
             return Web3Wrapper.contractSendTx(web3, {
               from: from,
               to: contractAddr,
               abi: profileScJSON.abi,
               method: 'hatchArtistToken',
               useGSN: useGSN,
-              params: [artistTokenAddr, wphtAddr, Web3Wrapper.utils.toWei(amountInPht), true]
+              params: [artistTokenAddr, Web3Wrapper.utils.toWei(amountInPht), true]
             });
 
-          case 7:
+          case 6:
             receipt = _context6.sent;
 
             if (receipt.events['HatchedArtistTokens']) {
-              _context6.next = 10;
+              _context6.next = 9;
               break;
             }
 
             return _context6.abrupt("return", null);
 
-          case 10:
+          case 9:
             tokens = receipt.events['HatchedArtistTokens'].returnValues['amount'];
             logger("Hatcher ".concat(from, " obtained an estimated amount of ").concat(Web3Wrapper.utils.toPht(tokens).toString(), " ArtistTokens ").concat(artistTokenAddr));
             return _context6.abrupt("return", Web3Wrapper.utils.toBN(tokens));
 
-          case 13:
+          case 12:
           case "end":
             return _context6.stop();
         }
@@ -506,22 +500,22 @@ function () {
   }));
 
   return function (_x12, _x13) {
-    return _ref18.apply(this, arguments);
+    return _ref20.apply(this, arguments);
   };
 }();
 
 module.exports.claimArtistToken =
 /*#__PURE__*/
 function () {
-  var _ref20 = _asyncToGenerator(
+  var _ref22 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee7(web3, _ref21) {
+  regeneratorRuntime.mark(function _callee7(web3, _ref23) {
     var from, contractAddr, artistTokenAddr, useGSN, receipt, tokens;
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            from = _ref21.from, contractAddr = _ref21.contractAddr, artistTokenAddr = _ref21.artistTokenAddr, useGSN = _ref21.useGSN;
+            from = _ref23.from, contractAddr = _ref23.contractAddr, artistTokenAddr = _ref23.artistTokenAddr, useGSN = _ref23.useGSN;
             Web3Wrapper.validator.validateAddress("from", from);
             Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
             Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
@@ -559,52 +553,51 @@ function () {
   }));
 
   return function (_x14, _x15) {
-    return _ref20.apply(this, arguments);
+    return _ref22.apply(this, arguments);
   };
 }();
 
 module.exports.refundArtistToken =
 /*#__PURE__*/
 function () {
-  var _ref22 = _asyncToGenerator(
+  var _ref24 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee8(web3, _ref23) {
-    var from, contractAddr, artistTokenAddr, wphtAddr, useGSN, receipt, tokens;
+  regeneratorRuntime.mark(function _callee8(web3, _ref25) {
+    var from, contractAddr, artistTokenAddr, useGSN, receipt, tokens;
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
-            from = _ref23.from, contractAddr = _ref23.contractAddr, artistTokenAddr = _ref23.artistTokenAddr, wphtAddr = _ref23.wphtAddr, useGSN = _ref23.useGSN;
+            from = _ref25.from, contractAddr = _ref25.contractAddr, artistTokenAddr = _ref25.artistTokenAddr, useGSN = _ref25.useGSN;
             Web3Wrapper.validator.validateAddress("from", from);
             Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
             Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
-            Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
-            _context8.next = 7;
+            _context8.next = 6;
             return Web3Wrapper.contractSendTx(web3, {
               from: from,
               to: contractAddr,
               abi: profileScJSON.abi,
               method: 'refundArtistToken',
               useGSN: useGSN,
-              params: [artistTokenAddr, wphtAddr]
+              params: [artistTokenAddr]
             });
 
-          case 7:
+          case 6:
             receipt = _context8.sent;
 
             if (receipt.events['RefundedTokens']) {
-              _context8.next = 10;
+              _context8.next = 9;
               break;
             }
 
             return _context8.abrupt("return", null);
 
-          case 10:
+          case 9:
             tokens = receipt.events['RefundedTokens'].returnValues['amount'];
             logger("Hatcher ".concat(from, " get a refund of ").concat(Web3Wrapper.utils.toPht(tokens).toString(), " WPHT tokens"));
             return _context8.abrupt("return", Web3Wrapper.utils.toBN(tokens));
 
-          case 13:
+          case 12:
           case "end":
             return _context8.stop();
         }
@@ -613,51 +606,50 @@ function () {
   }));
 
   return function (_x16, _x17) {
-    return _ref22.apply(this, arguments);
+    return _ref24.apply(this, arguments);
   };
 }();
 
 module.exports.buyArtistToken =
 /*#__PURE__*/
 function () {
-  var _ref24 = _asyncToGenerator(
+  var _ref26 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee9(web3, _ref25) {
-    var from, contractAddr, artistTokenAddr, wphtAddr, amountInPht, receipt, tokens;
+  regeneratorRuntime.mark(function _callee9(web3, _ref27) {
+    var from, contractAddr, artistTokenAddr, amountInPht, receipt, tokens;
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
           case 0:
-            from = _ref25.from, contractAddr = _ref25.contractAddr, artistTokenAddr = _ref25.artistTokenAddr, wphtAddr = _ref25.wphtAddr, amountInPht = _ref25.amountInPht;
+            from = _ref27.from, contractAddr = _ref27.contractAddr, artistTokenAddr = _ref27.artistTokenAddr, amountInPht = _ref27.amountInPht;
             Web3Wrapper.validator.validateAddress("from", from);
-            Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
             Web3Wrapper.validator.validateAddress("contractAddr", contractAddr);
             Web3Wrapper.validator.validateAddress("artistTokenAddr", artistTokenAddr);
-            _context9.next = 7;
+            _context9.next = 6;
             return Web3Wrapper.contractSendTx(web3, {
               from: from,
               to: contractAddr,
               abi: profileScJSON.abi,
               method: 'buyArtistToken',
-              params: [artistTokenAddr, wphtAddr, Web3Wrapper.utils.toWei(amountInPht), true]
+              params: [artistTokenAddr, Web3Wrapper.utils.toWei(amountInPht), true]
             });
 
-          case 7:
+          case 6:
             receipt = _context9.sent;
 
             if (receipt.events['BoughtArtistTokens']) {
-              _context9.next = 10;
+              _context9.next = 9;
               break;
             }
 
             return _context9.abrupt("return", null);
 
-          case 10:
+          case 9:
             tokens = receipt.events['BoughtArtistTokens'].returnValues['amount'];
             logger("Buyer ".concat(from, " purchased ").concat(Web3Wrapper.utils.toPht(tokens).toString(), " of ArtistTokens ").concat(artistTokenAddr));
             return _context9.abrupt("return", Web3Wrapper.utils.toBN(tokens));
 
-          case 13:
+          case 12:
           case "end":
             return _context9.stop();
         }
@@ -666,6 +658,6 @@ function () {
   }));
 
   return function (_x18, _x19) {
-    return _ref24.apply(this, arguments);
+    return _ref26.apply(this, arguments);
   };
 }();

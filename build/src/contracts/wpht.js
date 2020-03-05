@@ -19,18 +19,28 @@ var fundingPoolSc = require('../../build/contracts/FundingPool.json');
 
 var logger = Debug('ls-sdk:contract:wpht');
 
+module.exports.deployContract = function (web3, _ref) {
+  var from = _ref.from;
+  return Web3Wrapper.deployContract(web3, {
+    from: from,
+    abi: wphtSc.abi,
+    bytecode: wphtSc.bytecode,
+    params: []
+  });
+};
+
 module.exports.getWPHTBalanceOf =
 /*#__PURE__*/
 function () {
-  var _ref = _asyncToGenerator(
+  var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(web3, _ref2) {
+  regeneratorRuntime.mark(function _callee(web3, _ref3) {
     var wphtAddr, accountAddr, balance;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            wphtAddr = _ref2.wphtAddr, accountAddr = _ref2.accountAddr;
+            wphtAddr = _ref3.wphtAddr, accountAddr = _ref3.accountAddr;
             Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
             Web3Wrapper.validator.validateAddress("accountAddr", accountAddr);
             _context.next = 5;
@@ -44,10 +54,9 @@ function () {
 
           case 5:
             balance = _context.sent;
-            logger("Account ".concat(accountAddr, " has ").concat(Web3Wrapper.utils.wei2pht(balance.toString()), " WPHT"));
             return _context.abrupt("return", Web3Wrapper.utils.toBN(balance));
 
-          case 8:
+          case 7:
           case "end":
             return _context.stop();
         }
@@ -56,22 +65,22 @@ function () {
   }));
 
   return function (_x, _x2) {
-    return _ref.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
 module.exports.deposit =
 /*#__PURE__*/
 function () {
-  var _ref3 = _asyncToGenerator(
+  var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(web3, _ref4) {
+  regeneratorRuntime.mark(function _callee2(web3, _ref5) {
     var from, wphtAddr, amountInPht;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            from = _ref4.from, wphtAddr = _ref4.wphtAddr, amountInPht = _ref4.amountInPht;
+            from = _ref5.from, wphtAddr = _ref5.wphtAddr, amountInPht = _ref5.amountInPht;
             Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
             _context2.next = 4;
             return Web3Wrapper.contractSendTx(web3, {
@@ -94,22 +103,22 @@ function () {
   }));
 
   return function (_x3, _x4) {
-    return _ref3.apply(this, arguments);
+    return _ref4.apply(this, arguments);
   };
 }();
 
 module.exports.deployFundingPool =
 /*#__PURE__*/
 function () {
-  var _ref5 = _asyncToGenerator(
+  var _ref6 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3(web3, _ref6) {
+  regeneratorRuntime.mark(function _callee3(web3, _ref7) {
     var from, wphtAddr, owner;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            from = _ref6.from, wphtAddr = _ref6.wphtAddr, owner = _ref6.owner;
+            from = _ref7.from, wphtAddr = _ref7.wphtAddr, owner = _ref7.owner;
             Web3Wrapper.validator.validateAddress("wphtAddr", wphtAddr);
             _context3.next = 4;
             return Web3Wrapper.deployContract(web3, {
@@ -131,6 +140,6 @@ function () {
   }));
 
   return function (_x5, _x6) {
-    return _ref5.apply(this, arguments);
+    return _ref6.apply(this, arguments);
   };
 }();
