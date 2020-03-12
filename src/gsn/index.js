@@ -73,12 +73,18 @@ module.exports.fundRecipient = async (web3, { from, recipient, relayHub, amountI
     throw new Error(`Invalid "amountInPht" value ${amountInPht}. Expected a float number`);
   }
 
+  // IMPORTANT: Amount cannot be higher than 10% relay server address balance
+  // @TODO: Verify assumption and implement validation
+  const maxFundingValueInPht = 100;
+  if(parseFloat(amountInPht) > maxFundingValueInPht) {
+    throw new Error(`GSN deposits cannot exceed ${maxFundingValueInPht}PHT`);
+  }
+
   logger(`Account ${from} depositing ${amountInPht} PHT in relayhub ${relayHub} to fund recipient ${recipient} `);
   const curBalance = await fRecipient(web3, {
     from,
     recipient,
     relayHubAddress: relayHub,
-    // IMPORTANT: Amount cannot be higher than relay server address balance (@TODO: Implement validation)
     amount: web3Utils.toWei(amountInPht, "ether")
   });
 

@@ -114,7 +114,7 @@ function () {
   var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(web3, _ref5) {
-    var from, recipient, relayHub, amountInPht, curBalance;
+    var from, recipient, relayHub, amountInPht, maxFundingValueInPht, curBalance;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -157,8 +157,18 @@ function () {
             throw new Error("Invalid \"amountInPht\" value ".concat(amountInPht, ". Expected a float number"));
 
           case 11:
+            maxFundingValueInPht = 100;
+
+            if (!(parseFloat(amountInPht) > maxFundingValueInPht)) {
+              _context2.next = 14;
+              break;
+            }
+
+            throw new Error("GSN deposits cannot exceed ".concat(maxFundingValueInPht, "PHT"));
+
+          case 14:
             logger("Account ".concat(from, " depositing ").concat(amountInPht, " PHT in relayhub ").concat(relayHub, " to fund recipient ").concat(recipient, " "));
-            _context2.next = 14;
+            _context2.next = 17;
             return fRecipient(web3, {
               from: from,
               recipient: recipient,
@@ -167,11 +177,11 @@ function () {
               amount: web3Utils.toWei(amountInPht, "ether")
             });
 
-          case 14:
+          case 17:
             curBalance = _context2.sent;
             return _context2.abrupt("return", curBalance);
 
-          case 16:
+          case 19:
           case "end":
             return _context2.stop();
         }
