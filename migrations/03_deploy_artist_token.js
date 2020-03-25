@@ -48,6 +48,7 @@ module.exports = function(deployer) {
           const pauserAddr = fromAccount;
           const initialRaiseInWeiBN = Web3Wrapper.utils.toBN(Web3Wrapper.utils.toWei(`${initialRaise}`));
           return deployer.deploy(ArtistToken,
+              fromAccount,
               name,
               symbol,
               [wphtAddr, fundingPoolAddr, feeRecipientAddr, pauserAddr],
