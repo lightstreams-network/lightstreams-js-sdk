@@ -19,6 +19,7 @@ export default class WalletPage extends Component {
       wallet: '',
       tld: 'lsn',
       address: null,
+      peerId: "",
       web3: null,
       ensAddress: '',
       resolverAddress: '',
@@ -59,9 +60,10 @@ export default class WalletPage extends Component {
   };
 
   generateAuthToken = async () => {
-    const { web3, address } = this.state;
+    const { web3, address, peerId } = this.state;
+
     try {
-      const token = await Leth.Token.generateAuthToken(web3, { address, tokenBlocksLifespan: 10000 });
+      const token = await Leth.Token.generateAuthToken(web3, { address, tokenBlocksLifespan: 10000, peerId });
 
       this.setState({ authToken: token });
     } catch (err) {
@@ -118,6 +120,10 @@ export default class WalletPage extends Component {
 
         <br/>
         <h3>Step 3: Generate Leth auth token</h3>
+        <label>PeerID:
+          <input type='input' style={{ width: '350px' }} value={this.state.peerId}
+        onChange={(e) => this.setState({ peerId: e.target.value })}/>
+        </label>
         <textarea value={this.state.authToken} rows="12" cols="50"/>
         <br/>
         <button onClick={() => this.generateAuthToken()}>Generate</button>

@@ -6,14 +6,15 @@
 
 const Web3Wrapper = require('../web3');
 
-module.exports.generateAuthToken = async (web3, { address, tokenBlocksLifespan }) => {
+module.exports.generateAuthToken = async (web3, { address, tokenBlocksLifespan, peerId }) => {
   return new Promise(async (resolve, reject) => {
     try {
       const currentBlock = await Web3Wrapper.getBlockNumber(web3);
       const expirationBlock = currentBlock + tokenBlocksLifespan;
 
       const claims = {
-        blockchain: "ETH",
+        blockchain: "PHT",
+        peer_id: peerId,
         eth_address: address,
         iat: currentBlock,
         eat: expirationBlock
