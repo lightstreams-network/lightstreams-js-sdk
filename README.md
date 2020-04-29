@@ -345,6 +345,10 @@ To run a single test file along with no migrations:
 FORCE_MIGRATION='false' npx truffle test ./test/{filename} --network standalone
 ```
 
+## How to release
+1. Change the version in `package.json`
+1. Commit and create a new Git tag
+
 ## Sample project
 - [Lighstreams Smart Vault Dashboard](https://github.com/lightstreams-network/example-dashboard)
 - [e-commerce distributed shop](https://github.com/lightstreams-network/example-eshop)
