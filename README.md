@@ -318,6 +318,17 @@ npm run build
 
 ### Deploy migrations
 
+#### Prerequisites
+
+1. Install and run the GSN. See: https://github.com/lightstreams-network/tabookey-gasless
+
+2. Copy and set the environment variables:
+```
+$> cp .env.sample .env
+```
+
+Ensure the RELAY_HUB variable has been set with the address of relayer admin account. This is copied from {TABOOKEY_PROJECT}/hubaddr.txt
+
 To deploy every migration over a network, such as `standalone`, you can run:
 ```
 $> FORCE_MIGRATION='true' npm run deploy -- standalone
