@@ -157,6 +157,8 @@ function () {
             throw new Error("Invalid \"amountInPht\" value ".concat(amountInPht, ". Expected a float number"));
 
           case 11:
+            // IMPORTANT: Amount cannot be higher than 10% relay server address balance
+            // @TODO: Verify assumption and implement validation
             maxFundingValueInPht = 100;
 
             if (!(parseFloat(amountInPht) > maxFundingValueInPht)) {
@@ -173,7 +175,6 @@ function () {
               from: from,
               recipient: recipient,
               relayHubAddress: relayHub,
-              // IMPORTANT: Amount cannot be higher than relay server address balance (@TODO: Implement validation)
               amount: web3Utils.toWei(amountInPht, "ether")
             });
 

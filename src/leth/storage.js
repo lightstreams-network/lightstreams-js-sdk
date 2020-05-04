@@ -27,3 +27,12 @@ module.exports.add = async (web3, gatewayStorage, { from, owner, file, isPublic 
 
   return await gatewayStorage.addWithAcl(owner, receipt.contractAddress, file);
 };
+
+/**
+ * Fetch information about the Smart Vault node.
+ *
+ * @returns {Promise<{ peer_id: <string>, }>}
+ */
+module.exports.status = async (web3, gatewayStorage) => {
+  return await gatewayStorage.status();
+};

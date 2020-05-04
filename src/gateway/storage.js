@@ -12,6 +12,7 @@ const ADD_RAW_WITH_ACL_PATH = `/storage/add-raw-with-acl`;
 const FETCH_FILE_PATH = `/storage/fetch`;
 const STREAM_FILE_PATH = `/storage/stream`;
 const META_PATH = `/storage/meta`;
+const STATUS_PATH = `/storage/status`;
 
 const request = require('../http/request');
 const {validateCid} = require('../leth/cid');
@@ -225,6 +226,19 @@ module.exports = (gwDomain) => ({
     return request.get(`${gwDomain}${META_PATH}`, {
       meta,
     }, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  },
+
+  /**
+   * Fetch information about the Smart Vault node.
+   *
+   * @returns {Promise<{ peer_id: <string>, }>}
+   */
+  status: () => {
+    return request.get(`${gwDomain}${STATUS_PATH}`, {
       headers: {
         'Content-Type': 'application/json',
       },

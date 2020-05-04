@@ -21,6 +21,7 @@ class SimpleReactFileUpload extends Component {
     this.onStorageFormFileChange = this.onStorageFormFileChange.bind(this);
 
     this.onACLFormSubmit = this.onACLFormSubmit.bind(this);
+    this.onStatusFormSubmit = this.onStatusFormSubmit.bind(this);
 
     this.onACLGrantRead = this.onACLGrantRead.bind(this);
     this.onACLGrantWrite = this.onACLGrantWrite.bind(this);
@@ -32,6 +33,7 @@ class SimpleReactFileUpload extends Component {
     this.onHasRead = this.onHasRead.bind(this);
     this.onHasAdmin = this.onHasAdmin.bind(this);
     this.onGetOwner = this.onGetOwner.bind(this);
+    this.onGetStatus = this.onGetStatus.bind(this);
   }
 
   componentDidMount() {
@@ -71,6 +73,10 @@ class SimpleReactFileUpload extends Component {
   }
 
   onACLFormSubmit(e) {
+    e.preventDefault();
+  }
+
+  onStatusFormSubmit(e) {
     e.preventDefault();
   }
 
@@ -164,12 +170,24 @@ class SimpleReactFileUpload extends Component {
       .catch(console.log)
   }
 
+  onGetStatus() {
+    const { peerId } = this.state;
+
+    Leth.Storage.status(web3, this.gateway.storage)
+      .then((res) => {
+        console.log(res);
+
+        this.setState({ peerId: res.peer_id });
+      })
+      .catch(console.log)
+  }
+
   onStorageFormFileChange(e) {
     this.setState({ file: e.target.files[0] })
   }
 
   render() {
-    const {owner, account, gatewayUrl, meta, acl, grantReadMsg } = this.state;
+    const {owner, account, gatewayUrl, meta, peerId, acl, grantReadMsg } = this.state;
 
     return (
       <div>
@@ -206,6 +224,14 @@ class SimpleReactFileUpload extends Component {
           </form>
           <p>
             <strong>{grantReadMsg}</strong>
+          </p>
+
+        <h3>Status:</h3>
+        <p>PeerId: {peerId}</p>
+        <p>
+          <form onSubmit={this.onStatusFormSubmit}>
+            <button type="submit" onClick={this.onGetStatus}>What's the node's status?</button>
+          </form>
           </p>
         </p>
       </div>

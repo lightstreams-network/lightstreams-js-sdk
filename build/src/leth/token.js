@@ -17,12 +17,12 @@ function () {
   var _ref = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(web3, _ref2) {
-    var address, tokenBlocksLifespan;
+    var address, tokenBlocksLifespan, peerId;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            address = _ref2.address, tokenBlocksLifespan = _ref2.tokenBlocksLifespan;
+            address = _ref2.address, tokenBlocksLifespan = _ref2.tokenBlocksLifespan, peerId = _ref2.peerId;
             return _context2.abrupt("return", new Promise(
             /*#__PURE__*/
             function () {
@@ -42,7 +42,8 @@ function () {
                         currentBlock = _context.sent;
                         expirationBlock = currentBlock + tokenBlocksLifespan;
                         claims = {
-                          blockchain: "ETH",
+                          blockchain: "PHT",
+                          peer_id: peerId,
                           eth_address: address,
                           iat: currentBlock,
                           eat: expirationBlock
