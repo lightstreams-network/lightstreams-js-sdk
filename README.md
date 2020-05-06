@@ -70,7 +70,7 @@ Here is an example of how upload a new file and grant read permissions using a l
 const { Leth, Web3, Gateway use useGateway } = require('lightstreams-js-sdk')
 
 // Instanciate web3 engine using my local lightstreams network provider and remote keys
-const web3 = Web3.createEngine('http://localhost:8545');
+const web3 = Web3.newEngine('http://localhost:8545');
 const gateway = useGateway('https://gateway.sirius.lightstreams.io');
 
 // Create accounts to be used in the example
