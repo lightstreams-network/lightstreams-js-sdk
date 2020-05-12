@@ -29,6 +29,7 @@ contract('Voter', (accounts) => {
     assert.equal(hubAddr, RELAY_HUB);
 
     const voterAddr = await voter.address;
+    console.log("voterAddr", voterAddr)
 
     // Register the Recipient in RelayHub
     const voterFundingPHTs = "10";
@@ -46,6 +47,7 @@ contract('Voter', (accounts) => {
     const isVoterReady = await isRelayHubDeployedForRecipient(web3, voter.address);
     assert.equal(isVoterReady, true);
 
+    console.log("web3.eth.currentProvider.host", web3.eth.currentProvider.host)
     web3gsn = await Web3.newEngine(web3.eth.currentProvider.host);
 
     emptyAccAddr = await web3gsn.eth.personal.newAccount("secret");

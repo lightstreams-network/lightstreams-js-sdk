@@ -23,7 +23,7 @@ module.exports = {
         },
         sirius: {
             host: "127.0.0.1",
-            port: 8545,
+            port: 8645,
             network_id: "162",
             gasPrice: "500000000000",
             from: "0xd119b8b038d3a67d34ca1d46e1898881626a082b"

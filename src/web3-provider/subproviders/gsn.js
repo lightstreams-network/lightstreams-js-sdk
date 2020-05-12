@@ -12,6 +12,7 @@ const Web3 = require('../../web3');
 
 function GsnSubprovider(provider, opts) {
   const web3 = Web3.newEngine(provider);
+  console.log("opts", opts);
   this.relayClient = new RelayClient(web3, { ...opts });
   this.jsonRpcSend = opts.jsonRpcSend ? opts.jsonRpcSend : mustProvideInConstructor('jsonRpcSend');
   this.options = opts;
@@ -39,6 +40,7 @@ GsnSubprovider.prototype._handleGetTransactionReceipt = function(payload, cb) {
 };
 
 GsnSubprovider.prototype._handleSendTransaction = function(payload, cb) {
+  console.log("payload", payload);
   // Check for GSN usage
   if (!this._withGSN(payload, this.options)) return false;
 
